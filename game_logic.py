@@ -2,10 +2,20 @@ class GameLogic:
     def __init__(self):
         self.board_slots = {slot_id: None for slot_id in range(120)}  # 120 slots
 
-    def is_valid_combination(self, chips):
+    def place_chip(self, chip, slot_id):
         """
-        Check if a set of chips forms a valid combination (run or group).
+        Place a chip in a slot.
         """
+        self.board_slots[slot_id] = chip
+
+    def validate_combination(self, slot_id):
+        """
+        Validate if the chips in the same row or group form a valid combination.
+        """
+        # Get all chips in the same row or group
+        chips = self.get_chips_in_combination(slot_id)
+
+        # Check if the combination is valid
         if len(chips) < 3:
             return False
 
@@ -21,15 +31,9 @@ class GameLogic:
 
         return False
 
-    def place_chip(self, chip, slot_id):
+    def get_chips_in_combination(self, slot_id):
         """
-        Place a chip in a slot and validate the move.
+        Get all chips in the same row or group as the given slot ID.
         """
-        self.board_slots[slot_id] = chip
-
-    def validate_board(self):
-        """
-        Validate all combinations on the board.
-        """
-        # Group chips by rows or columns and validate each group
-        pass
+        # Implement logic to retrieve chips in the same row or group
+        return []

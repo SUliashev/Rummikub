@@ -3,12 +3,12 @@ from chip import Chip
 from game_logic import GameLogic
 
 class Board:
-
     chip_image = pygame.image.load("chips/red_1_1.png")  # Load a sample chip image
     chip_width = chip_image.get_width()
     chip_height = chip_image.get_height()
 
-    def __init__(self):
+    def __init__(self, window):
+        self.window = window  # Initialize the window
         self.game_logic = GameLogic()  # Initialize game logic
         self.row1 = {}  # 29 slots
         self.row2 = {}
@@ -16,19 +16,20 @@ class Board:
         self.row4 = {}
         self.row5 = {}
         self.all_rows = [self.row1, self.row2, self.row3, self.row4, self.row5]
-        self.window = pygame.display.set_mode((1920, 1080))
         self.is_dragging = False
+        self.last_chip = None  # Track the last chip placed
+        self.placed_chips = []  # Track chips placed on the board
+        self.bottom_row_positions = []  # Track positions in the bottom row
 
         self.create_coordinates()
 
-        # Initialize test chips
-        self.chips = [
-            Chip(100, 800, "chips/red_4_1.png"),
-            Chip(200, 800, "chips/blue_4_1.png"),
-            Chip(300, 800, "chips/black_4_1.png"),
-            Chip(400, 800, "chips/orange_4_1.png"),
-            Chip(500, 800, "chips/black_1_1.png"),
-        ]
+        # Initialize black chips numbered 1-7 for testing
+        self.chips = []
+        for i in range(7):
+            x = 100 + i * Board.chip_width  # Separate chips by their width
+            y = 800
+            self.chips.append(Chip(x, y, f"chips/black_{i + 1}_1.png"))
+            self.bottom_row_positions.append((x, y))  # Add initial positions to the bottom row tracker
 
     def create_coordinates(self):
         for i in range(29):
@@ -41,7 +42,7 @@ class Board:
     def draw_lines(self):
         for row in self.all_rows:
             for i in range(29):
-                pygame.draw.rect(self.window, (255, 255, 255), (row[i][0], row[i][1], Board.chip_width,  Board.chip_height), 2 )
+                pygame.draw.rect(self.window, (255, 255, 255), (row[i][0], row[i][1], Board.chip_width, Board.chip_height), 2)
 
     def drag(self, event):
         if event.type == pygame.MOUSEBUTTONDOWN:
@@ -79,9 +80,32 @@ class Board:
                     chip.x, chip.y = nearest_slot
                     chip.update_boundaries()
 
+                    # Track placed chips
+                    self.placed_chips.append(chip)
+
                     # Inform GameLogic about the placement
                     slot_id = self.get_slot_id(nearest_slot)
                     self.game_logic.place_chip(chip, slot_id)
+
+                    # Validate the combination if 3 chips are placed
+                    if len(self.placed_chips) == 3:
+                        if not self.game_logic.validate_combination(slot_id):
+                            # If invalid, return all 3 chips to the bottom row
+                            for placed_chip in self.placed_chips:
+                                self.return_to_bottom_row(placed_chip)
+                            self.placed_chips.clear()  # Clear the placed chips list
+
+    def return_to_bottom_row(self, chip):
+        """
+        Return a chip to the next available position in the bottom row.
+        """
+        for x, y in self.bottom_row_positions:
+            # Check if the position is already occupied
+            if not any(c.x == x and c.y == y for c in self.chips):
+                chip.x = x
+                chip.y = y
+                chip.update_boundaries()
+                return
 
     def get_slot_id(self, slot_coordinates):
         """
@@ -90,15 +114,19 @@ class Board:
         # Implement logic to map (x, y) coordinates to a slot ID
         pass
 
-    def draw(self, chip):
-        self.window.blit(chip.sprite, (chip.x, chip.y))
+    def draw(self):
+        # Draw all chips and lines
+        self.window.fill((0, 0, 0))  # Clear the screen
+        self.draw_lines()
+        for chip in self.chips:
+            self.window.blit(chip.sprite, (chip.x, chip.y))
 
 
 pygame.init()
 window = pygame.display.set_mode((1920, 1080))
 clock = pygame.time.Clock()
 
-board = Board()
+board = Board(window)
 
 
 for keys, value in board.row2.items():
@@ -112,13 +140,9 @@ while True:
         board.drag(event)
 
     window.fill((0, 0, 0))
-    board.draw_lines()
+    board.draw()
 
     board.drag_to_slot()
-
-    # Draw all chips
-    for chip in board.chips:
-        chip.draw(board.window)
 
     pygame.display.flip()
     clock.tick(60)

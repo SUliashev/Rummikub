@@ -1,33 +1,29 @@
 import pygame
 from board import Board
-from chip import Chip
 
-pygame.init()
-window = pygame.display.set_mode((1920, 1080))
-clock = pygame.time.Clock()
+def main():
+    pygame.init()
+    window = pygame.display.set_mode((1920, 1080))
+    clock = pygame.time.Clock()
 
-board = Board()
-chip = Chip(500, 700)
+    # Initialize the board and pass the window
+    board = Board(window)
 
+    # Main game loop
+    while True:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                exit()
 
+            board.drag(event)
 
+        window.fill((0, 0, 0))  # Clear the screen
+        board.draw()  # Draw the board and chips
+        board.drag_to_slot()  # Handle dragging logic
 
-for keys, value in board.row2.items():
-    print(f"key: {keys}, values: {value}")
+        pygame.display.flip()  # Update the display
+        clock.tick(60)  # Limit the frame rate
 
-while True:
-    for event in pygame.event.get():
-        
-        if event.type == pygame.QUIT:
-            exit()
-
-
-    window.fill((0,0,0))
-    # board.draw_lines()
-    chip.draw(board.window)
-
-    
-    pygame.display.flip()
-
-    clock.tick(60)
+if __name__ == "__main__":
+    main()
 
