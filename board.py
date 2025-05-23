@@ -7,44 +7,36 @@ class Board:
     chip_width = chip_image.get_width()
     chip_height = chip_image.get_height()
 
-    def __init__(self, window):
-        self.window = window  # Initialize the window
-        self.game_logic = GameLogic()  # Initialize game logic
-        self.row1 = {}  # 29 slots
-        self.row2 = {}
-        self.row3 = {}
-        self.row4 = {}
-        self.row5 = {}
-        self.all_rows = [self.row1, self.row2, self.row3, self.row4, self.row5]
+    def __init__(self, window, chip_tracker):
+        self.window = window
+        self.chip_tracker = chip_tracker  # Use ChipTracker for chip management
+        self.slots = {}  # A dictionary to store slot positions for rendering
         self.is_dragging = False
-        self.last_chip = None  # Track the last chip placed
-        self.placed_chips = []  # Track chips placed on the board
-        self.bottom_row_positions = []  # Track positions in the bottom row
+        self.chips = []  # All chips on the board
 
         self.create_coordinates()
 
-        # Initialize black chips numbered 1-7 for testing
-        self.chips = []
-        for i in range(7):
-            x = 100 + i * Board.chip_width  # Separate chips by their width
-            y = 800
-            self.chips.append(Chip(x, y, f"chips/black_{i + 1}_1.png"))
-            self.bottom_row_positions.append((x, y))  # Add initial positions to the bottom row tracker
-
     def create_coordinates(self):
-        for i in range(29):
-            self.row1[i] = (Board.chip_width * i, 0)
-            self.row2[i] = (Board.chip_width * i, (Board.chip_height * 2))
-            self.row3[i] = (Board.chip_width * i, Board.chip_height * 4)
-            self.row4[i] = (Board.chip_width * i, Board.chip_height * 6)
-            self.row5[i] = (Board.chip_width * i, Board.chip_height * 8)
+        """
+        Create visual coordinates for the slots.
+        """
+        for row in range(5):
+            for col in range(29):
+                x = Board.chip_width * col
+                y = Board.chip_height * row * 2
+                self.slots[(row, col)] = (x, y)  # Store the slot's visual position
 
     def draw_lines(self):
-        for row in self.all_rows:
-            for i in range(29):
-                pygame.draw.rect(self.window, (255, 255, 255), (row[i][0], row[i][1], Board.chip_width, Board.chip_height), 2)
+        """
+        Draw the grid lines for the slots.
+        """
+        for (row, col), (x, y) in self.slots.items():
+            pygame.draw.rect(self.window, (255, 255, 255), (x, y, Board.chip_width, Board.chip_height), 2)
 
     def drag(self, event):
+        """
+        Handle dragging of chips.
+        """
         if event.type == pygame.MOUSEBUTTONDOWN:
             mouse_pos = pygame.mouse.get_pos()
             for chip in self.chips:
@@ -55,96 +47,43 @@ class Board:
             self.is_dragging = False
 
     def drag_to_slot(self):
-        if self.is_dragging:
+        """
+        Snap the dragged chip to the nearest slot.
+        """
+        if self.is_dragging and isinstance(self.is_dragging, Chip):
             # Update chip position while dragging
             mouse_pos = pygame.mouse.get_pos()
             self.is_dragging.x = mouse_pos[0] - self.is_dragging.width / 2
             self.is_dragging.y = mouse_pos[1] - self.is_dragging.height / 2
             self.is_dragging.update_boundaries()
         else:
-            # Snap chip to the nearest slot when dragging stops
-            for chip in self.chips:
+            if self.is_dragging:
+                # Snap chip to the nearest slot when dragging stops
                 nearest_slot = None
                 min_distance = float('inf')
 
-                for row in self.all_rows:
-                    for i in range(29):
-                        slot_x, slot_y = row[i]
-                        distance = ((chip.x - slot_x) ** 2 + (chip.y - slot_y) ** 2) ** 0.5
+                for (row, col), (slot_x, slot_y) in self.slots.items():
+                    distance = (self.is_dragging.x - slot_x) ** 2 + (self.is_dragging.y - slot_y) ** 2
 
-                        if distance < min_distance:
-                            min_distance = distance
-                            nearest_slot = (slot_x, slot_y)
+                    if distance < min_distance:
+                        min_distance = distance
+                        nearest_slot = (row, col)
 
                 if nearest_slot:
-                    chip.x, chip.y = nearest_slot
-                    chip.update_boundaries()
-
-                    # Track placed chips
-                    self.placed_chips.append(chip)
-
-                    # Inform GameLogic about the placement
-                    slot_id = self.get_slot_id(nearest_slot)
-                    self.game_logic.place_chip(chip, slot_id)
-
-                    # Validate the combination if 3 chips are placed
-                    if len(self.placed_chips) == 3:
-                        if not self.game_logic.validate_combination(slot_id):
-                            # If invalid, return all 3 chips to the bottom row
-                            for placed_chip in self.placed_chips:
-                                self.return_to_bottom_row(placed_chip)
-                            self.placed_chips.clear()  # Clear the placed chips list
-
-    def return_to_bottom_row(self, chip):
-        """
-        Return a chip to the next available position in the bottom row.
-        """
-        for x, y in self.bottom_row_positions:
-            # Check if the position is already occupied
-            if not any(c.x == x and c.y == y for c in self.chips):
-                chip.x = x
-                chip.y = y
-                chip.update_boundaries()
-                return
-
-    def get_slot_id(self, slot_coordinates):
-        """
-        Convert slot coordinates to a unique slot ID.
-        """
-        # Implement logic to map (x, y) coordinates to a slot ID
-        pass
+                    row, col = nearest_slot
+                    if self.chip_tracker.get_chip(row, col) is None:  # Check if the slot is empty
+                        self.chip_tracker.place_chip(self.is_dragging, row, col)  # Place chip logically
+                        self.is_dragging.x, self.is_dragging.y = self.slots[(row, col)]  # Snap visually
+                        self.is_dragging.update_boundaries()
+                    self.is_dragging = False
 
     def draw(self):
-        # Draw all chips and lines
+        """
+        Draw the board and chips.
+        """
         self.window.fill((0, 0, 0))  # Clear the screen
         self.draw_lines()
         for chip in self.chips:
             self.window.blit(chip.sprite, (chip.x, chip.y))
-
-
-pygame.init()
-window = pygame.display.set_mode((1920, 1080))
-clock = pygame.time.Clock()
-
-board = Board(window)
-
-
-for keys, value in board.row2.items():
-    print(f"key: {keys}, values: {value}")
-
-while True:
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            exit()
-
-        board.drag(event)
-
-    window.fill((0, 0, 0))
-    board.draw()
-
-    board.drag_to_slot()
-
-    pygame.display.flip()
-    clock.tick(60)
 
 
