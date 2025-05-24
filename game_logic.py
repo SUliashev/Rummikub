@@ -17,6 +17,9 @@ class GameLogic:
         # Retrieve chips in the same row or group
         chips = self.get_chips_in_combination(row, col)
 
+        # Debug: Print the chips in the combination
+        print(f"Combination for chip at ({row}, {col}): {[str(chip) for chip in chips]}")
+
         # Check if the combination is valid
         if len(chips) < 3:
             return False
@@ -33,16 +36,18 @@ class GameLogic:
 
         return False
 
-    def get_chips_in_combination(self, row, col):
-        """
-        Get all chips in the same row or group as the given slot.
-        """
-        # Example: Retrieve chips in the same row
+    def get_chips_in_combination(self, row, col) -> list:   # returns a list of chips that are in the same combination 
         chips = []
-        for c in range(self.chip_tracker.cols):
-            chip = self.chip_tracker.get_chip(row, c)
-            if chip:
-                chips.append(chip)
+        i = 1
+        while self.chip_tracker.get_chip(row, col - i) is not None:
+            chips.append(self.chip_tracker.get_chip(row, col - i))
+            i += 1
+        chips.append(self.chip_tracker.get_chip(row, col))
+        i = 1
+        while self.chip_tracker.get_chip(row, col + i) is not None:
+            chips.append(self.chip_tracker.get_chip(row, col + i))
+            i += 1
+
         return chips
 
     def handle_invalid_move(self, chip):
