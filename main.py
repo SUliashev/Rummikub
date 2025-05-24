@@ -1,5 +1,7 @@
 import pygame
 from board import Board
+from chip_tracker import ChipTracker
+from chip import Chip  # Import the Chip class
 
 def main():
     pygame.init()
@@ -7,7 +9,12 @@ def main():
     clock = pygame.time.Clock()
 
     # Initialize the board and pass the window
-    board = Board(window)
+    chip_tracker = ChipTracker()
+    board = Board(window, chip_tracker)
+
+    # Add one chip for experimentation
+    chip = Chip(100, 100, "chips/red_1_1.png")  # Create a chip at position (100, 100)
+    board.chips.append(chip)  # Add the chip to the board's chip list
 
     # Main game loop
     while True:
