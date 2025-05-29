@@ -10,43 +10,71 @@ class GameController:
         self.chip_tracker = ChipTracker()
         self.board = Board(window, self.chip_tracker)
         self.game_logic = GameLogic(self.chip_tracker)
-        self.players = ["Player 1", "Player 2"]  # Example: Two players
-        self.current_player_index = 0  # Start with Player 1
-        self.chips = []  # Store all generated chips
-        self.generate_chips()
+        self.current_player = "Player 1"  # Example: Start with Player 1
 
-    def generate_chips(self):
+        # Add testing chips
+        self.add_testing_chips()
+
+    def add_testing_chips(self):
         """
-        Generate chips with unique sprites and assign them to the board.
+        Add testing chips to the board and chip tracker for experimentation.
         """
-        colors = ["red", "blue", "black", "orange"]  
-        numbers = range(1, 14)  # Numbers 1 to 13
-        y_position = 800  # Example starting y-position for chips
+        colors = ["red", "black"]  # Colors for the chips
+        numbers = range(1, 8)  # Numbers from 1 to 7
+        y_position = 800  # Starting y-position for chips
 
         for color in colors:
             for number in numbers:
-                x_position = 100 + len(self.chips) * (Chip(0, 0, "chips/red_1_1.png").width + 10)
+                second = 0 if color == "red" else 7 * 70
+                x_position = (number - 1) * 70 + second  # Space chips horizontally
                 image_path = f"chips/{color}_{number}_1.png"  # Example sprite path
-                chip = Chip(x_position, y_position, image_path, color, number)
-                self.chips.append(chip)
-                self.board.chips.append(chip)  # Add chip to the board
+                chip = Chip(x_position, y_position, image_path, color=color, number=number)
 
-    def switch_turn(self):
-        """
-        Switch to the next player's turn.
-        """
-        self.current_player_index = (self.current_player_index + 1) % len(self.players)
-        print(f"It's now {self.players[self.current_player_index]}'s turn!")
+                # Add chips to the board's chip list fors rendering
+                self.board.chips.append(chip)
+
+                # # Place chips in the chip tracker (optional: specify row/col)
+                # row, col = 0 if color == "red" else 1, number - 1  # Red chips in row 0, black chips in row 1
+                # self.chip_tracker.place_chip(chip, row, col)
 
     def handle_event(self, event):
         """
         Handle a single pygame event.
         """
-        self.board.drag(event)  # Handle dragging logic
+        if event.type == pygame.MOUSEBUTTONUP:
+            # Handle snapping logic
+            snapped_chip, snapped_slot = self.board.snap_chip_to_slot()
+            if snapped_chip and snapped_slot:
+                row, col = snapped_slot
+                self.place_chip_and_validate(snapped_chip, row, col)
 
-        # if event.type == pygame.MOUSEBUTTONUP:
-        #     self.board.drag_to_slot()  # Handle snapping logic
-        #     self.switch_turn()  # Switch turns after a move
+        self.board.drag(event)  # Handle dragging logic
+        print({self.chip_tracker.slots[(3, 5)]})
+
+
+    def place_chip_and_validate(self, chip, row, col):
+        """
+        Place a chip and validate the move.
+        """
+        e = "place_chip_and_validate does not yet work"
+        try:
+            self.chip_tracker.place_chip(chip, row, col)
+            print('working though')
+            if not self.game_logic.validate_combination(row, col):
+                print(f"Invalid combination for chip at ({row}, {col})")
+                # Handle invalid move (e.g., return chip to original position)
+            else:
+                print(f"Valid combination for chip at ({row}, {col})")
+                self.switch_turn()
+        except ValueError as e:
+            print(e)
+
+    def switch_turn(self):
+        """
+        Switch to the next player's turn.
+        """
+        self.current_player = "Player 2" if self.current_player == "Player 1" else "Player 1"
+        print(f"It's now {self.current_player}'s turn!")
 
     def draw(self):
         """
@@ -68,18 +96,4 @@ class GameController:
                 self.handle_event(event)
 
             self.draw()
-            clock.tick(60)  # Limit the frame rate
-
-    def place_chip_and_validate(self, chip, row, col):
-        """
-        Place a chip and validate the move.
-        """
-        try:
-            self.chip_tracker.place_chip(chip, row, col)
-            if not self.game_logic.validate_combination(row, col):
-                print(f"Invalid combination for chip at ({row}, {col})")
-                # Handle invalid move (e.g., return chip to original position)
-            else:
-                print(f"Valid combination for chip at ({row}, {col})")
-        except ValueError as e:
-            print(e)
+            clock.tick(10)  # Limit the frame rate

@@ -7,12 +7,12 @@ class Chip:
         self.y = y
         self.width = self.sprite.get_width()
         self.height = self.sprite.get_height()
-        self.color = None
-        self.number = None 
+        self.color = color
+        self.number = number 
         self.update_boundaries()
 
     def __str__(self):
-        return f"{self.color} {self.number} at ({self.x}, {self.y})"
+        return f"{self.color} {self.number})"
     
     def __repr__(self):
         return f"Chip({self.x}, {self.y}, {self.sprite})"

@@ -36,6 +36,9 @@ class Board:
             pygame.draw.rect(self.window, (255, 255, 255), (x, y, Board.chip_width, Board.chip_height), 2)
 
     def drag(self, event):
+        """
+        Handle dragging of chips.
+        """
         mouse_pos = pygame.mouse.get_pos()  # Store the mouse position once
 
         if event.type == pygame.MOUSEBUTTONDOWN:
@@ -51,44 +54,40 @@ class Board:
             self.dragged_chip.y = mouse_pos[1] - self.dragged_chip.height / 2
             self.dragged_chip.update_boundaries()
 
-        elif event.type == pygame.MOUSEBUTTONUP and self.dragged_chip is not None:
-            # Handle snapping the chip to the nearest slot
+
+    def snap_chip_to_slot(self):
+        """
+        Snap the dragged chip to the nearest slot.
+        """
+        if self.dragged_chip:
             nearest_slot = None
             min_distance = float('inf')
 
-            # Define a bounding box around the dragged chip
-            search_radius = max(Board.chip_width, Board.chip_height) * 2
+            # Find the nearest slot
             chip_center_x = self.dragged_chip.x + self.dragged_chip.width / 2
             chip_center_y = self.dragged_chip.y + self.dragged_chip.height / 2
 
-            # Find the nearest slot within the search radius
             for (row, col), (slot_x, slot_y) in self.board_slots.items():
-                if abs(slot_x - chip_center_x) <= search_radius and abs(slot_y - chip_center_y) <= search_radius:
-                    distance = ((chip_center_x - slot_x) ** 2 + (chip_center_y - slot_y) ** 2) ** 0.5
-                    if distance < min_distance:
-                        min_distance = distance
-                        nearest_slot = (row, col)
-
-            # Log the nearest slot and distance for debugging purposes
-            import logging
-            logging.debug(f"Nearest slot: {nearest_slot}, Distance: {min_distance}")
+                distance = ((chip_center_x - slot_x) ** 2 + (chip_center_y - slot_y) ** 2) ** 0.5
+                if distance < min_distance:
+                    min_distance = distance
+                    nearest_slot = (row, col)
 
             # Snap the chip to the nearest slot if it's empty
             if nearest_slot:
-                row, col = nearest_slot  # Unpack the nearest slot
+                row, col = nearest_slot
                 if self.chip_tracker.get_chip(row, col) is None:  # Check if the slot is empty
                     self.dragged_chip.x, self.dragged_chip.y = self.board_slots[(row, col)]
                     self.dragged_chip.update_boundaries()
                     self.chip_tracker.place_chip(self.dragged_chip, row, col)
 
+            chip_placed = self.dragged_chip
+
             # Reset the dragged chip after snapping
             self.dragged_chip = None
 
-    # def drag_to_slot(self):
-    #     if self.is_dragging and isinstance(self.is_dragging, Chip):
-    #         # Update chip position while dragging
-
-    #     else:
+            return chip_placed, nearest_slot
+ 
             
     def draw(self):
         """

@@ -18,6 +18,7 @@ class ChipTracker:
         if self.slots[(row, col)] is not None:
             raise ValueError(f"Slot ({row}, {col}) is already occupied!")
         self.slots[(row, col)] = chip
+        
 
     def remove_chip(self, row, col):
         """
