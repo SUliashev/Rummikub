@@ -2,14 +2,6 @@ class GameLogic:
     def __init__(self, chip_tracker):
         self.chip_tracker = chip_tracker  # Use ChipTracker for chip management
 
-    def place_chip(self, chip, slot_id):
-        """
-        Place a chip in a slot and validate the move.
-        """
-        if slot_id in self.board_slots:
-            raise ValueError("Slot is already occupied!")
-        self.board_slots[slot_id] = chip
-
     def validate_combination(self, row, col):
         """
         Validate if the chips in the same row or group form a valid combination.

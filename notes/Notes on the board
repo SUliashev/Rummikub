@@ -1,20 +1,21 @@
-Notes on Boadsize:
-number of chips possible on the board:
-13 * 4 = 52
-52 // 3 = 17	(maximum number of combinations)
-17 * 3 = 51  (need about 3 spaces between 1 combination, so the dragging can work)
-
-104 spaces are needed, make it 120 just to be sure(this does not yet include the horizontal spaces)
-
-one chip has an approximate ratio of 1:2, so if monitor ratio is 9:16, 
 
 ------------------------------------------------------------------------
 Done:
 create methods so that a chip is dragged into a field and stays there, if it is not dragged into an active field it returns to its original position
 create sprites for all chips
 ------------------------------------------------------------------------
+Working on now:
+game logic, getting a combination of chips
+--chips are currently marked in the slot before they are snapped to it, i believe
+
+
+
+
+------------------------------------------------------------------------
 Next steps: 
-check what copilot created in the board logic and the new game logic file
+-imporove the drag to slot method, it seems to not always work
+
+
 start creating the logic for the game
 -numbers in wrong order
 -numbers with wrong colors
@@ -26,5 +27,7 @@ create text for the game rules
 work on the UI
 
 
+-------------------------------------------------------------------------
+Things to update:
 
 

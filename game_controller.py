@@ -66,6 +66,20 @@ class GameController:
                 if event.type == pygame.QUIT:
                     exit()
                 self.handle_event(event)
-            self.game_logic.validate_combination(3,5)
+
             self.draw()
             clock.tick(60)  # Limit the frame rate
+
+    def place_chip_and_validate(self, chip, row, col):
+        """
+        Place a chip and validate the move.
+        """
+        try:
+            self.chip_tracker.place_chip(chip, row, col)
+            if not self.game_logic.validate_combination(row, col):
+                print(f"Invalid combination for chip at ({row}, {col})")
+                # Handle invalid move (e.g., return chip to original position)
+            else:
+                print(f"Valid combination for chip at ({row}, {col})")
+        except ValueError as e:
+            print(e)

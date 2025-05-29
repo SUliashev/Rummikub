@@ -100,17 +100,3 @@ class Board:
             self.window.blit(chip.sprite, (chip.x, chip.y))
 
 
-# def main():
-#     pygame.init()
-#     window = pygame.display.set_mode((1920, 1080))
-#     clock = pygame.time.Clock()
-
-#     # Initialize the board and pass the window
-#     chip_tracker = ChipTracker()
-#     board = Board(window, chip_tracker)
-
-#     # Add one chip for experimentation
-#     chip = Chip(100, 100, "chips/red_1_1.png")  # Create a chip at position (100, 100)
-#     board.chips.append(chip)  # Add the chip to the board's chip list
-
-
