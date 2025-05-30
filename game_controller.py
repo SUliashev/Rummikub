@@ -41,33 +41,38 @@ class GameController:
         """
         Handle a single pygame event.
         """
-        if event.type == pygame.MOUSEBUTTONUP:
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            self.board.pick_up_chip(event)
+
+        elif event.type == pygame.MOUSEMOTION and self.board.dragged_chip is not None:
+            # Handle dragging of the chip
+            # if self.board.dragged_chip is not None: # not sure if this is needed
+            self.board.drag_chip(event)
+            self.board.choose_next_slot()
+
+        elif event.type == pygame.MOUSEBUTTONUP:
             # Handle snapping logic
-            snapped_chip, snapped_slot = self.board.snap_chip_to_slot()
+            snapped_chip, snapped_slot = self.board.snap_chip_to_slot(self.board.choose_next_slot())
             if snapped_chip and snapped_slot:
                 row, col = snapped_slot
                 self.place_chip_and_validate(snapped_chip, row, col)
-
-        self.board.drag(event)  # Handle dragging logic
-        print({self.chip_tracker.slots[(3, 5)]})
 
 
     def place_chip_and_validate(self, chip, row, col):
         """
         Place a chip and validate the move.
         """
-        e = "place_chip_and_validate does not yet work"
+        
         try:
             self.chip_tracker.place_chip(chip, row, col)
-            print('working though')
-            if not self.game_logic.validate_combination(row, col):
+            if not self.game_logic.validate_combination(row, col):        # To Do LATER
                 print(f"Invalid combination for chip at ({row}, {col})")
                 # Handle invalid move (e.g., return chip to original position)
             else:
                 print(f"Valid combination for chip at ({row}, {col})")
                 self.switch_turn()
         except ValueError as e:
-            print(e)
+            print("place_chip_and_validate does not yet work")
 
     def switch_turn(self):
         """
@@ -96,4 +101,4 @@ class GameController:
                 self.handle_event(event)
 
             self.draw()
-            clock.tick(10)  # Limit the frame rate
+            clock.tick(60)  # Limit the frame rate

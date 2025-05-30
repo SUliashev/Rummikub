@@ -18,15 +18,17 @@ class ChipTracker:
         if self.slots[(row, col)] is not None:
             raise ValueError(f"Slot ({row}, {col}) is already occupied!")
         self.slots[(row, col)] = chip
+        chip.put_chip_in_slot(row, col)
+        print(f"Placed chip {chip} at ({row}, {col})")
         
 
-    def remove_chip(self, row, col):
+    def remove_chip(self, chip, row, col):
         """
         Remove a chip from a specific slot.
         """
-        chip = self.slots[(row, col)]
+        chip.remove_chip_from_slot()
         self.slots[(row, col)] = None
-        return chip
+       
 
     def get_chip(self, row, col):
         """
