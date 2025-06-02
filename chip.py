@@ -14,10 +14,10 @@ class Chip:
         self.update_boundaries()
 
     def __str__(self):
-        return f"{self.color} {self.number})"
+        return f"({self.color} {self.number})"
     
     def __repr__(self):
-        return f"{self.color} {self.number})"
+        return f"({self.color} {self.number})"
     
     def update_boundaries(self):
         self.x_line = (self.x, self.x + self.width)

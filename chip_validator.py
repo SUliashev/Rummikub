@@ -1,13 +1,27 @@
-class GameLogic:
-    def __init__(self, chip_tracker):
-        self.chip_tracker = chip_tracker  # Use ChipTracker for chip management
+class ChipValidator:
+    def __init__(self, rows=5, cols=29):
+        self.slots = {}  # Map (row, col) to chips for validation
 
+        # Initialize empty slots
+        for row in range(rows):
+            for col in range(cols):
+                self.slots[(row, col)] = None  # None means the slot is empty
+
+
+    def validate_chip(self, chip, row, col):
+        if self.slots[(row, col)] is not None:
+            raise ValueError(f"Slot ({row}, {col}) is already occupied! (validation)")
+        self.slots[(row, col)] = chip  # Mark the slot as valid
+        
+    def get_validation_chip(self, row, col):
+        return self.slots.get((row, col))
+    
     def validate_combination(self, row, col):
         """
         Validate if the chips in the same row or group form a valid combination.
         """
         # Retrieve chips in the same row or group
-        chips = self.get_chips_in_combination(row, col)
+        chips = self.get_validation_chips(row, col)
 
         # Debug: Print the chips in the combination
         print(f"Combination for chip at ({row}, {col}): {[str(chip) for chip in chips]}")
@@ -28,19 +42,20 @@ class GameLogic:
 
         return False
 
-    def get_chips_in_combination(self, row, col) -> list:   # returns a list of chips that are in the same combination 
+    def get_validation_chips(self, row, col):
         chips = []
         i = 1
-        while self.chip_tracker.get_chip(row, col - i) is not None:
-            chips.append(self.chip_tracker.get_chip(row, col - i))
+        while self.chip_tracker.get_validation_chip(row, col - i) is not None:
+            chips.append(self.chip_tracker.get_validation_chip(row, col - i))
             i += 1
-        chips.append(self.chip_tracker.get_chip(row, col))
+        chips.append(self.chip_tracker.get_validation_chip(row, col))
         i = 1
-        while self.chip_tracker.get_chip(row, col + i) is not None:
-            chips.append(self.chip_tracker.get_chip(row, col + i))
+        while self.chip_tracker.get_validation_chip(row, col + i) is not None:
+            chips.append(self.chip_tracker.get_validation_chip(row, col + i))
             i += 1
 
         return chips
+    
 
     def handle_invalid_move(self, chip):
         """
