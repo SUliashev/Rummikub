@@ -8,10 +8,11 @@ class BoardInterface:
     chip_width = chip_image.get_width()
     chip_height = chip_image.get_height()
 
-    def __init__(self, window, chip_tracker):
+    def __init__(self, window, chip_tracker, chip_validator):
         self.window = window
         self.chip_tracker = chip_tracker  # Use ChipTracker for chip management
         self.board_slots = {}  # A dictionary to store slot positions for rendering
+        self.chip_validator = chip_validator  # Initialize the chip validator
         self.hovering_slot = None  # The slot currently being hovered over
         self.hovering_slot_valid = True
         self.dragged_chip = None
@@ -38,20 +39,6 @@ class BoardInterface:
         for (row, col), (x, y) in self.board_slots.items():
             pygame.draw.rect(self.window, (255, 255, 255), (x, y, BoardInterface.chip_width, BoardInterface.chip_height), 2)
 
-    def show_hovering_slot(self):
-        """
-        Highlight the slot currently being hovered over.
-        """
-        if self.hovering_slot_valid == True:
-            color = (0, 255, 0) #green
-        else:
-            color = (255, 0, 0) #red
-        if self.hovering_slot:
-            row, col = self.hovering_slot
-            x, y = self.board_slots[(row, col)]
-            pygame.draw.rect(self.window, color, (x, y, BoardInterface.chip_width, BoardInterface.chip_height), 7)
-            self.hovering_slot = (row, col)
-
 
     def pick_up_chip(self, event):
 
@@ -65,6 +52,7 @@ class BoardInterface:
                     self.dragged_chip_starting_position = chip.x , chip.y # Set the chip being dragged
                     if chip in self.chip_tracker.get_all_chips().values():
                         self.chip_tracker.remove_chip(chip, chip.row, chip.col)
+                    
                     break
 
     def drag_chip(self, event, validate_func=None):
@@ -79,15 +67,6 @@ class BoardInterface:
             self.dragged_chip.y = mouse_pos[1] - self.dragged_chip.height / 2
             self.dragged_chip.update_boundaries()
 
-            slot = self.choose_next_slot()
-            self.hovering_slot = slot
-            if slot and validate_func:
-                row, col = slot
-                # Call the GameController's validation function
-                self.hovering_slot_valid = validate_func(self.dragged_chip, row, col)
-            else:
-                self.hovering_slot_valid = True  # Or False if you want no slot to be red by default
-    
     def choose_next_slot(self, snap_range=60):
         """
         Choose the nearest empty slot for the dragged chip within snap_range.
@@ -116,10 +95,29 @@ class BoardInterface:
         for _, (row, col) in slot_distances:
             if self.chip_tracker.get_chip(row, col) is None:
                 self.hovering_slot = (row, col)
+           
                 return (row, col)
 
         # If all are occupied or none in range, return None
         return None
+    
+
+       
+    def show_hovering_slot(self):
+        """
+        Highlight the slot currently being hovered over.
+        """
+        if self.hovering_slot_valid == True:
+            color = (0, 255, 0) #green
+        else:
+            color = (255, 0, 0) #red
+        if self.hovering_slot:
+            row, col = self.hovering_slot
+            x, y = self.board_slots[(row, col)]
+            pygame.draw.rect(self.window, color, (x, y, BoardInterface.chip_width, BoardInterface.chip_height), 7)
+            self.hovering_slot = (row, col)
+
+      
 
     def snap_chip_to_slot(self, nearest_slot=None):
         """
