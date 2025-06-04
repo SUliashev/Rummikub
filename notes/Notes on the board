@@ -2,7 +2,7 @@ Outline of how the classes should be working:
 •board_interface: is responsible for drawing the current state of the game and interact with the chip_validator to see if the chips can be placed
 •chip_generator: code to generate PNG images of all the chips that will be used within the game
 •chip_tracker: keeps track of the current state of the game, where each chip is located
-•chip_validator: checks whether the desired placement of a chip is valid by keeping separate track of the chips()
+•chip_validator: checks whether the desired placement of a chip is valid. the chip_tracker class goes through this one
 •chip: class for the actual data of one specific chip. Keeps track of its color, number and location
 •game_controler: is responsible for the interaction between the classes
 •main: excecution of the game
@@ -10,13 +10,10 @@ Outline of how the classes should be working:
 
 ------------------------------------------------------------------------
 Working on now:
-added a new class which only validates the chips, if the validation is correct, the chip can be placed into the slot and the chip_tracker will be updated with the current state of the game
-- the classes have been changed completely once more, fix all issues so that the game returns to the previous testing stage
 
-the dragging of the chip towards a slot, if the slot is not empty, the chip should be returned to its original position
+create the tray which will hold the players chips
+-the dragging of the chip towards a slot, if the slot is not empty, the chip should be returned to its original position
 
-game logic, getting a combination of chips
---chips are currently marked in the slot before they are snapped to it, i believe
 
 
 
@@ -27,14 +24,14 @@ Done:
 -when the chip is removed from the slot, the slot is not being set to None
 -For the shown lines, if a chip is hovered over a rectangle, the rectange becomes larger
 -improve the selecting of the next slot, right now its not very intuitive
-
+-updating the chip_validator so that it validates the chips based on the hovering chip and the chip_tracker. The chip tracker will be updated via the validator, instead of both keeping track on the state of the game and separately being updated in the game controller 
+-fix chip validation so that it shows red if the move is not valid
 ------------------------------------------------------------------------
 Next steps: 
 
-start creating the logic for the game
--numbers in wrong order
--numbers with wrong colors
--numbers same numbers
+add tray class 
+
+implement movement of chips when they logically should be moved (if the player places or removes chips)
 
 create text for the game rules
 - create multiple languages

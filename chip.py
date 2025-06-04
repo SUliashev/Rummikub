@@ -1,6 +1,9 @@
 import pygame
 
 class Chip:
+    tray = 'Chip currently in tray'
+    board = 'Chip currently on the board'
+    hidden = 'Chip currently hidden'
     def __init__(self, x: int, y: int, image_path: str, color: str = None, number: int = None):
         self.sprite = pygame.image.load(image_path)  # Load the chip image
         self.x = x
@@ -9,8 +12,11 @@ class Chip:
         self.height = self.sprite.get_height()
         self.row = None
         self.col = None
+        self.tray_row = None
+        self.tray_col = None
         self.color = color
         self.number = number 
+        self.state = Chip.hidden
         self.update_boundaries()
 
     def __str__(self):
@@ -32,6 +38,7 @@ class Chip:
         """
         self.row = row
         self.col = col
+        self.state = Chip.board
     
     def remove_chip_from_slot(self):
         """
@@ -39,3 +46,13 @@ class Chip:
         """
         self.row = None
         self.col = None
+
+
+    def put_chip_in_tray(self, row, col):
+        self.tray_row = row
+        self.tray_col = col
+        self.state = Chip.tray
+    
+    def remove_chip_from_tray(self):
+        self.tray_row = None
+        self.tray_col = None

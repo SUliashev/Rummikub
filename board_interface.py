@@ -2,16 +2,19 @@ import pygame
 from chip import Chip
 from chip_validator import ChipValidator
 from chip_tracker import ChipTracker  # Import the ChipTracker class
+from tray import Tray
 
 class BoardInterface:
     chip_image = pygame.image.load("chips/red_1_1.png")  # Load a sample chip image
     chip_width = chip_image.get_width()
     chip_height = chip_image.get_height()
 
-    def __init__(self, window, chip_tracker, chip_validator):
+    def __init__(self, window, chip_tracker, chip_validator, tray):
         self.window = window
         self.chip_tracker = chip_tracker  # Use ChipTracker for chip management
         self.board_slots = {}  # A dictionary to store slot positions for rendering
+        self.tray_slots = {}
+        self.tray = tray
         self.chip_validator = chip_validator  # Initialize the chip validator
         self.hovering_slot = None  # The slot currently being hovered over
         self.hovering_slot_valid = True
@@ -20,40 +23,74 @@ class BoardInterface:
         self.chips = []  # All chips on the board
 
         self.create_coordinates()
+        self.create_tray_coordinates()
 
     def create_coordinates(self):
         """
-        Create visual coordinates for the slots.
+        Create visual coordinates for the slots with 5-pixel separation.
         """
+        spacing = 1
         for row in range(5):
             for col in range(29):
-                x = BoardInterface.chip_width * col
-                y = BoardInterface.chip_height * row * 2
-                self.board_slots[(row, col)] = (x, y)  # Store the slot's visual position
+                x = 3 + col * (BoardInterface.chip_width + spacing)
+                y = row * (BoardInterface.chip_height + spacing) * 1.9
+                self.board_slots[(row, col)] = (x, y)
 
+    def create_tray_coordinates(self):
+        spacing = 5
+        for row in range(2):
+            for col in range(15):
+                x = self.tray.x + BoardInterface.chip_width  + col * (BoardInterface.chip_width + spacing)
+                y = self.tray.y + row * (BoardInterface.chip_height + spacing)
+                self.tray_slots[(row, col)] = (x, y)
+            
 
     def draw_lines(self):
-        """
-        Draw the grid lines for the slots.
-        """
+        border_radius = 9  # Adjust for more/less curve
         for (row, col), (x, y) in self.board_slots.items():
-            pygame.draw.rect(self.window, (255, 255, 255), (x, y, BoardInterface.chip_width, BoardInterface.chip_height), 2)
-
-
+            pygame.draw.rect(
+                self.window, (255, 255, 255),
+                (x, y, BoardInterface.chip_width, BoardInterface.chip_height),
+                2, border_radius=border_radius
+            )
+        for (row, col), (x, y) in self.tray_slots.items():
+            pygame.draw.rect(
+                self.window, (255, 255, 255),
+                (x, y, BoardInterface.chip_width, BoardInterface.chip_height),
+                2, border_radius=border_radius
+            )
+    
+    def place_chip_in_tray(self, chip):
+        """
+        Place a chip in the tray.
+        """
+        if len(self.chip_tracker.tray_slots) < self.chip_tracker.tray_rows * self.chip_tracker.tray_cols:
+            self.chip_tracker.place_chip_in_tray_from_hidden(chip)
+            chip.x, chip.y = self.tray_slots[(chip.tray_row, chip.tray_col)]
+            chip.update_boundaries()
+            self.chips.append(chip)
+            
     def pick_up_chip(self, event):
-
-        mouse_pos = pygame.mouse.get_pos()  # Store the mouse position once
+        mouse_pos = pygame.mouse.get_pos()
 
         if event.type == pygame.MOUSEBUTTONDOWN:
-            # Check if the mouse is clicking on any chip
+            # Check if the mouse is clicking on any chip on the board
             for chip in self.chips:
                 if chip.x_line[0] <= mouse_pos[0] <= chip.x_line[1] and chip.y_line[0] <= mouse_pos[1] <= chip.y_line[1]:
-                    self.dragged_chip = chip 
-                    self.dragged_chip_starting_position = chip.x , chip.y # Set the chip being dragged
+                    self.dragged_chip = chip
+                    self.dragged_chip_starting_position = chip.x, chip.y
                     if chip in self.chip_tracker.get_all_chips().values():
                         self.chip_tracker.remove_chip(chip, chip.row, chip.col)
-                    
                     break
+            else:
+                # If not found on board, check tray chips
+                for chip in self.chip_tracker.tray_slots.values():
+                    if chip.x_line[0] <= mouse_pos[0] <= chip.x_line[1] and chip.y_line[0] <= mouse_pos[1] <= chip.y_line[1]:
+                        self.dragged_chip = chip
+                        self.dragged_chip_starting_position = chip.x, chip.y
+                        self.chip_tracker.remove_chip_from_tray(chip, chip.tray_row, chip.tray_col)
+                        self.chips.append(chip)  # Add to board chips for dragging/placing
+                        break
 
     def drag_chip(self, event, validate_func=None):
         """
@@ -158,10 +195,13 @@ class BoardInterface:
         """
         Draw the board and chips.
         """
-        self.window.fill((0, 0, 0))  # Clear the screen
+        self.window.fill((39,105,127))  # Clear the screen
+        self.tray.draw()
         self.draw_lines()
         self.show_hovering_slot()
         for chip in self.chips:
+            self.window.blit(chip.sprite, (chip.x, chip.y))
+        for chip in self.chip_tracker.tray_slots.values():
             self.window.blit(chip.sprite, (chip.x, chip.y))
 
 

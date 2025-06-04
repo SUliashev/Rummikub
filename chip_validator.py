@@ -1,7 +1,8 @@
 class ChipValidator:
-    def __init__(self, ):
+    def __init__(self ):    
         self.validation_chip = None
         self.validation_pos = None
+
 
     def validate_chip(self, chip, row, col):
         self.validation_chip = chip
@@ -43,6 +44,7 @@ class ChipValidator:
         while chip_tracker.get_chip(row, col - i) is not None:
             chips.append(chip_tracker.get_chip(row, col - i))
             i += 1
+        chips = chips[::-1]
         chips.append(chip)
         i = 1
         while chip_tracker.get_chip(row, col + i) is not None:

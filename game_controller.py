@@ -3,14 +3,15 @@ from board_interface import BoardInterface
 from chip_tracker import ChipTracker
 from chip_validator import ChipValidator
 from chip import Chip
+from tray import Tray
 
 class GameController:
     def __init__(self, window):
         self.window = window
         self.chip_tracker = ChipTracker()
         self.chip_validator = ChipValidator()
-        self.board = BoardInterface(window, self.chip_tracker, self.chip_validator)
-        
+        self.tray = Tray(window)
+        self.board = BoardInterface(window, self.chip_tracker, self.chip_validator, self.tray)
         self.current_player = "Player 1"  # Example: Start with Player 1
 
         # Add testing chips
@@ -41,7 +42,6 @@ class GameController:
     def validate_chip_placement(self, chip_tracker, chip, row, col):
         self.chip_validator.validate_chip(chip, row, col) # dont think this is needed
         is_valid = self.chip_validator.validate_combination(chip_tracker, chip, row, col)
-        # self.chip_validator.remove_chip(chip, row, col)
         self.board.hovering_slot_valid = is_valid
         return is_valid
 
@@ -49,7 +49,6 @@ class GameController:
         self.chip_tracker.place_chip(chip, row, col)
         chip.put_chip_in_slot(row, col)
         self.board.dragged_chip = None
-        
         
 
     def switch_turn(self):
@@ -86,16 +85,8 @@ class GameController:
         """
         Add testing chips to the board and chip tracker for experimentation.
         """
-        colors = ["red", "black"]  # Colors for the chips
-        numbers = range(1, 8)  # Numbers from 1 to 7
-        y_position = 800  # Starting y-position for chips
-
-        for color in colors:
-            for number in numbers:
-                second = 0 if color == "red" else 7 * 70
-                x_position = (number - 1) * 70 + second  # Space chips horizontally
-                image_path = f"chips/{color}_{number}_1.png"  # Example sprite path
-                chip = Chip(x_position, y_position, image_path, color=color, number=number)
-
-                # Add chips to the board's chip list fors rendering
-                self.board.chips.append(chip)
+        for color in ["red", "black"]:
+            for number in range(1, 8):
+                image_path = f"chips/{color}_{number}_1.png"
+                chip = Chip(0, 0, image_path, color=color, number=number)
+                self.board.place_chip_in_tray(chip)  # Add to tray, not to board

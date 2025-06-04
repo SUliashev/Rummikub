@@ -2,10 +2,13 @@
 # It provides methods to place, remove, and retrieve chips from specific slots, as well as to get all chips currently on the board.
 from chip_validator import ChipValidator
 class ChipTracker:
-    def __init__(self, rows=5, cols=29):
+    def __init__(self, rows=5, cols=29, tray_rows=2, tray_cols=15):
         self.slots = {}  # Map (row, col) to chips
         self.rows = rows
         self.cols = cols
+        self.tray_slots = {}
+        self.tray_rows = tray_rows  
+        self.tray_cols = tray_cols
 
         # Initialize empty slots
         for row in range(rows):
@@ -20,9 +23,20 @@ class ChipTracker:
         if self.slots[(row, col)] is not None:
             raise ValueError(f"Slot ({row}, {col}) is already occupied!")
         self.slots[(row, col)] = chip
-      
         chip.put_chip_in_slot(row, col)
         print(f"Placed chip {chip} at ({row}, {col})")
+        
+    def place_chip_in_tray_from_hidden(self, chip):
+        """
+        Place a chip in a specific tray slot.
+        """
+        for row in range(self.tray_rows):
+            for col in range(self.tray_cols):
+                if self.tray_slots.get((row, col)) is None:
+                    self.tray_slots[(row, col)] = chip
+                    chip.put_chip_in_tray(row, col)
+                    print(f"Placed chip {chip} in tray at ({row}, {col})")
+                    return
         
 
     def remove_chip(self, chip, row: int, col: int):
@@ -30,7 +44,6 @@ class ChipTracker:
         Remove a chip from a specific slot.
         """
         chip.remove_chip_from_slot()
-      
         self.slots[(row, col)] = None
    
 
@@ -40,7 +53,19 @@ class ChipTracker:
         """
         return self.slots.get((row, col))
     
-
+    def get_chip_from_tray(self, row, col):
+        """
+        Get the chip in a specific tray slot.
+        """
+        return self.tray_slots.get((row, col))
+    
+    def remove_chip_from_tray(self, chip, row: int, col: int):
+        """
+        Remove a chip from a specific tray slot.
+        """
+        chip.remove_chip_from_tray()
+        self.tray_slots[(row, col)] = None
+        print(f"Removed chip {chip} from tray at ({row}, {col})")
 
     def get_all_chips(self):
         """
