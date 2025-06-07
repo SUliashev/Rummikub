@@ -4,6 +4,8 @@ from chip_tracker import ChipTracker
 from chip_validator import ChipValidator
 from chip import Chip
 from tray import Tray
+import random
+from chip import Chip
 
 class GameController:
     def __init__(self, window):
@@ -14,8 +16,11 @@ class GameController:
         self.board = BoardInterface(window, self.chip_tracker, self.chip_validator, self.tray)
         self.current_player = "Player 1"  # Example: Start with Player 1
 
+
+        self.generate_and_shuffle_hidden_chips()
         # Add testing chips
-        self.add_testing_chips()
+        # self.add_testing_chips()
+        
 
 
     def handle_event(self, event):
@@ -24,20 +29,35 @@ class GameController:
         """
         if event.type == pygame.MOUSEBUTTONDOWN:
             self.board.pick_up_chip(event)
-
+            self.board.handle_draw_chip_button(self.chip_tracker)
+            
         elif event.type == pygame.MOUSEMOTION and self.board.dragged_chip is not None:
             self.board.drag_chip(event)
-            slot = self.board.choose_next_slot()
+            # Decide which slot logic to use based on mouse position
+            if self.board.is_mouse_over_tray():
+                slot = self.board.choose_next_tray_slot()
+            else:
+                slot = self.board.choose_next_slot()
             if slot:
                 self.validate_chip_placement(self.chip_tracker, self.board.dragged_chip, *slot)
 
         elif event.type == pygame.MOUSEBUTTONUP:
-            # Handle snapping logic
-            snapped_chip, snapped_slot = self.board.snap_chip_to_slot(self.board.choose_next_slot())
-            if snapped_chip and snapped_slot:
-                row, col = snapped_slot
-                if self.validate_chip_placement(self.chip_tracker, snapped_chip, row, col):
-                    self.place_chip(snapped_chip, row, col)
+            # Decide which slot logic to use based on mouse position
+            if self.board.is_mouse_over_tray():
+                tray_slot = self.board.choose_next_tray_slot()
+                snapped_chip, snapped_slot = self.board.snap_chip_to_tray_slot(tray_slot)
+                if snapped_chip and snapped_slot:
+                    row, col = snapped_slot
+                    # You may want to validate tray placement or just place directly
+                    self.board.snap_chip_to_tray_slot(snapped_slot)
+                    self.chip_tracker.get_all_chips_in_tray()
+            else:
+                board_slot = self.board.choose_next_slot()
+                snapped_chip, snapped_slot = self.board.snap_chip_to_slot(board_slot)
+                if snapped_chip and snapped_slot:
+                    row, col = snapped_slot
+                    if self.validate_chip_placement(self.chip_tracker, snapped_chip, row, col):
+                        self.place_chip(snapped_chip, row, col)
 
     def validate_chip_placement(self, chip_tracker, chip, row, col):
         self.chip_validator.validate_chip(chip, row, col) # dont think this is needed
@@ -86,7 +106,28 @@ class GameController:
         Add testing chips to the board and chip tracker for experimentation.
         """
         for color in ["red", "black"]:
-            for number in range(1, 8):
+            for number in range(1, 3):
                 image_path = f"chips/{color}_{number}_1.png"
                 chip = Chip(0, 0, image_path, color=color, number=number)
                 self.board.place_chip_in_tray(chip)  # Add to tray, not to board
+    
+    def generate_and_shuffle_hidden_chips(self):
+        """
+        Generate all chips (red, blue, orange, black, numbers 1-13, two of each) and shuffle them.
+        Assigns the shuffled list to chip_tracker.hidden.
+        """
+
+
+        colors = ["red", "blue", "orange", "black"]
+        numbers = range(1, 14)
+        hidden_chips = []
+
+        for color in colors:
+            for number in numbers:
+                for _ in range(2):  # Two of each chip
+                    chip = Chip(0, 0, f"chips/{color}_{number}_1.png", color=color, number=number)
+                    chip.state = Chip.hidden
+                    hidden_chips.append(chip)
+
+        random.shuffle(hidden_chips)
+        self.chip_tracker.hidden = hidden_chips

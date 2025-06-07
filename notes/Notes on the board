@@ -10,11 +10,32 @@ Outline of how the classes should be working:
 
 ------------------------------------------------------------------------
 Working on now:
+- the chip x and y oordinates are updated to the trayslot coordinates when moved from hidden to tray
+-make it so that chips are moved when trying to place them into the tray
 
-create the tray which will hold the players chips
+
 -the dragging of the chip towards a slot, if the slot is not empty, the chip should be returned to its original position
 
 
+
+
+
+
+------------------------------------------------------------------------
+Next steps: 
+to get done today:
+
+
+
+
+
+-create rules for the joker
+-create player changes
+
+create text for the game rules
+- create multiple languages
+
+work on the UI
 
 
 ------------------------------------------------------------------------
@@ -26,19 +47,7 @@ Done:
 -improve the selecting of the next slot, right now its not very intuitive
 -updating the chip_validator so that it validates the chips based on the hovering chip and the chip_tracker. The chip tracker will be updated via the validator, instead of both keeping track on the state of the game and separately being updated in the game controller 
 -fix chip validation so that it shows red if the move is not valid
-------------------------------------------------------------------------
-Next steps: 
-
-add tray class 
-
-implement movement of chips when they logically should be moved (if the player places or removes chips)
-
-create text for the game rules
-- create multiple languages
-
-work on the UI
-
-
+-create the tray which will hold the players chips
 -------------------------------------------------------------------------
 Things to update:
 

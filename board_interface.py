@@ -16,6 +16,7 @@ class BoardInterface:
         self.tray_slots = {}
         self.tray = tray
         self.chip_validator = chip_validator  # Initialize the chip validator
+        self.hovering_tray_slot = None
         self.hovering_slot = None  # The slot currently being hovered over
         self.hovering_slot_valid = True
         self.dragged_chip = None
@@ -25,72 +26,38 @@ class BoardInterface:
         self.create_coordinates()
         self.create_tray_coordinates()
 
-    def create_coordinates(self):
-        """
-        Create visual coordinates for the slots with 5-pixel separation.
-        """
-        spacing = 1
-        for row in range(5):
-            for col in range(29):
-                x = 3 + col * (BoardInterface.chip_width + spacing)
-                y = row * (BoardInterface.chip_height + spacing) * 1.9
-                self.board_slots[(row, col)] = (x, y)
 
-    def create_tray_coordinates(self):
-        spacing = 5
-        for row in range(2):
-            for col in range(15):
-                x = self.tray.x + BoardInterface.chip_width  + col * (BoardInterface.chip_width + spacing)
-                y = self.tray.y + row * (BoardInterface.chip_height + spacing)
-                self.tray_slots[(row, col)] = (x, y)
-            
-
-    def draw_lines(self):
-        border_radius = 9  # Adjust for more/less curve
-        for (row, col), (x, y) in self.board_slots.items():
-            pygame.draw.rect(
-                self.window, (255, 255, 255),
-                (x, y, BoardInterface.chip_width, BoardInterface.chip_height),
-                2, border_radius=border_radius
-            )
-        for (row, col), (x, y) in self.tray_slots.items():
-            pygame.draw.rect(
-                self.window, (255, 255, 255),
-                (x, y, BoardInterface.chip_width, BoardInterface.chip_height),
-                2, border_radius=border_radius
-            )
+    def is_mouse_over_tray(self):
+        """
+        Check if the mouse is currently over the tray area.
+        """
+        mouse_x, mouse_y = pygame.mouse.get_pos()
+        tray_rect = pygame.Rect(self.tray.x, self.tray.y, self.tray.width, self.tray.height)
+        return tray_rect.collidepoint(mouse_x, mouse_y)
     
-    def place_chip_in_tray(self, chip):
-        """
-        Place a chip in the tray.
-        """
-        if len(self.chip_tracker.tray_slots) < self.chip_tracker.tray_rows * self.chip_tracker.tray_cols:
-            self.chip_tracker.place_chip_in_tray_from_hidden(chip)
-            chip.x, chip.y = self.tray_slots[(chip.tray_row, chip.tray_col)]
-            chip.update_boundaries()
-            self.chips.append(chip)
-            
     def pick_up_chip(self, event):
         mouse_pos = pygame.mouse.get_pos()
 
         if event.type == pygame.MOUSEBUTTONDOWN:
-            # Check if the mouse is clicking on any chip on the board
-            for chip in self.chips:
-                if chip.x_line[0] <= mouse_pos[0] <= chip.x_line[1] and chip.y_line[0] <= mouse_pos[1] <= chip.y_line[1]:
-                    self.dragged_chip = chip
-                    self.dragged_chip_starting_position = chip.x, chip.y
-                    if chip in self.chip_tracker.get_all_chips().values():
-                        self.chip_tracker.remove_chip(chip, chip.row, chip.col)
-                    break
-            else:
-                # If not found on board, check tray chips
+            if self.is_mouse_over_tray():
+                # Check tray chips only
                 for chip in self.chip_tracker.tray_slots.values():
-                    if chip.x_line[0] <= mouse_pos[0] <= chip.x_line[1] and chip.y_line[0] <= mouse_pos[1] <= chip.y_line[1]:
+                    if chip and chip.x_line[0] <= mouse_pos[0] <= chip.x_line[1] and chip.y_line[0] <= mouse_pos[1] <= chip.y_line[1]:
                         self.dragged_chip = chip
                         self.dragged_chip_starting_position = chip.x, chip.y
                         self.chip_tracker.remove_chip_from_tray(chip, chip.tray_row, chip.tray_col)
-                        self.chips.append(chip)  # Add to board chips for dragging/placing
+                        print(f"Picked up chip {chip} from tray")
                         break
+            else:
+                # Check board chips only
+                for chip in self.chips:
+                    if chip.x_line[0] <= mouse_pos[0] <= chip.x_line[1] and chip.y_line[0] <= mouse_pos[1] <= chip.y_line[1]:
+                        self.dragged_chip = chip
+                        self.dragged_chip_starting_position = chip.x, chip.y
+                        if chip in self.chip_tracker.get_all_chips().values():
+                            self.chip_tracker.remove_chip(chip, chip.row, chip.col)
+                        break
+    
 
     def drag_chip(self, event, validate_func=None):
         """
@@ -98,11 +65,9 @@ class BoardInterface:
         """
         mouse_pos = pygame.mouse.get_pos()  # Store the mouse position once
 
-        if self.dragged_chip is not None and event.type == pygame.MOUSEMOTION:
-            # Update the position of the dragged chip
-            self.dragged_chip.x = mouse_pos[0] - self.dragged_chip.width / 2
-            self.dragged_chip.y = mouse_pos[1] - self.dragged_chip.height / 2
-            self.dragged_chip.update_boundaries()
+        self.dragged_chip.x = mouse_pos[0] - self.dragged_chip.width / 2
+        self.dragged_chip.y = mouse_pos[1] - self.dragged_chip.height / 2
+        self.dragged_chip.update_boundaries()
 
     def choose_next_slot(self, snap_range=60):
         """
@@ -113,33 +78,62 @@ class BoardInterface:
         if not self.dragged_chip:
             return None
 
-        chip_center_x = self.dragged_chip.x + self.dragged_chip.width / 2
-        chip_center_y = self.dragged_chip.y + self.dragged_chip.height / 2
+        if self.dragged_chip.y < self.window.get_height() - (BoardInterface.chip_height / 2) - self.tray.get_height():
+            chip_center_x = self.dragged_chip.x + self.dragged_chip.width / 2
+            chip_center_y = self.dragged_chip.y + self.dragged_chip.height / 2
 
-        # List of (distance, (row, col)) for all slots within snap_range
-        slot_distances = []
-        for (row, col), (slot_x, slot_y) in self.board_slots.items():
-            slot_center_x = slot_x + BoardInterface.chip_width / 2
-            slot_center_y = slot_y + BoardInterface.chip_height / 2
-            distance = ((chip_center_x - slot_center_x) ** 2 + (chip_center_y - slot_center_y) ** 2) ** 0.5
-            if distance <= snap_range:
-                slot_distances.append((distance, (row, col)))
+            # List of (distance, (row, col)) for all slots within snap_range
+            slot_distances = []
+            for (row, col), (slot_x, slot_y) in self.board_slots.items():
+                slot_center_x = slot_x + BoardInterface.chip_width / 2
+                slot_center_y = slot_y + BoardInterface.chip_height / 2
+                distance = ((chip_center_x - slot_center_x) ** 2 + (chip_center_y - slot_center_y) ** 2) ** 0.5
+                if distance <= snap_range:
+                    slot_distances.append((distance, (row, col)))
 
-        # Sort slots by distance
-        slot_distances.sort(key=lambda x: x[0])
+            # Sort slots by distance
+            slot_distances.sort(key=lambda x: x[0])
 
-        # Return the closest empty slot, if any
-        for _, (row, col) in slot_distances:
-            if self.chip_tracker.get_chip(row, col) is None:
-                self.hovering_slot = (row, col)
-           
-                return (row, col)
+            # Return the closest empty slot, if any
+            for _, (row, col) in slot_distances:
+                if self.chip_tracker.get_chip(row, col) is None:
+                    self.hovering_slot = (row, col)
+                    self.hovering_tray_slot = None
+                    return (row, col)
 
         # If all are occupied or none in range, return None
         return None
     
+    def choose_next_tray_slot(self, snap_range=60):
+        """
+        Choose the nearest empty tray slot for the dragged chip within snap_range.
+        Returns (row, col) if a slot is close enough and empty, else None.
+        """
+        if not self.dragged_chip:
+            return None
+        
+        if self.dragged_chip.y >= self.window.get_height() - (BoardInterface.chip_height / 2) - self.tray.get_height():
 
+            chip_center_x = self.dragged_chip.x + self.dragged_chip.width / 2
+            chip_center_y = self.dragged_chip.y + self.dragged_chip.height / 2
+
+            slot_distances = []
+            for (row, col), (slot_x, slot_y) in self.tray_slots.items():
+                slot_center_x = slot_x + BoardInterface.chip_width / 2
+                slot_center_y = slot_y + BoardInterface.chip_height / 2
+                distance = ((chip_center_x - slot_center_x) ** 2 + (chip_center_y - slot_center_y) ** 2) ** 0.5
+                # Check if tray slot is empty and within snap range
+                if distance <= snap_range and self.chip_tracker.tray_slots.get((row, col)) is None:
+                    slot_distances.append((distance, (row, col)))
+
+            slot_distances.sort(key=lambda x: x[0])
+            if slot_distances:
+                self.hovering_tray_slot = slot_distances[0][1]
+                self.hovering_slot = None
+                return slot_distances[0][1]
+            return None
        
+
     def show_hovering_slot(self):
         """
         Highlight the slot currently being hovered over.
@@ -154,7 +148,45 @@ class BoardInterface:
             pygame.draw.rect(self.window, color, (x, y, BoardInterface.chip_width, BoardInterface.chip_height), 7)
             self.hovering_slot = (row, col)
 
-      
+    def show_hovering_tray_slot(self):
+        """
+        Highlight the tray slot currently being hovered over.
+        If valid is True, use green; else use red.
+        """
+        if self.hovering_tray_slot:
+            row, col = self.hovering_tray_slot
+            x, y = self.tray_slots[(row, col)]
+            color = (0, 255, 0) 
+            pygame.draw.rect(
+                self.window,
+                color,
+                (x, y, BoardInterface.chip_width, BoardInterface.chip_height),
+                5,  # thickness
+                border_radius=12
+            )
+
+    def handle_chip_snapping(self):
+        """
+        Handle the snapping of the chip to the nearest slot or tray position.
+        This method should be called after dragging a chip.
+        """
+        if self.is_mouse_over_tray():
+            tray_slot = self.choose_next_tray_slot()
+            # Snap to tray slot if available
+            if tray_slot:
+                # Place chip in tray slot, update chip position, etc.
+                chip_placed, _ = self.snap_chip_to_tray_slot(tray_slot)
+                if chip_placed:
+                    self.place_chip_in_tray(chip_placed)
+        else:
+            board_slot = self.choose_next_slot()
+            # Snap to board slot if available
+            if board_slot:
+                # Place chip in board slot, update chip position, etc.
+                chip_placed, _ = self.snap_chip_to_slot(board_slot)
+                if chip_placed:
+                    # Additional logic for placing chip on board if needed
+                    pass
 
     def snap_chip_to_slot(self, nearest_slot=None):
         """
@@ -177,6 +209,36 @@ class BoardInterface:
 
         return chip_placed, nearest_slot
 
+    def snap_chip_to_tray_slot(self, tray_slot):
+        """
+        Snap the dragged chip to the given tray slot (row, col).
+        Returns (chip, (row, col)) if successful, else (None, None).
+        """
+        if self.dragged_chip and tray_slot:
+            row, col = tray_slot
+            if self.chip_tracker.tray_slots.get((row, col)) is None:
+                # Move chip to tray slot
+                self.chip_tracker.tray_slots[(row, col)] = self.dragged_chip
+                self.dragged_chip.tray_row = row
+                self.dragged_chip.tray_col = col
+                self.dragged_chip.x, self.dragged_chip.y = self.tray_slots[(row, col)]
+                self.dragged_chip.update_boundaries()
+                chip = self.dragged_chip
+                self.dragged_chip = None
+                return chip, (row, col)
+        return None, None
+
+    def place_chip_in_tray(self, chip):  # can be deleted i think 
+        """
+        Place a chip in the tray.
+        """
+        if len(self.chip_tracker.tray_slots) < self.chip_tracker.tray_rows * self.chip_tracker.tray_cols:
+            self.chip_tracker.place_chip_in_tray_from_hidden(chip)
+            chip.x, chip.y = self.tray_slots[(chip.tray_row, chip.tray_col)]
+            chip.update_boundaries()
+            self.chips.append(chip)
+
+
     def reset_dragged_chip(self, chip=None):
         """
         Reset the dragged chip to its original position.
@@ -190,6 +252,7 @@ class BoardInterface:
             self.hovering_slot = None
             self.dragged_chip_starting_position = None
 
+
             
     def draw(self):
         """
@@ -199,9 +262,88 @@ class BoardInterface:
         self.tray.draw()
         self.draw_lines()
         self.show_hovering_slot()
+        self.show_hovering_tray_slot()
+        self.draw_draw_chip_button()
         for chip in self.chips:
             self.window.blit(chip.sprite, (chip.x, chip.y))
-        for chip in self.chip_tracker.tray_slots.values():
-            self.window.blit(chip.sprite, (chip.x, chip.y))
+      
+    def create_coordinates(self):
+        """
+        Create visual coordinates for the slots with 5-pixel separation.
+        """
+        spacing = 1
+        for row in range(5):
+            for col in range(29):
+                x = 3 + col * (BoardInterface.chip_width + spacing)
+                y = row * (BoardInterface.chip_height + spacing) * 1.9
+                self.board_slots[(row, col)] = (x, y)
+
+    def create_tray_coordinates(self):
+        spacing = 5
+        for row in range(2):
+            for col in range(15):
+                x = BoardInterface.chip_width + self.tray.x + col * (BoardInterface.chip_width + spacing)
+                y = self.tray.y + row * (BoardInterface.chip_height + spacing)
+                self.tray_slots[(row, col)] = (x, y)
+            
+
+    def draw_lines(self):
+        border_radius = 9  # Adjust for more/less curve
+        for (row, col), (x, y) in self.board_slots.items():
+            pygame.draw.rect(
+                self.window, (255, 255, 255),
+                (x, y, BoardInterface.chip_width, BoardInterface.chip_height),
+                2, border_radius=border_radius
+            )
+        for (row, col), (x, y) in self.tray_slots.items():
+            pygame.draw.rect(
+                self.window, (255, 255, 255),
+                (x, y, BoardInterface.chip_width, BoardInterface.chip_height),
+                2, border_radius=border_radius
+            )
+
+    def draw_draw_chip_button(self):
+        """
+        Draw a button at the bottom right of the window to draw a chip from the hidden pile.
+        """
+        button_width, button_height = 180, 60
+        margin = 30
+        self.button_rect = pygame.Rect(
+            self.window.get_width() - button_width - margin,
+            self.window.get_height() - button_height - 100,
+            button_width,
+            button_height
+        )
+        pygame.draw.rect(self.window, (70, 130, 180), self.button_rect, border_radius=12)
+        font = pygame.font.SysFont(None, 36)
+        text = font.render("Draw Chip", True, (255, 255, 255))
+        text_rect = text.get_rect(center=self.button_rect.center)
+        self.window.blit(text, text_rect)
+
+    def handle_draw_chip_button(self, chip_tracker):
+        """
+        If the draw button is pressed, move a chip from hidden to the tray and add to self.chips.
+        """
+        mouse_pos = pygame.mouse.get_pos()
+        mouse_pressed = pygame.mouse.get_pressed()
+        if hasattr(self, 'button_rect') and self.button_rect.collidepoint(mouse_pos):
+            if mouse_pressed[0]:  # Left mouse button
+                self.draw_chip_from_hidden_to_tray(chip_tracker)
+
+    def draw_chip_from_hidden_to_tray(self, chip_tracker):
+        """
+        Draw a chip from the hidden pile to the tray and add it to self.chips for rendering.
+        """
+        before = set(chip_tracker.tray_slots.values())
+        chip_tracker.place_chip_in_tray_from_hidden()
+        after = set(chip_tracker.tray_slots.values())
+        new_chips = [chip for chip in after if chip and chip not in before]
+        for chip in new_chips:
+            if chip not in self.chips:
+                self.chips.append(chip)
+
+
+
+
 
 

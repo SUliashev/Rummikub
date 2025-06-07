@@ -14,6 +14,9 @@ class Tray:
         self.x = (win_width - self.width) // 2
         self.y = win_height - self.height - 30  # 30px margin from bottom
 
+    def get_height(self):
+        return self.height
+    
     def add_chip(self, chip):
         if len(self.chips) < self.chip_capacity:
             self.chips.append(chip)
@@ -21,7 +24,5 @@ class Tray:
     def draw(self):
         # Draw tray background
         pygame.draw.rect(self.window, self.bg_color, (self.x, self.y, self.width, self.height), border_radius=20)
-        for chip in self.chips:
-            chip.put_chip_in_tray(chip.tray_row, chip.tray_col)
-            chip.draw(self.window)
+        
 
