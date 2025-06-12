@@ -20,7 +20,7 @@ class ChipValidator:
             return True
         
         # Debug: Print the chips in the combination
-        print(f"Combination for chip at ({row}, {col}): {[str(chip) for chip in chips]}")
+        # print(f"Combination for chip at ({row}, {col}): {[str(chip) for chip in chips]}")
        
         # Check if the combination is valid
         if len(chips) > 1:

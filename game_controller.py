@@ -22,16 +22,26 @@ class GameController:
         # self.add_testing_chips()
         
 
-
     def handle_event(self, event):
         """
         Handle a single pygame event.
         """
         if event.type == pygame.MOUSEBUTTONDOWN:
-            self.board.pick_up_chip(event)
-            self.board.handle_draw_chip_button(self.chip_tracker)
+            self.handle_mousebutton_dowm(event)
+
             
-        elif event.type == pygame.MOUSEMOTION and self.board.dragged_chip is not None:
+        elif event.type == pygame.MOUSEMOTION:
+            self.handle_mousemotion(event)
+
+        elif event.type == pygame.MOUSEBUTTONUP:
+            self.handle_mousebutton_up()
+
+    def handle_mousebutton_dowm(self, event):
+        self.board.pick_up_chip(event)
+        self.board.handle_draw_chip_button(self.chip_tracker)
+
+    def handle_mousemotion(self, event):
+        if self.board.dragged_chip:
             self.board.drag_chip(event)
             # Decide which slot logic to use based on mouse position
             if self.board.is_mouse_over_tray():
@@ -40,36 +50,49 @@ class GameController:
                 slot = self.board.choose_next_slot()
             if slot:
                 self.validate_chip_placement(self.chip_tracker, self.board.dragged_chip, *slot)
+        
+    def handle_mousebutton_up(self):
+        # Decide which slot logic to use based on mouse position
+        if self.board.is_mouse_over_tray():
+            tray_slot = self.board.choose_next_tray_slot()
+            # Optionally, validate tray placement here if needed
+            snapped_chip, snapped_slot = self.board.snap_chip_to_tray_slot(tray_slot)
+            if snapped_chip and snapped_slot:
+                self.chip_tracker.get_all_chips_in_tray()
+        else:
+            board_slot = self.board.choose_next_slot()
+            if board_slot and self.board.dragged_chip:
+                row, col = board_slot
+                valid_placement = self.validate_chip_placement(self.chip_tracker, self.board.dragged_chip, row, col)
+                if valid_placement:
+                    snapped_chip, snapped_slot = self.board.snap_chip_to_slot(board_slot)
 
-        elif event.type == pygame.MOUSEBUTTONUP:
-            # Decide which slot logic to use based on mouse position
-            if self.board.is_mouse_over_tray():
-                tray_slot = self.board.choose_next_tray_slot()
-                snapped_chip, snapped_slot = self.board.snap_chip_to_tray_slot(tray_slot)
-                if snapped_chip and snapped_slot:
-                    row, col = snapped_slot
-                    # You may want to validate tray placement or just place directly
-                    self.board.snap_chip_to_tray_slot(snapped_slot)
-                    self.chip_tracker.get_all_chips_in_tray()
+                    if snapped_chip and snapped_slot:
+                        self.place_chip_on_board(snapped_chip, row, col)
+                else:
+                    self.board.snap_chip_back_to_origin()
             else:
-                board_slot = self.board.choose_next_slot()
-                snapped_chip, snapped_slot = self.board.snap_chip_to_slot(board_slot)
-                if snapped_chip and snapped_slot:
-                    row, col = snapped_slot
-                    if self.validate_chip_placement(self.chip_tracker, snapped_chip, row, col):
-                        self.place_chip(snapped_chip, row, col)
+                # If not over a valid slot, snap back to origin
+                self.board.snap_chip_back_to_origin()
+
+        
+
 
     def validate_chip_placement(self, chip_tracker, chip, row, col):
-        self.chip_validator.validate_chip(chip, row, col) # dont think this is needed
+        # self.chip_validator.validate_chip(chip, row, col) # dont think this is needed
         is_valid = self.chip_validator.validate_combination(chip_tracker, chip, row, col)
         self.board.hovering_slot_valid = is_valid
         return is_valid
 
-    def place_chip(self, chip, row, col):
+    def place_chip_on_board(self, chip, row, col):
         self.chip_tracker.place_chip(chip, row, col)
         chip.put_chip_in_slot(row, col)
         self.board.dragged_chip = None
-        
+
+    def place_chip_in_tray(self, chip, row, col):   
+        self.chip_tracker.place_chip_in_tray(chip, row, col)
+        chip.put_chip_in_tray(row, col)
+        self.board.dragged_chip = None
 
     def switch_turn(self):
         """

@@ -30,7 +30,7 @@ class ChipTracker:
             raise ValueError(f"Slot ({row}, {col}) is already occupied!")
         self.slots[(row, col)] = chip
         chip.put_chip_in_slot(row, col)
-        print(f"Placed chip {chip} at ({row}, {col})")
+        # print(f"Placed chip {chip} at ({row}, {col})")
 
     def place_chip_in_tray(self, chip, row, col):
         """
@@ -41,7 +41,7 @@ class ChipTracker:
             return
         self.tray_slots[(row, col)] = chip
         chip.put_chip_in_tray(row, col)
-        print(f"Placed chip {chip} in tray at ({row}, {col})")
+        # print(f"Placed chip {chip} in tray at ({row}, {col})")
 
         
     def place_chip_in_tray_from_hidden(self):
@@ -51,13 +51,8 @@ class ChipTracker:
         if not self.hidden:
             print("No hidden chips left!")
             return
-        chip = self.hidden.pop()
-        self.place_chip_in_first_tray_slot(chip)
 
-    def place_chip_in_first_tray_slot(self, chip):
-        """
-        Place the given chip in the first available tray slot.
-        """
+        chip = self.hidden.pop()
         for row in range(self.tray_rows):
             for col in range(self.tray_cols):
                 if self.tray_slots.get((row, col)) is None:
@@ -93,7 +88,7 @@ class ChipTracker:
         """
         self.tray_slots[(row, col)] = None
         chip.remove_chip_from_tray()
-        print(f"Removed chip {chip} from tray at ({row}, {col})")
+        # print(f"Removed chip {chip} from tray at ({row}, {col})")
 
     def get_all_chips(self):
         """
@@ -108,4 +103,4 @@ class ChipTracker:
         for chip in self.tray_slots.values():
             # print(f'{chip},row: {chip.tray_row}, col: {chip.tray_col}')
             pass
-    
+

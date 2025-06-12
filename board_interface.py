@@ -26,6 +26,18 @@ class BoardInterface:
         self.create_coordinates()
         self.create_tray_coordinates()
 
+    def update_chip_coordinates(self):
+        """
+        Update the coordinates of all chips on the board.
+        This should be called after placing or moving chips.
+        """
+        for chip in self.chips:
+            if chip.state == Chip.board:
+                chip.x, chip.y = self.board_slots[(chip.row, chip.col)]
+            elif chip.state == Chip.tray:
+                chip.x, chip.y = self.tray_slots[(chip.tray_row, chip.tray_col)]
+            chip.update_boundaries()
+
 
     def is_mouse_over_tray(self):
         """
@@ -44,7 +56,7 @@ class BoardInterface:
                 for chip in self.chip_tracker.tray_slots.values():
                     if chip and chip.x_line[0] <= mouse_pos[0] <= chip.x_line[1] and chip.y_line[0] <= mouse_pos[1] <= chip.y_line[1]:
                         self.dragged_chip = chip
-                        self.dragged_chip_starting_position = chip.x, chip.y
+                        self.dragged_chip_starting_position = chip.tray_row, chip.tray_col
                         self.chip_tracker.remove_chip_from_tray(chip, chip.tray_row, chip.tray_col)
                         print(f"Picked up chip {chip} from tray")
                         break
@@ -53,9 +65,8 @@ class BoardInterface:
                 for chip in self.chips:
                     if chip.x_line[0] <= mouse_pos[0] <= chip.x_line[1] and chip.y_line[0] <= mouse_pos[1] <= chip.y_line[1]:
                         self.dragged_chip = chip
-                        self.dragged_chip_starting_position = chip.x, chip.y
-                        if chip in self.chip_tracker.get_all_chips().values():
-                            self.chip_tracker.remove_chip(chip, chip.row, chip.col)
+                        self.dragged_chip_starting_position = chip.row, chip.col
+                        self.chip_tracker.remove_chip(chip, chip.row, chip.col)
                         break
     
 
@@ -76,13 +87,13 @@ class BoardInterface:
         Returns (row, col) if a slot is close enough and empty, else None.
         """
         if not self.dragged_chip:
+            self.hovering_slot = None
             return None
 
         if self.dragged_chip.y < self.window.get_height() - (BoardInterface.chip_height / 2) - self.tray.get_height():
             chip_center_x = self.dragged_chip.x + self.dragged_chip.width / 2
             chip_center_y = self.dragged_chip.y + self.dragged_chip.height / 2
 
-            # List of (distance, (row, col)) for all slots within snap_range
             slot_distances = []
             for (row, col), (slot_x, slot_y) in self.board_slots.items():
                 slot_center_x = slot_x + BoardInterface.chip_width / 2
@@ -91,17 +102,15 @@ class BoardInterface:
                 if distance <= snap_range:
                     slot_distances.append((distance, (row, col)))
 
-            # Sort slots by distance
             slot_distances.sort(key=lambda x: x[0])
-
-            # Return the closest empty slot, if any
             for _, (row, col) in slot_distances:
                 if self.chip_tracker.get_chip(row, col) is None:
                     self.hovering_slot = (row, col)
                     self.hovering_tray_slot = None
                     return (row, col)
 
-        # If all are occupied or none in range, return None
+    # If no slot is in range, clear hovering
+        self.hovering_slot = None
         return None
     
     def choose_next_tray_slot(self, snap_range=60):
@@ -110,8 +119,9 @@ class BoardInterface:
         Returns (row, col) if a slot is close enough and empty, else None.
         """
         if not self.dragged_chip:
+            self.hovering_tray_slot = None
             return None
-        
+
         if self.dragged_chip.y >= self.window.get_height() - (BoardInterface.chip_height / 2) - self.tray.get_height():
 
             chip_center_x = self.dragged_chip.x + self.dragged_chip.width / 2
@@ -131,7 +141,10 @@ class BoardInterface:
                 self.hovering_tray_slot = slot_distances[0][1]
                 self.hovering_slot = None
                 return slot_distances[0][1]
-            return None
+
+    # If no tray slot is in range, clear hovering
+        self.hovering_tray_slot = None
+        return None
        
 
     def show_hovering_slot(self):
@@ -208,16 +221,18 @@ class BoardInterface:
         self.hovering_slot = None
 
         return chip_placed, nearest_slot
+    
 
     def snap_chip_to_tray_slot(self, tray_slot):
         """
         Snap the dragged chip to the given tray slot (row, col).
         Returns (chip, (row, col)) if successful, else (None, None).
         """
-        if self.dragged_chip and tray_slot:
+        if tray_slot:
             row, col = tray_slot
             if self.chip_tracker.tray_slots.get((row, col)) is None:
                 # Move chip to tray slot
+    
                 self.chip_tracker.tray_slots[(row, col)] = self.dragged_chip
                 self.dragged_chip.tray_row = row
                 self.dragged_chip.tray_col = col
@@ -228,30 +243,21 @@ class BoardInterface:
                 return chip, (row, col)
         return None, None
 
-    def place_chip_in_tray(self, chip):  # can be deleted i think 
-        """
-        Place a chip in the tray.
-        """
-        if len(self.chip_tracker.tray_slots) < self.chip_tracker.tray_rows * self.chip_tracker.tray_cols:
-            self.chip_tracker.place_chip_in_tray_from_hidden(chip)
-            chip.x, chip.y = self.tray_slots[(chip.tray_row, chip.tray_col)]
-            chip.update_boundaries()
-            self.chips.append(chip)
 
-
-    def reset_dragged_chip(self, chip=None):
+    def snap_chip_back_to_origin(self):
         """
-        Reset the dragged chip to its original position.
+        Snap the dragged chip back to its original position if not placed in a valid slot or combination is invalid.
         """
-        if chip is None:
-            chip = self.dragged_chip
-        if chip and self.dragged_chip_starting_position:
-            chip.x, chip.y = self.dragged_chip_starting_position
-            chip.update_boundaries()
+        if self.dragged_chip and self.dragged_chip_starting_position:
+            if self.dragged_chip.state == Chip.board:
+                self.snap_chip_to_slot(self.dragged_chip_starting_position)
+            elif self.dragged_chip.state == Chip.tray:
+                # If the chip was dragged from the tray, snap it back to its original tray position
+                self.snap_chip_to_tray_slot(self.dragged_chip_starting_position)
             self.dragged_chip = None
             self.hovering_slot = None
+            self.hovering_tray_slot = None
             self.dragged_chip_starting_position = None
-
 
             
     def draw(self):
@@ -265,7 +271,8 @@ class BoardInterface:
         self.show_hovering_tray_slot()
         self.draw_draw_chip_button()
         for chip in self.chips:
-            self.window.blit(chip.sprite, (chip.x, chip.y))
+            if chip.state != Chip.hidden:
+             self.window.blit(chip.sprite, (chip.x, chip.y))
       
     def create_coordinates(self):
         """
@@ -285,7 +292,7 @@ class BoardInterface:
                 x = BoardInterface.chip_width + self.tray.x + col * (BoardInterface.chip_width + spacing)
                 y = self.tray.y + row * (BoardInterface.chip_height + spacing)
                 self.tray_slots[(row, col)] = (x, y)
-            
+       
 
     def draw_lines(self):
         border_radius = 9  # Adjust for more/less curve
@@ -336,12 +343,14 @@ class BoardInterface:
         """
         before = set(chip_tracker.tray_slots.values())
         chip_tracker.place_chip_in_tray_from_hidden()
+      
         after = set(chip_tracker.tray_slots.values())
         new_chips = [chip for chip in after if chip and chip not in before]
         for chip in new_chips:
             if chip not in self.chips:
                 self.chips.append(chip)
-
+        self.update_chip_coordinates()
+        print(self.board_slots[(1, 1)])
 
 
 
