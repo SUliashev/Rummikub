@@ -19,7 +19,7 @@ class GameController:
 
         self.generate_and_shuffle_hidden_chips()
         # Add testing chips
-        # self.add_testing_chips()
+        self.add_testing_chips()
         
 
     def handle_event(self, event):
@@ -128,11 +128,8 @@ class GameController:
         """
         Add testing chips to the board and chip tracker for experimentation.
         """
-        for color in ["red", "black"]:
-            for number in range(1, 3):
-                image_path = f"chips/{color}_{number}_1.png"
-                chip = Chip(0, 0, image_path, color=color, number=number)
-                self.board.place_chip_in_tray(chip)  # Add to tray, not to board
+        for i in range(14):
+            self.board.draw_chip_from_hidden_to_tray(self.chip_tracker)
     
     def generate_and_shuffle_hidden_chips(self):
         """

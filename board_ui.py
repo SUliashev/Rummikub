@@ -66,6 +66,7 @@ class BoardInterface:
                     if chip.x_line[0] <= mouse_pos[0] <= chip.x_line[1] and chip.y_line[0] <= mouse_pos[1] <= chip.y_line[1]:
                         self.dragged_chip = chip
                         self.dragged_chip_starting_position = chip.row, chip.col
+                        print(self.dragged_chip_starting_position)
                         self.chip_tracker.remove_chip(chip, chip.row, chip.col)
                         break
     
@@ -211,6 +212,8 @@ class BoardInterface:
             row, col = nearest_slot
             if self.chip_tracker.get_chip(row, col) is None:  # Check if the slot is empty
                 self.dragged_chip.x, self.dragged_chip.y = self.board_slots[(row, col)]
+                self.dragged_chip.row = row
+                self.dragged_chip.col = col
                 self.dragged_chip.update_boundaries()
                 # self.chip_tracker.place_chip(self.dragged_chip, row, col)
 
@@ -236,6 +239,7 @@ class BoardInterface:
                 self.chip_tracker.tray_slots[(row, col)] = self.dragged_chip
                 self.dragged_chip.tray_row = row
                 self.dragged_chip.tray_col = col
+                self.dragged_chip.state = Chip.tray
                 self.dragged_chip.x, self.dragged_chip.y = self.tray_slots[(row, col)]
                 self.dragged_chip.update_boundaries()
                 chip = self.dragged_chip
@@ -272,8 +276,9 @@ class BoardInterface:
         self.draw_draw_chip_button()
         for chip in self.chips:
             if chip.state != Chip.hidden:
-             self.window.blit(chip.sprite, (chip.x, chip.y))
-      
+                self.window.blit(chip.sprite, (chip.x, chip.y))
+                print(chip.state)
+
     def create_coordinates(self):
         """
         Create visual coordinates for the slots with 5-pixel separation.
