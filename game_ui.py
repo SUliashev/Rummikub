@@ -33,17 +33,17 @@ class GameUI:
         self.draw_board_grid()
         self.draw_tray_background()
         self.draw_tray_grid()
+        self.draw_draw_chip_button()
+
         # self.show_hovering_slot()
         # self.show_hovering_tray_slot()
-        # self.draw_draw_chip_button()
+        
         # for chip in self.chips:
         #     if chip.state != Chip.hidden
         #         self.window.blit(chip.sprite, (chip.x, chip.y))
         #         print(chip.state)
 
 
-
-    
     
     def draw_tray_background(self):
         """
@@ -68,29 +68,32 @@ class GameUI:
                 2, border_radius=border_radius
             )
 
+
     def draw_board_grid(self):
         border_radius = 9  # Adjust for more/less curve
+        font = pygame.font.SysFont(None, 18)  # Small font for column numbers
 
         for (row, col), (x, y) in self.chip_tracker.board_grid.slot_coordinates.items():
+            # Draw the slot rectangle
             pygame.draw.rect(
                 self.window, (255, 255, 255),
                 (x, y, Config.chip_width, Config.chip_height),
                 2, border_radius=border_radius
             )
-    # def update_chip_coordinates(self): #not yet sure if needed
-    #     """
-    #     Update the coordinates of all chips on the board.
-    #     This should be called after placing or moving chips.
-    #     """
-    #     for chip in self.chips:
-    #         if chip.state == Chip.board:
-    #             chip.x, chip.y = self.board_slots[(chip.row, chip.col)]
-    #         elif chip.state == Chip.tray:
-    #             chip.x, chip.y = self.tray_slots[(chip.tray_row, chip.tray_col)]
-    #         chip.update_boundaries()
-
-
+            # Draw the column number near the top-left of the slot
+            col_text = font.render(str(col + 1), True, (200, 200, 0))
+            self.window.blit(col_text, (x + 4, y + 2))
+        
     
+    def draw_draw_chip_button(self):
+        button_rect = pygame.Rect(Config.draw_button_x, Config.draw_button_y, Config.draw_button_width * Config.relative_width, Config.draw_button_height * Config.relative_height)
+
+        pygame.draw.rect(self.window, Config.draw_button_color, button_rect, border_radius=12)
+        font = pygame.font.SysFont(None, 36)
+        text = font.render("Draw Chip", True, (255, 255, 255))
+        text_rect = text.get_rect(center=button_rect.center)
+        self.window.blit(text, text_rect)
+
 
 
 
