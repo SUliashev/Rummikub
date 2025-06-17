@@ -10,11 +10,21 @@ Outline of how the classes should be working:
 
 ------------------------------------------------------------------------
 Working on now:
-- the chip x and y oordinates are updated to the trayslot coordinates when moved from hidden to tray
+
+
+
+redo the storing of data for chips
+-chip coordinates should be stored in the chip Tracker, this should also hold the row and col of the chip, these in turn update the chip x and y, and these are shown on the board
+
+return to tray origin is not working, it is currently being returned to the board
+
+
+-implement 2 players
+
 -make it so that chips are moved when trying to place them into the tray
 
 
--the dragging of the chip towards a slot, if the slot is not empty, the chip should be returned to its original position
+
 
 
 
@@ -23,8 +33,7 @@ Working on now:
 
 ------------------------------------------------------------------------
 Next steps: 
-to get done today:
--get the return chip to the original place method
+select multiple chips
 
 
 
@@ -39,7 +48,11 @@ work on the UI
 
 
 ------------------------------------------------------------------------
-Done:
+Done V2: 
+
+Done V1:
+
+
 -create methods so that a chip is dragged into a field and stays there, if it is not dragged into an active field it returns to its original position
 -create sprites for all chips
 -when the chip is removed from the slot, the slot is not being set to None
@@ -48,6 +61,7 @@ Done:
 -updating the chip_validator so that it validates the chips based on the hovering chip and the chip_tracker. The chip tracker will be updated via the validator, instead of both keeping track on the state of the game and separately being updated in the game controller 
 -fix chip validation so that it shows red if the move is not valid
 -create the tray which will hold the players chips
+-the dragging of the chip towards a slot, if the slot is not empty, the chip should be returned to its original position
 -------------------------------------------------------------------------
 Things to update:
 

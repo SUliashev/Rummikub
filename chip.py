@@ -1,23 +1,17 @@
 import pygame
 
 class Chip:
-    tray = 'Chip currently in tray'
-    board = 'Chip currently on the board'
-    hidden = 'Chip currently hidden'
-    def __init__(self, x: int, y: int, image_path: str, color: str = None, number: int = None):
-        self.sprite = pygame.image.load(image_path)  # Load the chip image
-        self.x = x
-        self.y = y
-        self.width = self.sprite.get_width()
-        self.height = self.sprite.get_height()
-        self.row = None
-        self.col = None
-        self.tray_row = None
-        self.tray_col = None
+    chip_width = None
+    chip_height = None
+
+
+    def __init__(self, x: int, y: int, image: pygame.Surface, color: str = None, number: int = None):
+        self.sprite = image # Load the chip image
         self.color = color
         self.number = number 
-        self.state = Chip.hidden
-        self.update_boundaries()
+        if Chip.chip_height is None or Chip.chip_width is None:
+            Chip.set_chip_size(Chip, image.get_width(), image.get_height())
+  
 
     def __str__(self):
         return f"({self.color} {self.number})"
@@ -25,34 +19,24 @@ class Chip:
     def __repr__(self):
         return f"({self.color} {self.number})"
     
+    def set_chip_size(cls, width: int, height: int):
+        cls.chip_width = width
+        cls.chip_height = height
+    
     def update_boundaries(self):
-        self.x_line = (self.x, self.x + self.width)
-        self.y_line = (self.y, self.y + self.height)
+        self.x_line = (self.x, self.x + Chip.chip_width)
+        self.y_line = (self.y, self.y + Chip.chip_height)
 
     def draw(self, window):
         window.blit(self.sprite, (self.x, self.y))
 
-    def put_chip_in_slot(self, row, col):
-        """
-        Place the chip in a specific slot.
-        """
-        self.row = row
-        self.col = col
+    def put_chip_in_slot(self):
+        
         self.state = Chip.board
-    
-    def remove_chip_from_slot(self):
-        """
-        Remove the chip from its current slot.
-        """
-        self.row = None
-        self.col = None
+        self.update_boundaries()
 
 
-    def put_chip_in_tray(self, row, col):
-        self.tray_row = row
-        self.tray_col = col
+    def put_chip_in_tray(self):
         self.state = Chip.tray
-    
-    def remove_chip_from_tray(self):
-        self.tray_row = None
-        self.tray_col = None
+        self.update_boundaries()
+
