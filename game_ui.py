@@ -8,7 +8,7 @@ from config import Config
 class GameUI:
     def __init__(self, chip_tracker):
 
-        self.window = pygame.display.set_mode((Config.window_width, Config.window_height),  pygame.RESIZABLE)
+        self.window = Config.window 
         print('size', self.window.get_size())
         pygame.display.set_caption("Rummikub")
         self.chip_tracker = chip_tracker  # Use ChipTracker for chip management
@@ -34,7 +34,7 @@ class GameUI:
         self.draw_board_grid()
         self.draw_tray_background()
         self.draw_tray_grid()
-        self.draw_draw_chip_button()
+        # self.draw_draw_chip_button()
 
         # self.show_hovering_slot()
         # self.show_hovering_tray_slot()
@@ -54,7 +54,7 @@ class GameUI:
         pygame.draw.rect(
             self.window,
             (60, 60, 60),  # Tray background color, adjust as needed
-            (Config.tray_background_x, Config.tray_background_y , Config.tray_background_width + Config.tray_background_extra_width,  Config.tray_background_height + Config.tray_background_extra_height),
+            (Config.tray_background_x, Config.tray_background_y , Config.tray_background_width ,  Config.tray_background_height ),
             border_radius=20
         )
 
@@ -87,7 +87,7 @@ class GameUI:
         
     
     def draw_draw_chip_button(self):
-        button_rect = pygame.Rect(Config.draw_button_x, Config.draw_button_y, Config.draw_button_width * Config.relative_width, Config.draw_button_height * Config.relative_height)
+        button_rect = pygame.Rect(Config.draw_button_x, Config.draw_button_y, Config.draw_button_width *  Config.draw_button_height )
 
         pygame.draw.rect(self.window, Config.draw_button_color, button_rect, border_radius=12)
         font = pygame.font.SysFont(None, 36)
