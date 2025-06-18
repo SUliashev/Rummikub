@@ -12,7 +12,7 @@ class BoardGrid:
         self.create_coordinates()
 
     def create_coordinates(self):
-        start_x = Config.board_horizontal_edge + Config.slot_horizontal_spacing // 2
+        start_x = Config.board_horizontal_edge + Config.slot_horizontal_spacing / 2
         for row in range(Config.board_rows):
             for col in range(Config.board_cols):
                 x = start_x + (Config.chip_width + Config.slot_horizontal_spacing) * col

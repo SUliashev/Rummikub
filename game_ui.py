@@ -34,7 +34,7 @@ class GameUI:
         self.draw_board_grid()
         self.draw_tray_background()
         self.draw_tray_grid()
-        # self.draw_draw_chip_button()
+        self.draw_draw_chip_button()
 
         # self.show_hovering_slot()
         # self.show_hovering_tray_slot()
@@ -87,10 +87,10 @@ class GameUI:
         
     
     def draw_draw_chip_button(self):
-        button_rect = pygame.Rect(Config.draw_button_x, Config.draw_button_y, Config.draw_button_width *  Config.draw_button_height )
-
+        button_rect = pygame.Rect(Config.draw_button_x, Config.draw_button_y, Config.draw_button_width ,  Config.draw_button_height )
+        font_size = int(Config.draw_button_width * 0.2)
         pygame.draw.rect(self.window, Config.draw_button_color, button_rect, border_radius=12)
-        font = pygame.font.SysFont(None, 36)
+        font = pygame.font.SysFont(None, font_size)
         text = font.render("Draw Chip", True, (255, 255, 255))
         text_rect = text.get_rect(center=button_rect.center)
         self.window.blit(text, text_rect)

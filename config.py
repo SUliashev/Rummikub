@@ -26,24 +26,18 @@ class Config:
     
 
     '''Draw Button'''
-    draw_button_color = (144, 255, 0)  # Green
+    draw_button_color = (69, 69, 69)  # Green
     draw_button_width = 250
     draw_button_height = 70
 
 
 
     '''STATIC VARIABLES'''
+
     '''Window'''
+    window = None
     window_width = None
     window_height = None
-
-    # relative_width = None
-    # relative_height = None
-
-    '''Board'''
-    board_slot_edge_x = None 
-    board_slot_edge_y = None
-    board_bottom_edge_y = None
 
     '''Chip'''
     chip_width = None
@@ -61,10 +55,12 @@ class Config:
 
 
     '''Draw Button'''
+    draw_button_width = None
+    draw_button_height = None
     draw_button_x = None
     draw_button_y = None
 
-    window = None
+    
 
     @staticmethod
     def setup_config():
@@ -72,20 +68,10 @@ class Config:
         pygame.init()
         info = pygame.display.Info()
         Config.window = pygame.display.set_mode((info.current_w, info.current_h), pygame.RESIZABLE)
-        # REFERENCE_WIDTH = 1920
-        # REFERENCE_HEIGHT = 1011
+
         Config.window_width = Config.window.get_width()
         Config.window_height = Config.window.get_height()
         
-
-        # Config.relative_width = Config.window_width / REFERENCE_WIDTH
-        # Config.relative_height = Config.window_height / REFERENCE_HEIGHT
-
-        # Config.board_slot_edge_x = int(Config.board_horizontal_edge * Config.relative_width)
-        # Config.board_slot_edge_y = int(Config.board_vertical_edge * Config.relative_height)
-
-        # Config.board_bottom_edge_y = Config.window_height - Config.tray_background_y - Config.board_slot_edge_y
-        # Config.board_bottom_edge_y = Config.window_height - Config.tray_background_y - Config.board_slot_edge_y
 
         Config.chip_width = int(((Config.window_width - Config.board_horizontal_edge * 2) - Config.slot_horizontal_spacing * (Config.board_cols - 1)) / Config.board_cols) 
         Config.chip_height = int((((Config.window_height - Config.board_vertical_edge * 2) - Config.tray_background_extra_height * 2 ) - Config.slot_vertical_spacing * Config.board_rows)  / (Config.board_rows + Config.tray_rows))
@@ -100,7 +86,9 @@ class Config:
         Config.tray_background_x =  int(Config.window_width * 0.5 - Config.tray_background_width / 2)
         Config.tray_background_y = Config.tray_grid_y - Config.tray_background_extra_height 
       
-        
-        Config.draw_button_x = int(Config.window_width * 0.9 - Config.draw_button_width // 2)
-        Config.draw_button_y = int((Config.window_height + Config.tray_background_extra_height) * 0.5 - Config.draw_button_height // 2) 
+        Config.draw_button_width =  Config.tray_background_x // 2
+        print(Config.draw_button_width)
+        Config.draw_button_height = Config.draw_button_width // 3
+        Config.draw_button_x = int(Config.window_width  - Config.tray_background_x) + Config.draw_button_width // 2
+        Config.draw_button_y = int((Config.window_height + Config.tray_background_y) // 2) - Config.draw_button_height // 2
         
