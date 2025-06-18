@@ -12,11 +12,10 @@ class BoardGrid:
         self.create_coordinates()
 
     def create_coordinates(self):
-        spacing = 1
         for row in range(Config.board_rows):
             for col in range(Config.board_cols):
-                x = Config.slot_spacing + col * (Config.chip_width + Config.slot_spacing)
-                y = row * (Config.chip_height + spacing) * 1.9
+                x = Config.board_horizontal_edge + (Config.chip_width + Config.slot_horizontal_spacing) * col
+                y = Config.board_vertical_edge +  (Config.chip_height + Config.slot_vertical_spacing) * row
                 self.slot_coordinates[(row, col)] = (x, y)
                 self.slots[(row, col)] = None
                 

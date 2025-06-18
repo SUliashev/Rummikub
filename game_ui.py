@@ -8,7 +8,8 @@ from config import Config
 class GameUI:
     def __init__(self, chip_tracker):
 
-        self.window = pygame.display.set_mode((Config.window_width, Config.window_height))
+        self.window = pygame.display.set_mode((Config.window_width, Config.window_height),  pygame.RESIZABLE)
+        print('size', self.window.get_size())
         pygame.display.set_caption("Rummikub")
         self.chip_tracker = chip_tracker  # Use ChipTracker for chip management
 
