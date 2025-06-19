@@ -14,17 +14,7 @@ class GameUI:
         self.chip_tracker = chip_tracker  # Use ChipTracker for chip management
 
 
-        # self.tray = tray # this should be removed later
-        # self.chip_validator = chip_validator  # Initialize the chip validator
-        # self.hovering_tray_slot = None
-        # self.hovering_slot = None  # The slot currently being hovered over
-        # self.hovering_slot_valid = True
-        # self.dragged_chip = None
-        # self.dragged_chip_starting_position = None
-        # self.chips = []  # All chips on the board
 
-
-#Add a method which takes the hovering slot as an angument and displays it
 
     def draw(self):
         """
@@ -34,6 +24,7 @@ class GameUI:
         self.draw_board_grid()
         self.draw_tray_background()
         self.draw_tray_grid()
+        self.draw_moving_chip()
         self.draw_draw_chip_button()
 
         # self.show_hovering_slot()
@@ -44,13 +35,22 @@ class GameUI:
         #         self.window.blit(chip.sprite, (chip.x, chip.y))
         #         print(chip.state)
 
+    def draw_empty_slot(self, x, y):
+        border_radius = 9 
+        rect = pygame.draw.rect(
+                self.window, (255, 255, 255),
+                (x, y, Config.chip_width, Config.chip_height),
+                2, border_radius=border_radius
+            )
+        return rect
+    
+    def draw_chip(self, chip, x, y):
+        chip_drawing = self.window.blit(chip.sprite, (x, y))
 
+        return chip_drawing
+      
     
     def draw_tray_background(self):
-        """
-        Draw a background rectangle for the tray: 2 chips high, 13 chips wide, centered at the bottom.
-        """
-        
         pygame.draw.rect(
             self.window,
             (60, 60, 60),  # Tray background color, adjust as needed
@@ -58,16 +58,14 @@ class GameUI:
             border_radius=20
         )
 
-    def draw_tray_grid(self):
-        border_radius = 9 
-
+    def draw_tray_grid(self): 
         for (row, col), (x, y) in self.chip_tracker.tray_grid.slot_coordinates.items():
-    
-            pygame.draw.rect(
-                self.window, (255, 255, 255),
-                (x, y, Config.chip_width, Config.chip_height),
-                2, border_radius=border_radius
-            )
+            item_in_slot = self.chip_tracker.tray_grid.slots[(row, col)]
+            if item_in_slot is None:
+                self.draw_empty_slot(x, y)
+            elif isinstance(item_in_slot, Chip):
+                self.draw_chip(item_in_slot, x, y)
+                
 
 
     def draw_board_grid(self):
@@ -85,6 +83,13 @@ class GameUI:
             col_text = font.render(str(col + 1), True, (200, 200, 0))
             self.window.blit(col_text, (x + 4, y + 2))
         
+    def draw_moving_chip(self):
+        if self.chip_tracker.dragging_chip.chip:
+            chip = self.chip_tracker.dragging_chip.chip
+            mouse_x, mouse_y = pygame.mouse.get_pos()
+            chip.x = mouse_x - Config.chip_width / 2
+            chip.y = mouse_y - Config.chip_height / 2
+            self.draw_chip(chip, chip.x, chip.y)
     
     def draw_draw_chip_button(self):
         button_rect = pygame.Rect(Config.draw_button_x, Config.draw_button_y, Config.draw_button_width ,  Config.draw_button_height )
@@ -99,38 +104,7 @@ class GameUI:
 
 
     
-    # def choose_next_tray_slot(self, snap_range=60):
-    #     """
-    #     Choose the nearest empty tray slot for the dragged chip within snap_range.
-    #     Returns (row, col) if a slot is close enough and empty, else None.
-    #     """
-    #     if not self.dragged_chip:
-    #         self.hovering_tray_slot = None
-    #         return None
 
-    #     if self.dragged_chip.y >= self.window.get_height() - (GameUI.chip_height / 2) - self.tray.get_height():
-
-    #         chip_center_x = self.dragged_chip.x + self.dragged_chip.width / 2
-    #         chip_center_y = self.dragged_chip.y + self.dragged_chip.height / 2
-
-    #         slot_distances = []
-    #         for (row, col), (slot_x, slot_y) in self.tray_slots.items():
-    #             slot_center_x = slot_x + GameUI.chip_width / 2
-    #             slot_center_y = slot_y + GameUI.chip_height / 2
-    #             distance = ((chip_center_x - slot_center_x) ** 2 + (chip_center_y - slot_center_y) ** 2) ** 0.5
-    #             # Check if tray slot is empty and within snap range
-    #             if distance <= snap_range and self.chip_tracker.tray_slots.get((row, col)) is None:
-    #                 slot_distances.append((distance, (row, col)))
-
-    #         slot_distances.sort(key=lambda x: x[0])
-    #         if slot_distances:
-    #             self.hovering_tray_slot = slot_distances[0][1]
-    #             self.hovering_slot = None
-    #             return slot_distances[0][1]
-
-    # # If no tray slot is in range, clear hovering
-    #     self.hovering_tray_slot = None
-    #     return None
        
 
     # def show_hovering_slot(self):
