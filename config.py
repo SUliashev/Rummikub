@@ -42,6 +42,7 @@ class Config:
     '''Chip'''
     chip_width = None
     chip_height = None
+    chip_sufrace = None
 
     '''Tray'''
     tray_grid_width = None
@@ -75,6 +76,8 @@ class Config:
 
         Config.chip_width = int(((Config.window_width - Config.board_horizontal_edge * 2) - Config.slot_horizontal_spacing * (Config.board_cols - 1)) / Config.board_cols) 
         Config.chip_height = int((((Config.window_height - Config.board_vertical_edge * 2) - Config.tray_background_extra_height * 2 ) - Config.slot_vertical_spacing * Config.board_rows)  / (Config.board_rows + Config.tray_rows))
+        Config.chip_sufrace = pygame.Surface((Config.chip_width, Config.chip_height))
+
 
         Config.tray_grid_width = (Config.chip_width * Config.tray_cols) + Config.tray_slot_horizontal_spacing * (Config.tray_cols - 1) 
         Config.tray_grid_height = (Config.chip_height * Config.tray_rows) + Config.tray_slot_vertical_spacing * (Config.tray_rows - 1)
