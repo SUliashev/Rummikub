@@ -2,6 +2,7 @@ from typing import Dict
 import pygame
 from chip import Chip
 from dragging_chip import DraggingChip
+from players import Player 
 from game_ui import GameUI
 from chip_tracker import ChipTracker
 from board_grid import BoardGrid
@@ -23,9 +24,17 @@ class GameController:
 
         self.generate_and_shuffle_hidden_chips()
         self.test_draw_from_hidden()  # can be removed later 
-        self.player_interaction = PlayerInteraction(self.chip_tracker, self.chip_validator)  # Placeholder for player interaction logic   
-        self.game_ui = GameUI(self.chip_tracker, self.chip_validator)  # Initialize GameUI with the window and chip tracker
+        self.player_interaction = PlayerInteraction(self.chip_tracker, self.chip_validator)  # Placeholder for player interaction logic 
+        self.players = [
+            Player("Player 1", TrayGrid()),
+            Player("Player 2", TrayGrid()),
+            # Add more players as needed
+        ]
+        self.current_player_index = 0
+        self.current_player = self.players[self.current_player_index]
 
+        self.game_ui = GameUI(self.chip_tracker, self.chip_validator)  # Initialize GameUI with the window and chip tracker
+        
         # self.current_player = "Player 1"  # Example: Start with Player 1
 
         
@@ -58,9 +67,12 @@ class GameController:
         for color in colors:
             for number in numbers:
                 for _ in range(2):  # Two of each chip
-                    chip = Chip(0, 0, self.sprites[f"{color}_{number}_1"], color=color, number=number)
+                    chip = Chip(self.sprites[f"{color}_{number}_1"], color=color, number=number)
                     hidden_chips.append(chip)
 
+        for i in range(2):
+            chip = Chip(self.sprites['joker'], 'purple', None, True) 
+            hidden_chips.append(chip)
 
         random.shuffle(hidden_chips)
         self.chip_tracker.hidden_chips = hidden_chips
