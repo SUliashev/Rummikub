@@ -1,7 +1,5 @@
 from typing import Dict
 from PIL import Image, ImageDraw, ImageFont
-import os
-import glob
 from config import Config
 from pygame import Surface
 import pygame
@@ -19,8 +17,7 @@ class ChipSpriteGenerator:
         circle_size = circle_radius * 2
         font_path = "Ubuntu-B.ttf"
         font_size = int(chip_height * 0.38)
-        output_dir = "chips"
-        os.makedirs(output_dir, exist_ok=True)
+  
 
         # === Color Definitions ===
         colors = {
@@ -106,7 +103,5 @@ class ChipSpriteGenerator:
             draw.text((text_x, text_y), "J", font=font, fill=colors["purple"])
             result['joker'] = pygame.image.fromstring(chip.tobytes(), chip.size, chip.mode)
             
-
-        print(f"Deck generated in /{output_dir} with chip size {chip_width}x{chip_height}")
 
         return result

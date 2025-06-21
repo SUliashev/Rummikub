@@ -1,0 +1,38 @@
+To do:
+
+some sort of bug is happening with the validation when the joker is in play, combination [J, b11, b13] shows as valid
+
+player should not be able to place a chip if the move is not valid, chip should be returned
+
+add button which sorts the chips in the tray 
+
+button for undo move
+
+button for undoing all the moves the player has made
+
+select multiple chips and drag them 
+
+to adjust the sprite generator
+
+add a method that shifts the chips to the left or right if a hovering chip wants to be placed there, also for the chips to return if the chip is then moved
+
+add chips visibly being moved around the board when returning and being drawn (in gameUI)
+
+add menu 
+
+
+
+Some explanation on the classes: 
+
+board_grid: stores xy coordinates of slot locations and the item within slot
+sprite_generation: creates images of all the chips 
+chip_tracker : contains tray_grids, board_grids and dragging_chip and handles their interaction
+chip_validator : checks whether chip combinations are valid based on the values in the chip_tracker
+chip: class for the chip itself, holds image, color and number (can be a joker)
+config: holds data on the sizes of the object(buttons, chips, window width, ect.), uppon starting, it creates sizes of everyting based on the resolution of the window
+dragging_chip: chip that is being moved by a player around the window
+game_controller: connects the chip_tracker , chip_validator, player_interaction and the gameUI
+gameUI: renders the current state of the game based on the chip_tracker
+player_interaction: checks the events and pushes the needed actions to ChipTracker and gameUI
+players: creates players on startup which have their own name and own tray_grid
+tray_grid: holds chips and chip coordinates for individual players
