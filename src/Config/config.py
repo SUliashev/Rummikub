@@ -1,3 +1,4 @@
+import os
 class Config:
     '''CONFIGURATION VARIABLES'''
 
@@ -43,7 +44,8 @@ class Config:
     chip_width = None
     chip_height = None
     chip_sufrace = None
-
+    FONT_PATH = os.path.join(os.path.dirname(__file__), '../../assets/fonts/Ubuntu-B.ttf')
+    
     '''Tray'''
     tray_grid_width = None
     tray_grid_height = None

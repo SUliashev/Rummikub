@@ -15,7 +15,7 @@ class ChipSpriteGenerator:
         corner_radius = int(chip_width * 0.18)
         circle_radius = int(chip_width * 0.38)
         circle_size = circle_radius * 2
-        font_path = "Ubuntu-B.ttf"
+        font_path = Config.FONT_PATH
         font_size = int(chip_height * 0.38)
   
 
