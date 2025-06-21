@@ -1,6 +1,6 @@
-from src.core.game_controller import GameController
-from src.gameUI.sprite_generator import ChipSpriteGenerator
-from src.config.config import Config
+from src.Core.game_controller import GameController
+from src.GameUI.sprite_generator import ChipSpriteGenerator
+from src.Config.config import Config
 
 def main():
     Config.setup_config()

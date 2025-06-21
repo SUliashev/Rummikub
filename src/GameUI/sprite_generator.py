@@ -1,6 +1,6 @@
 from typing import Dict
 from PIL import Image, ImageDraw, ImageFont
-from config import Config
+from src.Config.config import Config
 from pygame import Surface
 import pygame
 

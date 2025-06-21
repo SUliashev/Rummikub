@@ -1,5 +1,5 @@
-from chip import Chip
-from config import Config
+from src.Core.chip import Chip
+from src.Config.config import Config
 
 class TrayGrid:
     def __init__(self):

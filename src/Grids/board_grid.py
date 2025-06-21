@@ -1,4 +1,4 @@
-from config import Config
+from src.Config.config import Config
 
 class BoardGrid:
     def __init__(self, rows: int=5, cols: int=29):

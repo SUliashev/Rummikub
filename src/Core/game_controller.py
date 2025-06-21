@@ -1,14 +1,14 @@
 from typing import Dict
 import pygame
-from chip import Chip
-from dragging_chip import DraggingChip
-from players import Player 
-from game_ui import GameUI
-from chip_tracker import ChipTracker
-from board_grid import BoardGrid
-from tray_grid import TrayGrid
-from chip_validator import ChipValidator
-from player_interaction import PlayerInteraction  
+from src.Core.chip import Chip
+from src.GameUI.dragging_chip import DraggingChip
+from src.Core.players import Player 
+from src.GameUI.game_ui import GameUI
+from src.Core.chip_tracker import ChipTracker
+from src.Grids.board_grid import BoardGrid
+from src.Grids.tray_grid import TrayGrid
+from src.Core.chip_validator import ChipValidator
+from src.GameUI.player_interaction import PlayerInteraction  
 import random
 
 
@@ -28,7 +28,7 @@ class GameController:
         self.chip_validator = ChipValidator(self.chip_tracker)
 
         self.player_interaction = PlayerInteraction(self.chip_tracker, self.chip_validator) 
-        self.game_ui = GameUI(self.chip_tracker, self.chip_validator, self.current_player)  # Initialize GameUI with the window and chip tracker
+        self.game_ui = GameUI(self.chip_tracker, self.chip_validator, self.current_player) 
         
 
     def run(self):
@@ -42,12 +42,12 @@ class GameController:
                     self.next_turn()
 
             self.draw()
-            clock.tick(60)  # Limit the frame rate
+            clock.tick(60)  
 
 
     def draw(self):
-        self.game_ui.draw()  # Draw the board and chips
-        pygame.display.flip()  # Update the display
+        self.game_ui.draw()  
+        pygame.display.flip()  
 
 
     def create_players(self, number_of_players):
@@ -83,7 +83,7 @@ class GameController:
 
         random.shuffle(hidden_chips)
         self.chip_tracker.hidden_chips = hidden_chips
-        
+
 
     def test_draw_from_hidden(self):
         for i in range(14):

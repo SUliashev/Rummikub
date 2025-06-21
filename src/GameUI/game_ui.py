@@ -1,6 +1,6 @@
 import pygame
-from chip import Chip
-from config import Config
+from src.Core.chip import Chip
+from src.Config.config import Config
 
 class GameUI:
     def __init__(self, chip_tracker, chip_validator, current_player):

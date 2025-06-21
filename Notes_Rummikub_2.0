@@ -1,5 +1,7 @@
 To do:
 
+implement testing 
+
 some sort of bug is happening with the validation when the joker is in play, combination [J, b11, b13] shows as valid
 
 player should not be able to place a chip if the move is not valid, chip should be returned

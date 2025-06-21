@@ -1,5 +1,5 @@
 import pygame
-from config import Config as C
+from src.Config.config import Config as C
 
 class PlayerInteraction:
     def __init__(self,  chip_tracker, chip_validator):
