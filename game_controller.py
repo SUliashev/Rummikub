@@ -17,25 +17,27 @@ class GameController:
     def __init__(self, sprites: Dict[str, pygame.Surface]):
         self.sprites = sprites
         self.board_grid = BoardGrid()
-        self.tray_grid = TrayGrid()
         self.moving_chip = DraggingChip()  # Placeholder for the chip being dragged
-        self.chip_tracker = ChipTracker(self.board_grid, self.tray_grid, self.moving_chip)
-        self.chip_validator = ChipValidator(self.chip_tracker)
+   
 
-        self.generate_and_shuffle_hidden_chips()
-        self.test_draw_from_hidden()  # can be removed later 
-        self.player_interaction = PlayerInteraction(self.chip_tracker, self.chip_validator)  # Placeholder for player interaction logic 
-        self.players = [
+
+        # Placeholder for player interaction logic 
+        self.players = [            #later to turn this into a method
             Player("Player 1", TrayGrid()),
             Player("Player 2", TrayGrid()),
-            # Add more players as needed
+           
         ]
         self.current_player_index = 0
         self.current_player = self.players[self.current_player_index]
+        self.chip_tracker = ChipTracker(self.board_grid, self.players[self.current_player_index].tray_grid, self.moving_chip)
+        self.generate_and_shuffle_hidden_chips()
+        self.test_draw_from_hidden()  # can be removed later 
+        self.chip_validator = ChipValidator(self.chip_tracker)
+        self.player_interaction = PlayerInteraction(self.chip_tracker, self.chip_validator) 
 
-        self.game_ui = GameUI(self.chip_tracker, self.chip_validator)  # Initialize GameUI with the window and chip tracker
+
+        self.game_ui = GameUI(self.chip_tracker, self.chip_validator, self.current_player)  # Initialize GameUI with the window and chip tracker
         
-        # self.current_player = "Player 1"  # Example: Start with Player 1
 
         
     def draw(self):
@@ -54,10 +56,19 @@ class GameController:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     exit()
-                self.player_interaction.handle_event(event) #testing stage
+                result = self.player_interaction.handle_event(event) #testing stage
+                if result == 'next player':
+                    self.next_turn()
 
             self.draw()
             clock.tick(60)  # Limit the frame rate
+
+    def next_turn(self):
+        self.current_player_index = (self.current_player_index + 1) % len(self.players)
+        self.current_player = self.players[self.current_player_index]
+        self.chip_tracker.tray_grid = self.current_player.tray_grid
+        self.game_ui.current_player = self.current_player
+        print(f"Switched to {self.current_player.name}")
 
     def generate_and_shuffle_hidden_chips(self):
         colors = ["red", "blue", "orange", "black"]

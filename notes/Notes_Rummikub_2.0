@@ -1,5 +1,6 @@
-Working on now:
+To do:
 
-assign the chip width so that it is generated relative to the screen width
+to update next player button method and config
 
-fix draw chip button
+add hue around chips on the board if their combination is wrong:
+    validation.slots currently show all valid slots, i need to add something so that the empty slots which dont need to be validated are not being shown 

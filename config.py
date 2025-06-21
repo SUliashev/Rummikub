@@ -61,7 +61,9 @@ class Config:
     draw_button_x = None
     draw_button_y = None
 
-    
+    '''Next Player Button'''
+    next_player_button_x = None
+    next_player_button_y = None
 
     @staticmethod
     def setup_config():
@@ -90,8 +92,9 @@ class Config:
         Config.tray_background_y = Config.tray_grid_y - Config.tray_background_extra_height 
       
         Config.draw_button_width =  Config.tray_background_x // 2
-        print(Config.draw_button_width)
         Config.draw_button_height = Config.draw_button_width // 3
         Config.draw_button_x = int(Config.window_width  - Config.tray_background_x) + Config.draw_button_width // 2
         Config.draw_button_y = int((Config.window_height + Config.tray_background_y) // 2) - Config.draw_button_height // 2
         
+        Config.next_player_button_x = Config.window_width - Config.draw_button_x - Config.draw_button_width
+        Config.next_player_button_y = Config.draw_button_y

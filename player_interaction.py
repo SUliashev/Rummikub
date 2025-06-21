@@ -10,6 +10,9 @@ class PlayerInteraction:
     def handle_event(self, event):
         if event.type == pygame.MOUSEBUTTONDOWN:
             self.mouse_button_down(event)
+            if self.next_player_button_interaction(event):
+                print("button pressed")
+                return 'next player'
         elif event.type == pygame.MOUSEMOTION and self.chip_tracker.dragging_chip.chip is not None:
             self.choose_next_slot(event)
         elif event.type == pygame.MOUSEBUTTONUP and self.chip_tracker.dragging_chip.chip is not None:
@@ -28,11 +31,14 @@ class PlayerInteraction:
         if self.is_mouse_over_tray(event):
             if self.chip_tracker.tray_grid.slots[slot]:
                 self.chip_tracker.chip_from_tray_to_dragging(slot)
-                self.chip_validator.validate_current_state()
+                self.chip_validator.validate_dragging_chip()
+                
         elif self.is_mouse_over_board(event):
             if self.chip_tracker.board_grid.slots[slot]:
                 self.chip_tracker.chip_from_board_to_dragging(slot)
+                self.chip_validator.validate_dragging_chip()
                 self.chip_validator.validate_current_state()
+            
 
     def draw_button_interaction(self, event):
         if event.type == pygame.MOUSEBUTTONDOWN:
@@ -41,13 +47,22 @@ class PlayerInteraction:
             if button_rect.collidepoint(mouse_x, mouse_y):
                 self.chip_tracker.place_chip_in_tray_from_hidden()
                 return True
-        
+
+    def next_player_button_interaction(self, event):
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            button_rect = pygame.Rect(C.next_player_button_x, C.next_player_button_y, C.draw_button_width, C.draw_button_height)
+            mouse_x, mouse_y = event.pos
+            if button_rect.collidepoint(mouse_x, mouse_y):
+                return True
+            return False
+
     def release_chip(self, event):
         next_slot = self.chip_tracker.hovering_slot
         if next_slot == None:
             self.chip_tracker.return_chip_to_origin_pos()
         elif next_slot[0] == 'board':
             self.chip_tracker.chip_from_dragging_to_board(next_slot[1])
+            self.chip_validator.validate_current_state()
  
         elif next_slot[0] == 'tray':
             self.chip_tracker.chip_from_dragging_to_tray(next_slot[1])
