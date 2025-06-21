@@ -1,11 +1,5 @@
-from chip import Chip
-from chip_validator import ChipValidator
-from board_grid import BoardGrid
-import pygame
-
 class ChipTracker:
     def __init__(self, board_grid, tray_grid, dragging_chip):
-        
         self.chips_on_board_and_tray = []
         self.dragging_chip = dragging_chip
         self.board_grid = board_grid
@@ -26,11 +20,7 @@ class ChipTracker:
         self.dragging_chip.chip == None
 
 
-
     def chip_from_tray_to_dragging(self, coordinates):
-        """
-        Move a chip from the tray to the dragging state.
-        """
         chip = self.tray_grid.slots.get(coordinates)
         if chip:
             self.tray_grid.slots[coordinates] = None
@@ -38,6 +28,7 @@ class ChipTracker:
             self.origin_pos = ('tray', coordinates)
             return chip
         
+
     def chip_from_board_to_dragging(self, coordinates):
         chip = self.board_grid.slots.get(coordinates)
         if chip:
@@ -48,7 +39,6 @@ class ChipTracker:
             return chip
         
 
-
     def chip_from_dragging_to_board(self, coordinates: tuple ):# update later with validation
         chip = self.dragging_chip.chip
         if self.board_grid.slots[coordinates] is None:
@@ -58,6 +48,7 @@ class ChipTracker:
             self.hovering_slot = None
         else:
             self.return_chip_to_origin_pos()
+
 
     def chip_from_dragging_to_tray(self, coordinates): #update later with chips moving to the side while hovering
         chip = self.dragging_chip.chip
@@ -70,7 +61,6 @@ class ChipTracker:
             self.return_chip_to_origin_pos()
 
 
-
     def place_chip_in_tray_from_hidden(self):
         if not self.hidden_chips:
             print("No hidden chips left!")
@@ -79,13 +69,6 @@ class ChipTracker:
         chip = self.hidden_chips.pop()
         self.tray_grid.put_chip_in_tray_from_hidden(chip)
 
-
-    def add_testing_chips(self):
-        """
-        Add testing chips to the board and chip tracker for experimentation.
-        """
-        for i in range(14):
-            self.place_chip_in_tray_from_hidden()
 
 
 

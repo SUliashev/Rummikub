@@ -1,4 +1,3 @@
-import pygame
 from chip import Chip
 from config import Config
 
@@ -8,6 +7,7 @@ class TrayGrid:
         self.slots = {}
         self.create_coordinates()
 
+
     def get_first_open_slot(self):
         for row in range(Config.tray_rows):
             for col in range(Config.tray_cols):
@@ -15,6 +15,7 @@ class TrayGrid:
                     return (row, col)
         raise ValueError('No empty trayslots available')
     
+
     def put_chip_in_tray_from_hidden(self, chip: Chip):
         try:
             row, col = self.get_first_open_slot()

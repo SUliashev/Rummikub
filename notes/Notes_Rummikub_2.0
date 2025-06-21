@@ -1,6 +1,16 @@
 To do:
 
-to update next player button method and config
+player should not be able to place a chip if the move is not valid, chip should be returned
 
-add hue around chips on the board if their combination is wrong:
-    validation.slots currently show all valid slots, i need to add something so that the empty slots which dont need to be validated are not being shown 
+add button which sorts the chips in the tray 
+
+button for undo move
+
+select multiple chips and drag them 
+
+to adjust the sprite generator
+
+add a method that shifts the chips to the left or right if a hovering chip wants to be placed there, also for the chips to return if the chip is then moved
+
+add chips visibly being moved around the board when returning and being drawn (in gameUI)
+

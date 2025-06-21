@@ -1,8 +1,5 @@
 import pygame
 from chip import Chip
-from chip_validator import ChipValidator
-from chip_tracker import ChipTracker  # Import the ChipTracker class
-from tray_grid import TrayGrid
 from config import Config
 
 class GameUI:
@@ -16,63 +13,71 @@ class GameUI:
 
 
     def draw(self):
-        """
-        Draw the board and chips.
-        """
         self.window.fill((39,105,127))  # Clear the screen
-        
-        # self.draw_board_grid()
+
         self.draw_tray_background()
         self.draw_tray_grid()
-        self.draw_hovering_slot()
-        self.draw_moving_chip()
+
         self.draw_draw_chip_button()
         self.draw_next_player_button()
+
         self.draw_board_slots()
-        self.draw_incorrect_chip_combination()
-        # self.show_hovering_slot()
-        # self.show_hovering_tray_slot()
+
+        self.draw_incorrect_chip_combination()      # shows which combinations on the board are not valid
+        self.draw_hovering_slot()
+        self.draw_moving_chip()
+
         
-
-    # def draw_empty_slot(self, x, y):
-    #     border_radius = 9 
-    #     rect = pygame.draw.rect(
-    #             self.window, (255, 255, 255),
-    #             (x, y, Config.chip_width, Config.chip_height),
-    #             2, border_radius=border_radius
-    #         )
-    #     return rect           # not sure about this return 
-    
-    def draw_chip(self, chip, x, y):
-        chip_drawing = self.window.blit(chip.sprite, (x, y))
-
-        return chip_drawing
     
     def draw_board_slots(self):
+        draw_validation_for_all_slots = False   # testing variable, if False, it only shows the validation for the slots that are located next to chips
+        draw_numbers_next_to_slots = True       # testing stage, adds numbers next to the slots on the board
+        font = pygame.font.SysFont(None, 18)
+
         for (row, col), item_in_slot in self.chip_tracker.board_grid.slots.items():
             x , y = self.chip_tracker.board_grid.slot_coordinates[row, col]
             if item_in_slot is None:
                 if self.chip_tracker.dragging_chip.chip == None :
                     self.draw_empty_slot(x, y)
                 else:
-                    validation_slot = self.chip_validator.slots.get((row, col), None)
-                    if validation_slot == False:
-                        self.draw_validation_slot(x, y, False)
-                    elif validation_slot == True:
-                        self.draw_validation_slot(x, y, True)
-                    else:
-                        self.draw_empty_slot(x, y)
+                    if draw_validation_for_all_slots:
+                        validation_slot = self.chip_validator.slots.get((row, col), None)
+                        if validation_slot == False:
+                            self.draw_validation_slot(x, y, False)
+                        else: 
+                            self.draw_validation_slot(x, y, True)
+                    else:           # Code for when draw_validation_for_all_slots is False
+                        if not self.chip_validator.slot_next_to_chip[(row, col)]:
+                            self.draw_empty_slot(x, y)
+                            if draw_numbers_next_to_slots:
+                                col_text = font.render(str(col + 1), True, (200, 200, 0))
+                                self.window.blit(col_text, (x + 4, y + 2))
+                            continue
+                        validation_slot = self.chip_validator.slots[(row, col)]
+                        if validation_slot == False:
+                            self.draw_validation_slot(x, y, False)
+                        else: 
+                            self.draw_validation_slot(x, y, True)
+               
             else:
                 self.draw_chip(item_in_slot, x, y)
+            if draw_numbers_next_to_slots:
+                col_text = font.render(str(col + 1), True, (200, 200, 0))
+                self.window.blit(col_text, (x + 4, y + 2))
 
+    def draw_chip(self, chip, x, y):
+        chip_drawing = self.window.blit(chip.sprite, (x, y))
+        return chip_drawing
+    
+    
     def draw_empty_slot(self, x: int, y: int):
-            border_radius = 9
-            thickness = 2
-            pygame.draw.rect(
-            self.window, (255, 255, 255),
-            (x, y, Config.chip_width, Config.chip_height),
-            thickness, border_radius=border_radius
-        )
+        border_radius = 9
+        thickness = 2
+        pygame.draw.rect(
+        self.window, (255, 255, 255),
+        (x, y, Config.chip_width, Config.chip_height),
+        thickness, border_radius=border_radius)
+        
     
     def draw_validation_slot(self, x: int, y: int, correct: bool):
         if correct:
@@ -80,55 +85,44 @@ class GameUI:
         else:
             color = (255, 0, 0)
         border_radius = 9
+        pygame.draw.rect(
+            self.window, color,
+            (x, y, Config.chip_width, Config.chip_height),
+            2, border_radius=border_radius)
+            
+        
+    def draw_hovering_slot(self):
+        coordinates = self.chip_tracker.hovering_slot
+        if coordinates == None:
+            return
+        
+        elif coordinates[0] == 'tray':
+            x, y = self.chip_tracker.tray_grid.slot_coordinates[coordinates[1]]
+        elif coordinates[0] == 'board':
+            x, y = self.chip_tracker.board_grid.slot_coordinates[coordinates[1]]
+
+        border_radius = 9
         rect = pygame.draw.rect(
-                self.window, color,
+                self.window, (0, 30, 140),
                 (x, y, Config.chip_width, Config.chip_height),
-                2, border_radius=border_radius
-            )
-
-
-
+                3, border_radius=border_radius)
+            
+        
     def draw_incorrect_chip_combination(self):
         for (row, col), correct in self.chip_validator.slots_on_board.items():
             if not correct:
                 self.draw_invalid_placed_chip_border(*self.chip_tracker.board_grid.slot_coordinates[row, col])
                 
-    def draw_invalid_placed_chip_border(self, x, y):       # can improve on this a little
+
+    def draw_invalid_placed_chip_border(self, x, y):       
         thickness = 5
         border_radius = 15
         pygame.draw.rect(
         self.window, (255, 0, 0),
         (x - thickness , y - thickness , Config.chip_width + thickness * 2, Config.chip_height  + thickness * 2),
-        thickness, border_radius=border_radius
-    )
+        thickness, border_radius=border_radius)
+    
         
-
-        
-    def draw_slot_validation(self): #all slots are shown for the testing stage
-
-        for (row, col), chip in self.chip_tracker.board_grid.slots.items():
-            if chip == None:
-                self.draw_validation_slot(row, col)
-            else: 
-                (x, y) = self.chip_tracker.board_grid.slot_coordinates[row, col]
-                self.draw_chip(chip, x, y)
-
-
-
-
-    def draw_board_grid(self):
-        if self.chip_tracker.dragging_chip.chip == None:
-            self.draw_empty_slots()
-            
-        else:
-            self.draw_slot_validation()
-
-        font = pygame.font.SysFont(None, 18)  # Small font for column numbers
-        for (row, col), (x, y) in self.chip_tracker.board_grid.slot_coordinates.items():
-                col_text = font.render(str(col + 1), True, (200, 200, 0))
-                self.window.blit(col_text, (x + 4, y + 2))
-
-
     def draw_moving_chip(self):
         if self.chip_tracker.dragging_chip.chip:
             chip = self.chip_tracker.dragging_chip.chip
@@ -136,6 +130,7 @@ class GameUI:
             chip.x = mouse_x - Config.chip_width / 2
             chip.y = mouse_y - Config.chip_height / 2
             self.draw_chip(chip, chip.x, chip.y)
+
     
     def draw_draw_chip_button(self):
         button_rect = pygame.Rect(Config.draw_button_x, Config.draw_button_y, Config.draw_button_width ,  Config.draw_button_height )
@@ -145,6 +140,7 @@ class GameUI:
         text = font.render("Draw Chip", True, (255, 255, 255))
         text_rect = text.get_rect(center=button_rect.center)
         self.window.blit(text, text_rect)
+
     
     def draw_next_player_button(self): #to update later with config data
         button_rect = pygame.Rect(Config.next_player_button_x, Config.next_player_button_y, Config.draw_button_width ,  Config.draw_button_height )
@@ -156,31 +152,13 @@ class GameUI:
         self.window.blit(text, text_rect)
 
 
-    def draw_hovering_slot(self):
-        coordinates = self.chip_tracker.hovering_slot
-        if coordinates == None:
-            return
-        
-        elif coordinates[0] == 'tray':
-            x, y = self.chip_tracker.tray_grid.slot_coordinates[coordinates[1]]
-        elif coordinates[0] == 'board':
-            x, y = self.chip_tracker.board_grid.slot_coordinates[coordinates[1]]
-
-        border_radius = 17
-        rect = pygame.draw.rect(
-                self.window, (0, 0, 255),
-                (x, y, Config.chip_width, Config.chip_height),
-                2, border_radius=border_radius
-            )
-        
-
     def draw_tray_background(self):
         pygame.draw.rect(
             self.window,
-            (60, 60, 60),  # Tray background color, adjust as needed
+            (69, 69, 69), 
             (Config.tray_background_x, Config.tray_background_y , Config.tray_background_width ,  Config.tray_background_height ),
-            border_radius=20
-        )
+            border_radius=20)
+        
 
     def draw_tray_grid(self): 
         for (row, col), (x, y) in self.chip_tracker.tray_grid.slot_coordinates.items():

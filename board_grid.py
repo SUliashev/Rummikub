@@ -1,4 +1,3 @@
-from chip import Chip
 from config import Config
 
 class BoardGrid:
@@ -11,6 +10,11 @@ class BoardGrid:
         self.hovering_slot = None 
         self.create_coordinates()
 
+
+    def place_chip(self, chip, coordinate : tuple):
+        self.slots[coordinate] = chip
+
+
     def create_coordinates(self):
         start_x = Config.board_horizontal_edge + Config.slot_horizontal_spacing / 2
         for row in range(Config.board_rows):
@@ -19,4 +23,6 @@ class BoardGrid:
                 y = Config.board_vertical_edge +  (Config.chip_height + Config.slot_vertical_spacing) * row
                 self.slot_coordinates[(row, col)] = (x, y)
                 self.slots[(row, col)] = None
+
+
                 

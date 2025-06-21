@@ -3,5 +3,3 @@ class DraggingChip:
         self.chip = None
         
 
-    def _chip(self, chip ):
-        pass
