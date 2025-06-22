@@ -67,7 +67,7 @@ class ChipValidatorTestCase(unittest.TestCase):
 
 
     def test_valid_group_of_same_color_with_joker(self):
-        # Place a group: 5-red, 5-blue, joker
+    
         self.board_grid.slots[(0,0)] = DummyChip(11, "red")
         self.board_grid.slots[(0,1)] = DummyChip(13, "red")
         self.board_grid.slots[(0,2)] = DummyChip(None, None, is_joker=True)
@@ -76,7 +76,7 @@ class ChipValidatorTestCase(unittest.TestCase):
             self.board_grid.slots[(0,1)],
             self.board_grid.slots[(0,2)],
         ]
-        self.assertTrue(self.chip_validator.validate_combination(chips))
+        self.assertFalse(self.chip_validator.validate_combination(chips))
 
 if __name__ == '__main__':
     unittest.main()

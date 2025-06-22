@@ -124,7 +124,7 @@ class PlayerInteraction:
 
     def draw_button_interaction(self, event):
         if event.type == pygame.MOUSEBUTTONDOWN:
-            button_rect = pygame.Rect(C.draw_button_x, C.draw_button_y, C.draw_button_width, C.draw_button_height)
+            button_rect = pygame.Rect(C.draw_button_x, C.draw_button_y, C.right_buttons_width, C.right_buttons_height)
             mouse_x, mouse_y = event.pos
             if button_rect.collidepoint(mouse_x, mouse_y):
                 self.chip_tracker.place_chip_in_tray_from_hidden()
@@ -133,7 +133,7 @@ class PlayerInteraction:
 
     def next_player_button_interaction(self, event):        # This can be improved
         if event.type == pygame.MOUSEBUTTONDOWN:
-            button_rect = pygame.Rect(C.next_player_button_x, C.next_player_button_y, C.draw_button_width, C.draw_button_height)
+            button_rect = pygame.Rect(C.next_player_button_x, C.next_player_button_y, C.right_buttons_width, C.right_buttons_height)
             mouse_x, mouse_y = event.pos
             if button_rect.collidepoint(mouse_x, mouse_y):
                 return True

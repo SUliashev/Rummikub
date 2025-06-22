@@ -11,7 +11,6 @@ from src.Core.chip_validator import ChipValidator
 from src.GameUI.player_interaction import PlayerInteraction  
 import random
 
-
 class GameController:
     def __init__(self, sprites: Dict[str, pygame.Surface]):
         self.sprites = sprites

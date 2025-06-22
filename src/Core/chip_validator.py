@@ -53,23 +53,24 @@ class ChipValidator:
 
         # Check for same color, increasing numbers
         if all(chip.color == non_jokers[0].color for chip in non_jokers):
-            joker_count = len(jokers)
 
-            prev = None
-            for chip in chips:
-                if getattr(chip, 'is_joker', False):
-                    if prev is not None:
-                        prev += 1  
+            combination_numbers = [chip.number if not chip.is_joker else None for chip in chips]
+            next_check = None
+            for number in combination_numbers:
+                if number is None and next_check is None:          #  None, 12 , None,  13
                     continue
-                if prev is not None:
-                    gap = chip.number - prev - 1
-                    if gap < 0:
-                        return False  
-                    if gap > joker_count:
-                        return False  
-                    joker_count -= gap
-                prev = chip.number
+                if number and next_check is None:
+                    next_check = number + 1
+                    continue
+                if number is None and next_check:
+                    next_check += 1
+                    continue
+                if number == next_check:
+                    next_check += 1
+                else:
+                    return False
             return True
+                
 
         # Check for same number, different colors
         if all(chip.number == non_jokers[0].number for chip in non_jokers):

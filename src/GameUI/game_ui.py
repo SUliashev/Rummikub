@@ -18,17 +18,37 @@ class GameUI:
         self.draw_tray_background()
         self.draw_tray_grid()
 
-        self.draw_draw_chip_button()
-        self.draw_next_player_button()
+        # self.draw_draw_chip_button()
+        # self.draw_next_player_button()
 
         self.draw_board_slots()
 
         self.draw_incorrect_chip_combination()      # shows which combinations on the board are not valid
         self.draw_hovering_slot()
         self.draw_moving_chip()
+        self.draw_side_rectangle()
+        self.draw_right_side_buttons()
 
         
-    
+    def draw_side_rectangle(self):
+        pygame.draw.rect(
+            self.window,
+            (200, 200, 200),  # Rectangle color
+            (Config.right_rect_x, Config.right_rect_y, Config.right_rect_width, Config.right_rect_height),
+            border_radius=12
+        )
+
+    def draw_right_side_buttons(self):
+        for i, (x, y, w, h) in enumerate(Config.right_buttons):
+            pygame.draw.rect(
+                self.window,
+                (69, 69, 69),  # Button color
+                (x, y, w, h),
+                border_radius=8
+        )
+
+
+
     def draw_board_slots(self):
         draw_validation_for_all_slots = False   # testing variable, if False, it only shows the validation for the slots that are located next to chips
         draw_numbers_next_to_slots = True       # testing stage, adds numbers next to the slots on the board
@@ -133,8 +153,8 @@ class GameUI:
 
     
     def draw_draw_chip_button(self):
-        button_rect = pygame.Rect(Config.draw_button_x, Config.draw_button_y, Config.draw_button_width ,  Config.draw_button_height )
-        font_size = int(Config.draw_button_width * 0.2)
+        button_rect = pygame.Rect(Config.draw_button_x, Config.draw_button_y, Config.right_buttons_width ,  Config.right_buttons_height )
+        font_size = int(Config.right_buttons_width * 0.2)
         pygame.draw.rect(self.window, Config.draw_button_color, button_rect, border_radius=12)
         font = pygame.font.SysFont(None, font_size)
         text = font.render("Draw Chip", True, (255, 255, 255))
@@ -143,8 +163,8 @@ class GameUI:
 
     
     def draw_next_player_button(self): #to update later with config data
-        button_rect = pygame.Rect(Config.next_player_button_x, Config.next_player_button_y, Config.draw_button_width ,  Config.draw_button_height )
-        font_size = int(Config.draw_button_width * 0.2)
+        button_rect = pygame.Rect(Config.next_player_button_x, Config.next_player_button_y, Config.right_buttons_width ,  Config.right_buttons_height )
+        font_size = int(Config.right_buttons_width * 0.2)
         pygame.draw.rect(self.window, Config.draw_button_color, button_rect, border_radius=12)
         font = pygame.font.SysFont(None, font_size)
         text = font.render("Next Player", True, (255, 255, 255))
