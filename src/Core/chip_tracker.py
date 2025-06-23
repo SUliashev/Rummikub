@@ -14,8 +14,18 @@ class ChipTracker:
         self.hovering_slot = None
         self.mouse_x = 0
         self.mouse_y = 0
+        self.draw_selection = False
+        self.selection_start = None  # (x1, y1)
+        self.selection_end = None   
 
+    def multiple_slots_selected(self, x, y):
+        print('called')
+        self.draw_selection = False
+        self.selection_end = (x, y)
 
+    def select_multiple_slots(self, x, y):
+        self.draw_selection = True
+        self.selection_start = (x, y)
 
 
     def on_choose_next_slot(self, mouse_x, mouse_y):
@@ -125,6 +135,9 @@ class ChipTracker:
         self.dispatcher.subscribe('mouse_movement', self.on_choose_next_slot)
         self.dispatcher.subscribe('button Draw Chip pressed', self.place_chip_in_tray_from_hidden)
         self.dispatcher.subscribe('button Sort Chips pressed', self.tray_grid.sort_chips_in_tray)
+        self.dispatcher.subscribe('selecting multiple slots', self.select_multiple_slots)
+        self.dispatcher.subscribe('multiple slots selected', self.multiple_slots_selected)
+
 
     def update_mouse_position(self, mouse_x, mouse_y, **kwargs):
         self.mouse_x = mouse_x

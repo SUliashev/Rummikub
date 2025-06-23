@@ -92,7 +92,7 @@ class GameController:
 
 
     def subscribe_events(self):
-        self.dispatcher.subscribe('chip_drag_start', self.on_chip_drag_start)
+        self.dispatcher.subscribe('slot clicked', self.on_chip_drag_start)
         self.dispatcher.subscribe('chip_drag_end', self.on_chip_drag_end)
         self.dispatcher.subscribe('button next player pressed', self.next_turn)
  
@@ -110,7 +110,9 @@ class GameController:
                 self.chip_validator.validate_current_state()
 
 
-    def on_chip_drag_end(self, slot_type, **kwargs):
+    def on_chip_drag_end(self, **kwargs):
+        if not self.chip_tracker.dragging_chip.chip:
+            return
         next_slot = self.chip_tracker.hovering_slot
         if next_slot == None:
             self.chip_tracker.return_chip_to_origin_pos()

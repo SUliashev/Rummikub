@@ -18,7 +18,6 @@ class GameUI:
         self.draw_tray_background()
         self.draw_tray_grid()
 
-        # self.draw_draw_chip_button()
         self.draw_next_player_button()
 
         self.draw_board_slots()
@@ -28,7 +27,20 @@ class GameUI:
         self.draw_moving_chip()
         self.draw_side_rectangle()
         self.draw_right_side_buttons()
+        self.draw_selection_rectangle()
 
+    def draw_selection_rectangle(self):
+        if self.chip_tracker.draw_selection:
+            x1, y1 = self.chip_tracker.selection_start
+            x2 = self.chip_tracker.mouse_x
+            y2 = self.chip_tracker.mouse_y
+            rect = pygame.Rect(min(x1, x2), min(y1, y2), abs(x2 - x1), abs(y2 - y1))
+            # Draw a semi-transparent fill
+            s = pygame.Surface((rect.width, rect.height), pygame.SRCALPHA)
+            s.fill((0, 120, 255, 60))  # RGBA: blue with alpha
+            self.window.blit(s, rect.topleft)
+            # Draw the border
+            pygame.draw.rect(self.window, (0, 120, 255), rect, 2)
 
         
     def draw_side_rectangle(self):
@@ -156,10 +168,26 @@ class GameUI:
             chip = self.chip_tracker.dragging_chip.chip
             x = self.chip_tracker.mouse_x - Config.chip_width / 2
             y = self.chip_tracker.mouse_y - Config.chip_height / 2
+
+            # Draw a white, slightly larger, semi-transparent rectangle behind the chip
+            outline_thickness = 10  # Thickness of the white edges
+            rect_x = x - outline_thickness // 2
+            rect_y = y - outline_thickness // 2
+            rect_w = Config.chip_width + outline_thickness
+            rect_h = Config.chip_height + outline_thickness
+
+            # Create a transparent surface for the outline
+            outline_surface = pygame.Surface((rect_w, rect_h), pygame.SRCALPHA)
+            pygame.draw.rect(
+                outline_surface,
+                (255, 255, 255, 120),  # White with alpha for soft glow
+                (0, 0, rect_w, rect_h),
+                border_radius=10
+            )
+            self.window.blit(outline_surface, (rect_x, rect_y))
+
+            # Draw the chip itself
             self.draw_chip(chip, x, y)
-
-    
-
     
     def draw_next_player_button(self): #to update later with config data
         button_rect = pygame.Rect(Config.next_player_button[0])
