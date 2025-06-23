@@ -1,5 +1,7 @@
 class DraggingChip:
     def __init__(self):
-        self.chip = None
+        self.chips = None
         
 
+    def clear(self):
+        self.chips = []

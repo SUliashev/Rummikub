@@ -28,6 +28,12 @@ class GameUI:
         self.draw_side_rectangle()
         self.draw_right_side_buttons()
         self.draw_selection_rectangle()
+        self.show_selected_chips()
+    
+    def show_selected_chips(self):
+        if self.chip_tracker.selected_chips:
+            for slot, chip in self.chip_tracker.selected_chips:
+                self.draw_chip_hue(*Config.tray_slot_coordinates[slot])
 
     def draw_selection_rectangle(self):
         if self.chip_tracker.draw_selection:
@@ -77,7 +83,7 @@ class GameUI:
         for (row, col), item_in_slot in self.chip_tracker.board_grid.slots.items():
             x , y = Config.board_slot_coordinates[row, col]
             if item_in_slot is None:
-                if self.chip_tracker.dragging_chip.chip == None :
+                if self.chip_tracker.dragging_chip.chips == None :
                     self.draw_empty_slot(x, y)
                 else:
                     if draw_validation_for_all_slots:
@@ -161,34 +167,44 @@ class GameUI:
         self.window, (255, 0, 0),
         (x - thickness , y - thickness , Config.chip_width + thickness * 2, Config.chip_height  + thickness * 2),
         thickness, border_radius=border_radius)
-    
         
+            
+    def draw_chip_hue(self, x, y, width=None, height=None, outline_thickness=10, border_radius=10):
+        """
+        Draws a white, semi-transparent hue (outline) behind a chip at (x, y).
+        """
+        if width is None:
+            width = Config.chip_width
+        if height is None:
+            height = Config.chip_height
+
+        rect_x = x - outline_thickness // 2
+        rect_y = y - outline_thickness // 2
+        rect_w = width + outline_thickness
+        rect_h = height + outline_thickness
+
+        outline_surface = pygame.Surface((rect_w, rect_h), pygame.SRCALPHA)
+        pygame.draw.rect(
+            outline_surface,
+            (255, 255, 255, 120),  # White with alpha for soft glow
+            (0, 0, rect_w, rect_h),
+            border_radius=border_radius
+        )
+        self.window.blit(outline_surface, (rect_x, rect_y))
+
+
     def draw_moving_chip(self):
-        if self.chip_tracker.dragging_chip.chip:
-            chip = self.chip_tracker.dragging_chip.chip
+        if self.chip_tracker.dragging_chip.chips:
+            chip = self.chip_tracker.dragging_chip.chips
             x = self.chip_tracker.mouse_x - Config.chip_width / 2
             y = self.chip_tracker.mouse_y - Config.chip_height / 2
 
-            # Draw a white, slightly larger, semi-transparent rectangle behind the chip
-            outline_thickness = 10  # Thickness of the white edges
-            rect_x = x - outline_thickness // 2
-            rect_y = y - outline_thickness // 2
-            rect_w = Config.chip_width + outline_thickness
-            rect_h = Config.chip_height + outline_thickness
-
-            # Create a transparent surface for the outline
-            outline_surface = pygame.Surface((rect_w, rect_h), pygame.SRCALPHA)
-            pygame.draw.rect(
-                outline_surface,
-                (255, 255, 255, 120),  # White with alpha for soft glow
-                (0, 0, rect_w, rect_h),
-                border_radius=10
-            )
-            self.window.blit(outline_surface, (rect_x, rect_y))
+            # Draw the hue behind the chip
+            self.draw_chip_hue(x, y)
 
             # Draw the chip itself
             self.draw_chip(chip, x, y)
-    
+        
     def draw_next_player_button(self): #to update later with config data
         button_rect = pygame.Rect(Config.next_player_button[0])
         font_size = int(Config.next_player_button[1])
@@ -217,13 +233,13 @@ class GameUI:
     
     
 
-       
+        
 
 
 
 
 
-    
+        
 
 
 

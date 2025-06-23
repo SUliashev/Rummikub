@@ -88,8 +88,8 @@ class ChipValidator:
             chips.append(self.chip_tracker.board_grid.slots[(row, col - i)])
             i += 1
         chips = chips[::-1]
-        if self.chip_tracker.dragging_chip.chip:
-            chips.append(self.chip_tracker.dragging_chip.chip)
+        if self.chip_tracker.dragging_chip.chips:
+            chips.append(self.chip_tracker.dragging_chip.chips)
         else:
             chips.append(self.chip_tracker.board_grid.slots[(row, col)])
         i = 1

@@ -1,4 +1,5 @@
 from src.Config.config import Config as C
+import pygame
 
 class ChipTracker:
     def __init__(self, board_grid, tray_grid, dragging_chip, dispatcher):
@@ -17,11 +18,29 @@ class ChipTracker:
         self.draw_selection = False
         self.selection_start = None  # (x1, y1)
         self.selection_end = None   
+        self.selected_chips = []
+
+    def select_chips_in_rectangle(self):
+        x1, y1 = self.selection_start
+        x2, y2 = self.selection_end
+        rect = pygame.Rect(min(x1, x2), min(y1, y2), abs(x2-x1), abs(y2-y1))
+        selected_chips = []
+        for (row, col), chip in self.tray_grid.slots.items():
+            if chip:
+                chip_x, chip_y = C.tray_slot_coordinates[(row, col)]
+                chip_rect = pygame.Rect(chip_x, chip_y, C.chip_width, C.chip_height)
+                if rect.colliderect(chip_rect):
+                    selected_chips.append(((row, col), chip))
+        # Remove from tray and add to dragging
+        # for (row, col), chip in selected_chips:
+        #     self.tray_grid.slots[(row, col)] = None
+        self.selected_chips = selected_chips
 
     def multiple_slots_selected(self, x, y):
         print('called')
         self.draw_selection = False
         self.selection_end = (x, y)
+        self.select_chips_in_rectangle()
 
     def select_multiple_slots(self, x, y):
         self.draw_selection = True
@@ -29,7 +48,7 @@ class ChipTracker:
 
 
     def on_choose_next_slot(self, mouse_x, mouse_y):
-        if self.dragging_chip.chip:
+        if self.dragging_chip.chips:
             snap_range = 60
             chip_center_x = mouse_x 
             chip_center_y = mouse_y 
@@ -70,21 +89,21 @@ class ChipTracker:
 
 
     def return_chip_to_origin_pos(self):
-        chip = self.dragging_chip.chip
+        chip = self.dragging_chip.chips
         if self.origin_pos[0] == 'tray':
             self.chip_from_dragging_to_tray(self.origin_pos[1])
             
         elif self.origin_pos[0] == 'board':
             self.chip_from_dragging_to_board(self.origin_pos[1])
         self.origin_pos = None
-        self.dragging_chip.chip == None
+        self.dragging_chip.chips == None
 
 
     def chip_from_tray_to_dragging(self, coordinates):
         chip = self.tray_grid.slots.get(coordinates)
         if chip:
             self.tray_grid.slots[coordinates] = None
-            self.dragging_chip.chip = chip
+            self.dragging_chip.chips = chip
             self.origin_pos = ('tray', coordinates)
             return chip
         
@@ -93,16 +112,16 @@ class ChipTracker:
         chip = self.board_grid.slots.get(coordinates)
         if chip:
             self.board_grid.slots[coordinates] = None
-            self.dragging_chip.chip = chip
+            self.dragging_chip.chips = chip
             self.origin_pos = ('board', coordinates)
             self.hovering_slot = None
             return chip
         
 
     def chip_from_dragging_to_board(self, coordinates: tuple ):# update later with validation
-        chip = self.dragging_chip.chip
+        chip = self.dragging_chip.chips
         if self.board_grid.slots[coordinates] is None:
-            self.dragging_chip.chip = None
+            self.dragging_chip.chips = None
             self.origin_pos = None
             self.board_grid.slots[coordinates] = chip
             self.hovering_slot = None
@@ -111,9 +130,9 @@ class ChipTracker:
 
 
     def chip_from_dragging_to_tray(self, coordinates): #update later with chips moving to the side while hovering
-        chip = self.dragging_chip.chip
+        chip = self.dragging_chip.chips
         if self.tray_grid.slots[coordinates] is None:
-            self.dragging_chip.chip = None
+            self.dragging_chip.chips = None
             self.origin_pos = None
             self.tray_grid.slots[coordinates] = chip
             self.hovering_slot = None

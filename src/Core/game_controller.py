@@ -111,7 +111,7 @@ class GameController:
 
 
     def on_chip_drag_end(self, **kwargs):
-        if not self.chip_tracker.dragging_chip.chip:
+        if not self.chip_tracker.dragging_chip.chips:
             return
         next_slot = self.chip_tracker.hovering_slot
         if next_slot == None:
