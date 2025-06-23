@@ -1,16 +1,10 @@
 To do:
 
-implement testing 
+add button side buttons (draw, sort, undo move, undo all moves)
 
-some sort of bug is happening with the validation when the joker is in play, combination [J, b11, b13] shows as valid
+add sorting of tray chips
 
 player should not be able to place a chip if the move is not valid, chip should be returned
-
-add button which sorts the chips in the tray 
-
-button for undo move
-
-button for undoing all the moves the player has made
 
 select multiple chips and drag them 
 
@@ -22,6 +16,10 @@ add chips visibly being moved around the board when returning and being drawn (i
 
 add menu 
 
+
+Notes for improvement:
+i did not manage to make the dragging chip be drawn via event of mouse movement, the drawing of it was called prior to the board being drawn, thus I could not draw it correctly
+Ended up dispatching the x and y coordinates or the mouse to the chiptracker, the moving chip is then drawn based on those coordinates
 
 
 Some explanation on the classes: 
@@ -38,3 +36,4 @@ gameUI: renders the current state of the game based on the chip_tracker
 player_interaction: checks the events and pushes the needed actions to ChipTracker and gameUI
 players: creates players on startup which have their own name and own tray_grid
 tray_grid: holds chips and chip coordinates for individual players
+

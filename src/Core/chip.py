@@ -6,7 +6,7 @@ class Chip:
         self.color = color
         self.number = number 
         self.is_joker = is_joker
-       
+
     def __str__(self):
         return f"({self.color} {self.number})"
     

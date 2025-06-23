@@ -3,13 +3,15 @@ from src.Core.chip import Chip
 from src.Config.config import Config
 
 class GameUI:
-    def __init__(self, chip_tracker, chip_validator, current_player):
+    def __init__(self, chip_tracker, chip_validator, current_player, dispatcher):
         self.window = Config.window 
         print('size', self.window.get_size())
         pygame.display.set_caption("Rummikub")
         self.chip_tracker = chip_tracker  # Use ChipTracker for chip management
         self.chip_validator = chip_validator
         self.current_player = current_player
+        # self.dispatcher = dispatcher
+        # self.subscribe_events()
 
 
     def draw(self):
@@ -28,6 +30,7 @@ class GameUI:
         self.draw_moving_chip()
         self.draw_side_rectangle()
         self.draw_right_side_buttons()
+
 
         
     def draw_side_rectangle(self):
@@ -55,7 +58,7 @@ class GameUI:
         font = pygame.font.SysFont(None, 18)
 
         for (row, col), item_in_slot in self.chip_tracker.board_grid.slots.items():
-            x , y = self.chip_tracker.board_grid.slot_coordinates[row, col]
+            x , y = Config.board_slot_coordinates[row, col]
             if item_in_slot is None:
                 if self.chip_tracker.dragging_chip.chip == None :
                     self.draw_empty_slot(x, y)
@@ -112,14 +115,14 @@ class GameUI:
             
         
     def draw_hovering_slot(self):
-        coordinates = self.chip_tracker.hovering_slot
-        if coordinates == None:
+        if not self.chip_tracker.hovering_slot:
             return
         
-        elif coordinates[0] == 'tray':
-            x, y = self.chip_tracker.tray_grid.slot_coordinates[coordinates[1]]
-        elif coordinates[0] == 'board':
-            x, y = self.chip_tracker.board_grid.slot_coordinates[coordinates[1]]
+        slot_type, slot = self.chip_tracker.hovering_slot       
+        if slot_type == 'tray':
+            x, y = Config.tray_slot_coordinates[slot]
+        elif slot_type == 'board':
+            x, y = Config.board_slot_coordinates[slot]
 
         border_radius = 9
         rect = pygame.draw.rect(
@@ -131,7 +134,7 @@ class GameUI:
     def draw_incorrect_chip_combination(self):
         for (row, col), correct in self.chip_validator.slots_on_board.items():
             if not correct:
-                self.draw_invalid_placed_chip_border(*self.chip_tracker.board_grid.slot_coordinates[row, col])
+                self.draw_invalid_placed_chip_border(*Config.board_slot_coordinates[row, col])
                 
 
     def draw_invalid_placed_chip_border(self, x, y):       
@@ -146,10 +149,9 @@ class GameUI:
     def draw_moving_chip(self):
         if self.chip_tracker.dragging_chip.chip:
             chip = self.chip_tracker.dragging_chip.chip
-            mouse_x, mouse_y = pygame.mouse.get_pos()
-            chip.x = mouse_x - Config.chip_width / 2
-            chip.y = mouse_y - Config.chip_height / 2
-            self.draw_chip(chip, chip.x, chip.y)
+            x = self.chip_tracker.mouse_x - Config.chip_width / 2
+            y = self.chip_tracker.mouse_y - Config.chip_height / 2
+            self.draw_chip(chip, x, y)
 
     
     def draw_draw_chip_button(self):
@@ -181,7 +183,7 @@ class GameUI:
         
 
     def draw_tray_grid(self): 
-        for (row, col), (x, y) in self.chip_tracker.tray_grid.slot_coordinates.items():
+        for (row, col), (x, y) in Config.tray_slot_coordinates.items():
             item_in_slot = self.chip_tracker.tray_grid.slots[(row, col)]
             if item_in_slot is None:
                 self.draw_empty_slot(x, y)

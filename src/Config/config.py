@@ -66,6 +66,11 @@ class Config:
     chip_sufrace = None
     FONT_PATH = os.path.join(os.path.dirname(__file__), '../../assets/fonts/Ubuntu-B.ttf')
     
+
+    '''Slot Coordinates'''
+    board_slot_coordinates = None
+    tray_slot_coordinates = None
+
     '''Tray'''
     tray_grid_width = None
     tray_grid_height = None
@@ -116,6 +121,8 @@ class Config:
         
         Config.setup_right_buttons()
 
+        Config.setup_slot_coordinates()
+
       
         Config.right_buttons_width =  Config.tray_background_x // 2 * 0.8
         Config.right_buttons_height = Config.right_buttons_width // 3
@@ -127,6 +134,26 @@ class Config:
 
         Config.next_player_button_x = Config.window_width - Config.draw_button_x - Config.right_buttons_width
         Config.next_player_button_y = Config.draw_button_y
+
+    @staticmethod
+    def setup_slot_coordinates():
+        Config.board_slot_coordinates = {}
+
+        start_x = Config.board_horizontal_edge + Config.slot_horizontal_spacing / 2
+        for row in range(Config.board_rows):
+            for col in range(Config.board_cols):
+                x = start_x + (Config.chip_width + Config.slot_horizontal_spacing) * col
+                y = Config.board_vertical_edge +  (Config.chip_height + Config.slot_vertical_spacing) * row
+                Config.board_slot_coordinates[(row, col)] = (x, y)
+                
+        Config.tray_slot_coordinates = {}
+        for row in range(Config.tray_rows):
+            for col in range(Config.tray_cols):
+                x = Config.tray_grid_x + col * (Config.chip_width + Config.tray_slot_horizontal_spacing)
+                y = Config.tray_grid_y + row * (Config.chip_height + Config.tray_slot_vertical_spacing) 
+                Config.tray_slot_coordinates[(row, col)] = (x, y)
+               
+
 
     @staticmethod
     def setup_right_rectangle():
@@ -149,9 +176,6 @@ class Config:
             x = Config.right_rect_x + button_margin
             y = Config.right_rect_y + button_margin + i * (button_height + button_margin)
             Config.right_buttons.append((x, y, button_width, button_height))
-
-
-
 
 
 

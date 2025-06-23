@@ -12,7 +12,9 @@ from src.GameUI.player_interaction import PlayerInteraction
 import random
 
 class GameController:
-    def __init__(self, sprites: Dict[str, pygame.Surface]):
+    def __init__(self, sprites: Dict[str, pygame.Surface], dispatcher):
+        self.dispatcher = dispatcher
+        self.subscribe_events()
         self.sprites = sprites
         self.board_grid = BoardGrid()
         self.moving_chip = DraggingChip()  
@@ -21,14 +23,15 @@ class GameController:
         self.current_player_index = 0
         self.current_player = self.players[self.current_player_index]
 
-        self.chip_tracker = ChipTracker(self.board_grid, self.players[self.current_player_index].tray_grid, self.moving_chip)
+        self.chip_tracker = ChipTracker(self.board_grid, self.players[self.current_player_index].tray_grid, self.moving_chip, self.dispatcher)
         self.generate_and_shuffle_hidden_chips()
         self.test_draw_from_hidden()  # can be removed later 
         self.chip_validator = ChipValidator(self.chip_tracker)
 
-        self.player_interaction = PlayerInteraction(self.chip_tracker, self.chip_validator) 
-        self.game_ui = GameUI(self.chip_tracker, self.chip_validator, self.current_player) 
+        self.player_interaction = PlayerInteraction(self.chip_tracker, self.chip_validator, self.dispatcher) 
+        self.game_ui = GameUI(self.chip_tracker, self.chip_validator, self.current_player, self.dispatcher) 
         
+ 
 
     def run(self):
         clock = pygame.time.Clock()
@@ -36,9 +39,8 @@ class GameController:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     exit()
-                result = self.player_interaction.handle_event(event) #testing stage
-                if result == 'next player':
-                    self.next_turn()
+                self.player_interaction.handle_event(event) #testing stage
+            
 
             self.draw()
             clock.tick(60)  
@@ -91,3 +93,35 @@ class GameController:
 
 
     
+    def subscribe_events(self):
+        self.dispatcher.subscribe('chip_drag_start', self.on_chip_drag_start)
+        self.dispatcher.subscribe('chip_drag_end', self.on_chip_drag_end)
+ 
+
+    def on_chip_drag_start(self, slot_type, slot, **kwargs):
+        if slot_type == 'tray':
+            if self.chip_tracker.tray_grid.slots[slot]:
+                self.chip_tracker.chip_from_tray_to_dragging(slot)
+                self.chip_validator.validate_dragging_chip()
+                
+        elif slot_type == 'board':
+            if self.chip_tracker.board_grid.slots[slot]:
+                self.chip_tracker.chip_from_board_to_dragging(slot)
+                self.chip_validator.validate_dragging_chip()
+                self.chip_validator.validate_current_state()
+
+
+    def on_chip_drag_end(self, slot_type, **kwargs):
+        next_slot = self.chip_tracker.hovering_slot
+        if next_slot == None:
+            self.chip_tracker.return_chip_to_origin_pos()
+            self.chip_validator.validate_current_state()
+        elif next_slot[0] == 'board':
+            self.chip_tracker.chip_from_dragging_to_board(next_slot[1])
+            self.chip_validator.validate_current_state()
+ 
+        elif next_slot[0] == 'tray':
+            self.chip_tracker.chip_from_dragging_to_tray(next_slot[1])
+         
+        else:
+            print('error with releasing chip')
