@@ -30,6 +30,10 @@ class PlayerInteraction:
                         self.dispatcher.dispatch(f'button {button_name} pressed')
                         return
                 
+            if pygame.Rect(C.next_player_button[0]).collidepoint(mouse_x, mouse_y):
+                self.dispatcher.dispatch('button next player pressed')
+                return
+            
             if self.is_mouse_over_board(event):
                 for (row, col), (x, y) in C.board_slot_coordinates.items():
                     if self.chip_tracker.board_grid.slots[(row, col)]:

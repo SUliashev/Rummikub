@@ -94,6 +94,7 @@ class GameController:
     def subscribe_events(self):
         self.dispatcher.subscribe('chip_drag_start', self.on_chip_drag_start)
         self.dispatcher.subscribe('chip_drag_end', self.on_chip_drag_end)
+        self.dispatcher.subscribe('button next player pressed', self.next_turn)
  
 
     def on_chip_drag_start(self, slot_type, slot, **kwargs):

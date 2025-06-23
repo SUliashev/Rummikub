@@ -92,10 +92,7 @@ class Config:
 
 
     '''Next Player Button'''
-    next_player_button_x = None
-    next_player_button_y = None
-    right_rect_width = None
-    right_rect_height = None
+    next_player_button = None
 
     @staticmethod
     def setup_config():
@@ -117,17 +114,32 @@ class Config:
 
         Config.setup_slot_coordinates()
 
+        Config.setup_next_player_button()
       
         Config.right_buttons_width =  Config.tray_background_x // 2 * 0.8
         Config.right_buttons_height = Config.right_buttons_width // 3
 
-        Config.draw_button_x = int(Config.window_width  - Config.tray_background_x) + Config.right_buttons_width // 2 * 0.1
-        Config.draw_button_y = int((Config.window_height + Config.tray_background_y) // 2) - Config.right_buttons_height // 2
-        
     
 
-        Config.next_player_button_x = Config.window_width - Config.draw_button_x - Config.right_buttons_width
-        Config.next_player_button_y = Config.draw_button_y
+    @staticmethod 
+    def setup_next_player_button():
+        width = Config.tray_background_x // 2
+        height = width // 3
+        x = width // 2
+        y = (Config.window_height + Config.tray_background_y) // 2 - (height // 2)
+
+        rect = (x, y, width, height)
+        font_size = int(rect[2] )   
+        font = pygame.font.SysFont(None, font_size)
+        text = font.render('Next Player', True, (255, 255, 255))
+        text_rect = text.get_rect(center=(rect[0] + rect[2] // 2, rect[1] + rect[3] // 2))
+        while text_rect.width > rect[2] * 0.8 and font_size > 10:
+            font_size -= 1
+            font = pygame.font.SysFont(None, font_size)
+            text = font.render("Next Player", True, (255, 255, 255))
+            text_rect = text.get_rect(center=(rect[0] + rect[2] //2 , rect[1] + rect[3] // 2))
+            
+        Config.next_player_button = (rect, font_size)
 
     @staticmethod
     def setup_slot_coordinates():

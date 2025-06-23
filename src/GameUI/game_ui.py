@@ -19,7 +19,7 @@ class GameUI:
         self.draw_tray_grid()
 
         # self.draw_draw_chip_button()
-        # self.draw_next_player_button()
+        self.draw_next_player_button()
 
         self.draw_board_slots()
 
@@ -159,19 +159,11 @@ class GameUI:
             self.draw_chip(chip, x, y)
 
     
-    def draw_draw_chip_button(self):
-        button_rect = pygame.Rect(Config.draw_button_x, Config.draw_button_y, Config.right_buttons_width ,  Config.right_buttons_height )
-        font_size = int(Config.right_buttons_width * 0.2)
-        pygame.draw.rect(self.window, Config.draw_button_color, button_rect, border_radius=12)
-        font = pygame.font.SysFont(None, font_size)
-        text = font.render("Draw Chip", True, (255, 255, 255))
-        text_rect = text.get_rect(center=button_rect.center)
-        self.window.blit(text, text_rect)
 
     
     def draw_next_player_button(self): #to update later with config data
-        button_rect = pygame.Rect(Config.next_player_button_x, Config.next_player_button_y, Config.right_buttons_width ,  Config.right_buttons_height )
-        font_size = int(Config.right_buttons_width * 0.2)
+        button_rect = pygame.Rect(Config.next_player_button[0])
+        font_size = int(Config.next_player_button[1])
         pygame.draw.rect(self.window, Config.draw_button_color, button_rect, border_radius=12)
         font = pygame.font.SysFont(None, font_size)
         text = font.render("Next Player", True, (255, 255, 255))
