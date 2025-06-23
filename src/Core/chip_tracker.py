@@ -123,6 +123,8 @@ class ChipTracker:
     def subscribe_events(self):
         self.dispatcher.subscribe('mouse_movement', self.update_mouse_position)
         self.dispatcher.subscribe('mouse_movement', self.on_choose_next_slot)
+        self.dispatcher.subscribe('button Draw Chip pressed', self.place_chip_in_tray_from_hidden)
+        self.dispatcher.subscribe('button Sort Chips pressed', self.tray_grid.sort_chips_in_tray)
 
     def update_mouse_position(self, mouse_x, mouse_y, **kwargs):
         self.mouse_x = mouse_x

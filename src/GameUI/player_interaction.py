@@ -11,9 +11,7 @@ class PlayerInteraction:
     def handle_event(self, event):
         if event.type == pygame.MOUSEBUTTONDOWN:
             self.mouse_button_down(event)
-            # if self.next_player_button_interaction(event):
-            #     print("button pressed")
-            #     return 'next player'
+
         elif event.type == pygame.MOUSEMOTION: # this is currently fed through API
             mouse_x, mouse_y = event.pos
             self.dispatcher.dispatch('mouse_movement', mouse_x=mouse_x, mouse_y=mouse_y)
@@ -25,6 +23,13 @@ class PlayerInteraction:
     def mouse_button_down(self, event):           # reworking due to dispatcher # currently checks a chip is in place
         if event.type == pygame.MOUSEBUTTONDOWN:
             mouse_x, mouse_y = event.pos
+            if pygame.Rect(C.right_rect).collidepoint(mouse_x, mouse_y):
+                for button_name, (x, y, w, h) in C.right_buttons.items():
+                    button_rect = pygame.Rect(x, y, w, h)
+                    if button_rect.collidepoint(mouse_x, mouse_y):
+                        self.dispatcher.dispatch(f'button {button_name} pressed')
+                        return
+                
             if self.is_mouse_over_board(event):
                 for (row, col), (x, y) in C.board_slot_coordinates.items():
                     if self.chip_tracker.board_grid.slots[(row, col)]:

@@ -30,6 +30,31 @@ class TrayGrid:
                 self.slots[(row, col)] = None
           
 
+    def sort_chips_in_tray(self):
+        all_chips_in_tray = [chip for chip in self.slots.values() if chip is not None]
+        if all_chips_in_tray:
+            sorted_chips = []
+
+            colors = set(chip.color for chip in all_chips_in_tray if not chip.is_joker)
+            jokers = [chip for chip in all_chips_in_tray if chip.is_joker]
+            if colors:
+                for color in colors:
+                    chips_of_same_color = sorted(
+                        [chip for chip in all_chips_in_tray if chip.color == color and not chip.is_joker], 
+                        key=lambda chip: chip.number)
+                    
+                    sorted_chips += chips_of_same_color
+
+            if jokers:
+                sorted_chips += jokers
+
+            for slot, chip in self.slots.items():
+                self.slots[slot] = None
+            for chip in sorted_chips:
+                self.slots[self.get_first_open_slot()] = chip
+                        
+
+
 
 
 

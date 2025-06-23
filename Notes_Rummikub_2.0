@@ -1,10 +1,6 @@
 To do:
 
-add button side buttons (draw, sort, undo move, undo all moves)
-
-add sorting of tray chips
-
-player should not be able to place a chip if the move is not valid, chip should be returned
+revive the next player button
 
 select multiple chips and drag them 
 

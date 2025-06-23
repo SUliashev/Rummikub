@@ -10,8 +10,6 @@ class GameUI:
         self.chip_tracker = chip_tracker  # Use ChipTracker for chip management
         self.chip_validator = chip_validator
         self.current_player = current_player
-        # self.dispatcher = dispatcher
-        # self.subscribe_events()
 
 
     def draw(self):
@@ -37,18 +35,25 @@ class GameUI:
         pygame.draw.rect(
             self.window,
             (200, 200, 200),  # Rectangle color
-            (Config.right_rect_x, Config.right_rect_y, Config.right_rect_width, Config.right_rect_height),
+            (Config.right_rect),
             border_radius=12
         )
 
     def draw_right_side_buttons(self):
-        for i, (x, y, w, h) in enumerate(Config.right_buttons):
+        for button_name, rect in Config.right_buttons.items():
             pygame.draw.rect(
                 self.window,
                 (69, 69, 69),  # Button color
-                (x, y, w, h),
+                rect,
                 border_radius=8
         )
+            font_size = Config.right_buttons_font_size[button_name]
+            font = pygame.font.SysFont(None, font_size)
+            text = font.render(button_name, True, (255, 255, 255))
+            text_rect = text.get_rect(center=(rect[0] + rect[2] // 2, rect[1] + rect[3] // 2))
+
+
+            self.window.blit(text, text_rect)
 
 
 

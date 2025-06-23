@@ -83,25 +83,19 @@ class Config:
 
 
     '''Buttons To The Right Ratio'''
-    right_buttons_width = None
-    right_buttons_height = None
+    right_rect = None
 
 
     '''Buttons To The Right Coordinates'''
-    right_buttons = None
-    draw_button_x = None
-    draw_button_y = None
-    sort_tray_button_x = None
-    sort_tray_button_y = None
-    undo_move_button_x = None
-    undo_move_button_y = None
-    undo_all_moves_button_x = None
-    undo_all_moves_button_y = None
+    right_buttons = {}
+    right_buttons_font_size = {}
 
 
     '''Next Player Button'''
     next_player_button_x = None
     next_player_button_y = None
+    right_rect_width = None
+    right_rect_height = None
 
     @staticmethod
     def setup_config():
@@ -158,26 +152,46 @@ class Config:
     @staticmethod
     def setup_right_rectangle():
         # Position rectangle to the right of the tray background
-        Config.right_rect_x = Config.tray_background_x + Config.tray_background_width + Config.side_rectangle_space_from_tray  
-        Config.right_rect_y = Config.tray_background_y
-        Config.right_rect_width = Config.window_width - Config.right_rect_x - Config.side_rectangle_space_from_window
-        Config.right_rect_height = Config.tray_background_height
-
+        x = Config.tray_background_x + Config.tray_background_width + Config.side_rectangle_space_from_tray  
+        y = Config.tray_background_y
+        width = Config.window_width - x - Config.side_rectangle_space_from_window
+        height = Config.tray_background_height
+        Config.right_rect = (x, y, width, height)
+        print('calculated')
 
     @staticmethod
     def setup_right_buttons():
-        button_count = 4
-        button_margin = 15  # vertical margin between buttons
-        button_height = (Config.right_rect_height - (button_count + 1) * button_margin) // button_count
-        button_width = Config.right_rect_width - 2 * button_margin
 
-        Config.right_buttons = []
-        for i in range(button_count):
-            x = Config.right_rect_x + button_margin
-            y = Config.right_rect_y + button_margin + i * (button_height + button_margin)
-            Config.right_buttons.append((x, y, button_width, button_height))
+        button_rows = 2
+        button_cols = 2
+        # button_count = button_rows * button_cols
+        button_margin_x = 15  # horizontal margin between buttons
+        button_margin_y = 15  # vertical margin between buttons
 
+        # Calculate button width and height
+        button_width = (Config.right_rect[2] - (button_cols + 1) * button_margin_x) // button_cols
+        button_height = (Config.right_rect[3] - (button_rows + 1) * button_margin_y) // button_rows
+        button_names = ['Draw Chip', 'Undo Move', 'Sort Chips', 'Undo All Moves']
 
+        name_index = 0
+        for row in range(button_rows):
+            for col in range(button_cols):
+                x = Config.right_rect[0] + button_margin_x + col * (button_width + button_margin_x)
+                y = Config.right_rect[1] + button_margin_y + row * (button_height + button_margin_y)
+                Config.right_buttons[button_names[name_index]] = ((x, y, button_width, button_height))
+                
+                rect = (x, y, button_width, button_height)
+                font_size = int(rect[2] )   
+                font = pygame.font.SysFont(None, font_size)
+                text = font.render(button_names[name_index], True, (255, 255, 255))
+                text_rect = text.get_rect(center=(rect[0] + rect[2] // 2, rect[1] + rect[3] // 2))
+                while text_rect.width > rect[2] * 0.8 and font_size > 10:
+                    font_size -= 1
+                    font = pygame.font.SysFont(None, font_size)
+                    text = font.render(button_names[name_index], True, (255, 255, 255))
+                    text_rect = text.get_rect(center=(rect[0] + rect[2] //2 , rect[1] + rect[3] // 2))
+                Config.right_buttons_font_size[button_names[name_index]] = font_size
+                name_index += 1
 
     @staticmethod
     def setup_chip_dimentions():

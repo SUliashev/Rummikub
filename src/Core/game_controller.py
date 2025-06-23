@@ -31,7 +31,6 @@ class GameController:
         self.player_interaction = PlayerInteraction(self.chip_tracker, self.chip_validator, self.dispatcher) 
         self.game_ui = GameUI(self.chip_tracker, self.chip_validator, self.current_player, self.dispatcher) 
         
- 
 
     def run(self):
         clock = pygame.time.Clock()
@@ -92,7 +91,6 @@ class GameController:
 
 
 
-    
     def subscribe_events(self):
         self.dispatcher.subscribe('chip_drag_start', self.on_chip_drag_start)
         self.dispatcher.subscribe('chip_drag_end', self.on_chip_drag_end)
@@ -117,8 +115,12 @@ class GameController:
             self.chip_tracker.return_chip_to_origin_pos()
             self.chip_validator.validate_current_state()
         elif next_slot[0] == 'board':
-            self.chip_tracker.chip_from_dragging_to_board(next_slot[1])
-            self.chip_validator.validate_current_state()
+            if self.chip_validator.slots[next_slot[1]]:
+                self.chip_tracker.chip_from_dragging_to_board(next_slot[1])
+                self.chip_validator.validate_current_state()
+            else:
+                self.chip_tracker.return_chip_to_origin_pos()
+                self.chip_validator.validate_current_state()
  
         elif next_slot[0] == 'tray':
             self.chip_tracker.chip_from_dragging_to_tray(next_slot[1])
