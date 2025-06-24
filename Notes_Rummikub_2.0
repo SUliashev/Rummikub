@@ -1,6 +1,17 @@
 To do:
 
+we got the game fuckedup, need to sepparate logic for one chip being dragged, and mulitple
+turn off chip validation, and try to get multiple chips placed into slots
+then add chip validation for multiple slots
+then implement the logic as it was for one chip
+
+
+select multiple chips, need sepparation between board and tray, can do the selcting for just one row
+implement ui with multiple chips dragged
+update the chip validation based on multiple chips dragged
+
 tray sortation currenltly only works for the first tray
+
 select multiple chips and drag them 
 
 to adjust the sprite generator

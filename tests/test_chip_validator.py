@@ -3,7 +3,7 @@ import sys
 import os
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from src.Core.chip_validator import ChipValidator
-from src.Config.config import Config
+from src.Config.config import C
 from src.Grids.board_grid import BoardGrid
 from src.Grids.tray_grid import TrayGrid
 from src.GameUI.dragging_chip import DraggingChip
@@ -16,7 +16,7 @@ class DummyChip:
 
 class ChipValidatorTestCase(unittest.TestCase):
     def setUp(self):
-        Config.setup_config()
+        C.setup_config()
         self.board_grid = BoardGrid()
         self.tray_grid = TrayGrid()
         self.dragging_chip = DraggingChip()

@@ -1,4 +1,4 @@
-from src.Config.config import Config
+from src.Config.config import C
 
 class BoardGrid:
     def __init__(self):
@@ -8,8 +8,8 @@ class BoardGrid:
 
 
     def create_slots(self):
-        for row in range(Config.board_rows):
-            for col in range(Config.board_cols):
+        for row in range(C.board_rows):
+            for col in range(C.board_cols):
                 self.slots[(row, col)] = None
 
 

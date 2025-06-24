@@ -1,6 +1,6 @@
 from typing import Dict
 from PIL import Image, ImageDraw, ImageFont
-from src.Config.config import Config
+from src.Config.config import C
 from pygame import Surface
 import pygame
 
@@ -9,13 +9,13 @@ class ChipSpriteGenerator:
     def generate_all_chips() -> Dict[str, Surface]:
         # === Settings: scale relative to screen size ===
         result = {}
-        chip_width = Config.chip_width   # ~65px for 1920px width
-        chip_height = Config.chip_height # ~90px for 1080px height
+        chip_width = C.chip_width   # ~65px for 1920px width
+        chip_height = C.chip_height # ~90px for 1080px height
         chip_bg_color = (235, 220, 180)
         corner_radius = int(chip_width * 0.18)
         circle_radius = int(chip_width * 0.38)
         circle_size = circle_radius * 2
-        font_path = Config.FONT_PATH
+        font_path = C.FONT_PATH
         font_size = int(chip_height * 0.38)
   
 

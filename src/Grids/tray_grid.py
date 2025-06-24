@@ -1,5 +1,5 @@
 from src.Core.chip import Chip
-from src.Config.config import Config
+from src.Config.config import C
 
 class TrayGrid:
     def __init__(self):
@@ -8,8 +8,8 @@ class TrayGrid:
 
 
     def get_first_open_slot(self):
-        for row in range(Config.tray_rows):
-            for col in range(Config.tray_cols):
+        for row in range(C.tray_rows):
+            for col in range(C.tray_cols):
                 if self.slots[(row, col)] is None:
                     return (row, col)
         raise ValueError('No empty trayslots available')
@@ -25,8 +25,8 @@ class TrayGrid:
 
 
     def create_coordinates(self):
-        for row in range(Config.tray_rows):
-            for col in range(Config.tray_cols):
+        for row in range(C.tray_rows):
+            for col in range(C.tray_cols):
                 self.slots[(row, col)] = None
           
 

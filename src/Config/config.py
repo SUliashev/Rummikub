@@ -1,6 +1,6 @@
 import os
 import pygame
-class Config:
+class C:
     '''CONFIGURATION VARIABLES'''
 
     '''Board'''
@@ -99,34 +99,34 @@ class Config:
 
         pygame.init()
         info = pygame.display.Info()
-        Config.window = pygame.display.set_mode((info.current_w, info.current_h), pygame.RESIZABLE)
+        C.window = pygame.display.set_mode((info.current_w, info.current_h), pygame.RESIZABLE)
 
-        Config.window_width = Config.window.get_width()
-        Config.window_height = Config.window.get_height()
+        C.window_width = C.window.get_width()
+        C.window_height = C.window.get_height()
         
-        Config.setup_chip_dimentions()
+        C.setup_chip_dimentions()
 
-        Config.setup_tray()
+        C.setup_tray()
 
-        Config.setup_right_rectangle()
+        C.setup_right_rectangle()
         
-        Config.setup_right_buttons()
+        C.setup_right_buttons()
 
-        Config.setup_slot_coordinates()
+        C.setup_slot_coordinates()
 
-        Config.setup_next_player_button()
+        C.setup_next_player_button()
       
-        Config.right_buttons_width =  Config.tray_background_x // 2 * 0.8
-        Config.right_buttons_height = Config.right_buttons_width // 3
+        C.right_buttons_width =  C.tray_background_x // 2 * 0.8
+        C.right_buttons_height = C.right_buttons_width // 3
 
     
 
     @staticmethod 
     def setup_next_player_button():
-        width = Config.tray_background_x // 2
+        width = C.tray_background_x // 2
         height = width // 3
         x = width // 2
-        y = (Config.window_height + Config.tray_background_y) // 2 - (height // 2)
+        y = (C.window_height + C.tray_background_y) // 2 - (height // 2)
 
         rect = (x, y, width, height)
         font_size = int(rect[2] )   
@@ -139,36 +139,36 @@ class Config:
             text = font.render("Next Player", True, (255, 255, 255))
             text_rect = text.get_rect(center=(rect[0] + rect[2] //2 , rect[1] + rect[3] // 2))
             
-        Config.next_player_button = (rect, font_size)
+        C.next_player_button = (rect, font_size)
 
     @staticmethod
     def setup_slot_coordinates():
-        Config.board_slot_coordinates = {}
+        C.board_slot_coordinates = {}
 
-        start_x = Config.board_horizontal_edge + Config.slot_horizontal_spacing / 2
-        for row in range(Config.board_rows):
-            for col in range(Config.board_cols):
-                x = start_x + (Config.chip_width + Config.slot_horizontal_spacing) * col
-                y = Config.board_vertical_edge +  (Config.chip_height + Config.slot_vertical_spacing) * row
-                Config.board_slot_coordinates[(row, col)] = (x, y)
+        start_x = C.board_horizontal_edge + C.slot_horizontal_spacing / 2
+        for row in range(C.board_rows):
+            for col in range(C.board_cols):
+                x = start_x + (C.chip_width + C.slot_horizontal_spacing) * col
+                y = C.board_vertical_edge +  (C.chip_height + C.slot_vertical_spacing) * row
+                C.board_slot_coordinates[(row, col)] = (x, y)
                 
-        Config.tray_slot_coordinates = {}
-        for row in range(Config.tray_rows):
-            for col in range(Config.tray_cols):
-                x = Config.tray_grid_x + col * (Config.chip_width + Config.tray_slot_horizontal_spacing)
-                y = Config.tray_grid_y + row * (Config.chip_height + Config.tray_slot_vertical_spacing) 
-                Config.tray_slot_coordinates[(row, col)] = (x, y)
+        C.tray_slot_coordinates = {}
+        for row in range(C.tray_rows):
+            for col in range(C.tray_cols):
+                x = C.tray_grid_x + col * (C.chip_width + C.tray_slot_horizontal_spacing)
+                y = C.tray_grid_y + row * (C.chip_height + C.tray_slot_vertical_spacing) 
+                C.tray_slot_coordinates[(row, col)] = (x, y)
                
 
 
     @staticmethod
     def setup_right_rectangle():
         # Position rectangle to the right of the tray background
-        x = Config.tray_background_x + Config.tray_background_width + Config.side_rectangle_space_from_tray  
-        y = Config.tray_background_y
-        width = Config.window_width - x - Config.side_rectangle_space_from_window
-        height = Config.tray_background_height
-        Config.right_rect = (x, y, width, height)
+        x = C.tray_background_x + C.tray_background_width + C.side_rectangle_space_from_tray  
+        y = C.tray_background_y
+        width = C.window_width - x - C.side_rectangle_space_from_window
+        height = C.tray_background_height
+        C.right_rect = (x, y, width, height)
         print('calculated')
 
     @staticmethod
@@ -181,16 +181,16 @@ class Config:
         button_margin_y = 15  # vertical margin between buttons
 
         # Calculate button width and height
-        button_width = (Config.right_rect[2] - (button_cols + 1) * button_margin_x) // button_cols
-        button_height = (Config.right_rect[3] - (button_rows + 1) * button_margin_y) // button_rows
+        button_width = (C.right_rect[2] - (button_cols + 1) * button_margin_x) // button_cols
+        button_height = (C.right_rect[3] - (button_rows + 1) * button_margin_y) // button_rows
         button_names = ['Draw Chip', 'Undo Move', 'Sort Chips', 'Undo All Moves']
 
         name_index = 0
         for row in range(button_rows):
             for col in range(button_cols):
-                x = Config.right_rect[0] + button_margin_x + col * (button_width + button_margin_x)
-                y = Config.right_rect[1] + button_margin_y + row * (button_height + button_margin_y)
-                Config.right_buttons[button_names[name_index]] = ((x, y, button_width, button_height))
+                x = C.right_rect[0] + button_margin_x + col * (button_width + button_margin_x)
+                y = C.right_rect[1] + button_margin_y + row * (button_height + button_margin_y)
+                C.right_buttons[button_names[name_index]] = ((x, y, button_width, button_height))
                 
                 rect = (x, y, button_width, button_height)
                 font_size = int(rect[2] )   
@@ -202,24 +202,24 @@ class Config:
                     font = pygame.font.SysFont(None, font_size)
                     text = font.render(button_names[name_index], True, (255, 255, 255))
                     text_rect = text.get_rect(center=(rect[0] + rect[2] //2 , rect[1] + rect[3] // 2))
-                Config.right_buttons_font_size[button_names[name_index]] = font_size
+                C.right_buttons_font_size[button_names[name_index]] = font_size
                 name_index += 1
 
     @staticmethod
     def setup_chip_dimentions():
-        Config.chip_width = int(((Config.window_width - Config.board_horizontal_edge * 2) - Config.slot_horizontal_spacing * (Config.board_cols - 1)) / Config.board_cols) 
-        Config.chip_height = int((((Config.window_height - Config.board_vertical_edge * 2) - Config.tray_background_extra_height * 2 ) - Config.slot_vertical_spacing * Config.board_rows)  / (Config.board_rows + Config.tray_rows))
-        Config.chip_sufrace = pygame.Surface((Config.chip_width, Config.chip_height))
+        C.chip_width = int(((C.window_width - C.board_horizontal_edge * 2) - C.slot_horizontal_spacing * (C.board_cols - 1)) / C.board_cols) 
+        C.chip_height = int((((C.window_height - C.board_vertical_edge * 2) - C.tray_background_extra_height * 2 ) - C.slot_vertical_spacing * C.board_rows)  / (C.board_rows + C.tray_rows))
+        C.chip_sufrace = pygame.Surface((C.chip_width, C.chip_height))
 
     @staticmethod
     def setup_tray():
-        Config.tray_grid_width = (Config.chip_width * Config.tray_cols) + Config.tray_slot_horizontal_spacing * (Config.tray_cols - 1) 
-        Config.tray_grid_height = (Config.chip_height * Config.tray_rows) + Config.tray_slot_vertical_spacing * (Config.tray_rows - 1)
-        Config.tray_background_width = Config.tray_grid_width + (Config.tray_background_extra_width * 2)
-        Config.tray_background_height = Config.tray_grid_height + (Config.tray_background_extra_height * 2)
+        C.tray_grid_width = (C.chip_width * C.tray_cols) + C.tray_slot_horizontal_spacing * (C.tray_cols - 1) 
+        C.tray_grid_height = (C.chip_height * C.tray_rows) + C.tray_slot_vertical_spacing * (C.tray_rows - 1)
+        C.tray_background_width = C.tray_grid_width + (C.tray_background_extra_width * 2)
+        C.tray_background_height = C.tray_grid_height + (C.tray_background_extra_height * 2)
 
-        Config.tray_grid_x = int(Config.window_width * 0.5 -  Config.tray_grid_width / 2) 
-        Config.tray_grid_y = int(Config.window_height - Config.tray_space_from_bottom_of_the_screen) - Config.tray_background_extra_height - Config.tray_grid_height
-        Config.tray_background_x =  int(Config.window_width * 0.5 - Config.tray_background_width / 2)
-        Config.tray_background_y = Config.tray_grid_y - Config.tray_background_extra_height 
+        C.tray_grid_x = int(C.window_width * 0.5 -  C.tray_grid_width / 2) 
+        C.tray_grid_y = int(C.window_height - C.tray_space_from_bottom_of_the_screen) - C.tray_background_extra_height - C.tray_grid_height
+        C.tray_background_x =  int(C.window_width * 0.5 - C.tray_background_width / 2)
+        C.tray_background_y = C.tray_grid_y - C.tray_background_extra_height 
 
