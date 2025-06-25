@@ -29,7 +29,7 @@ class GameController:
         self.chip_validator = ChipValidator(self.chip_tracker)
 
         self.player_interaction = PlayerInteraction(self.chip_tracker, self.chip_validator, self.dispatcher) 
-        self.game_ui = GameUI(self.chip_tracker, self.chip_validator, self.current_player, self.dispatcher) 
+        self.game_ui = GameUI(self.chip_tracker, self.chip_validator, self.current_player, self.dispatcher, self.player_interaction) 
         
 
     def run(self):

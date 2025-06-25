@@ -6,26 +6,31 @@ class PlayerInteraction:
         self.chip_tracker = chip_tracker
         self.chip_validator = chip_validator
         self.dispatcher = dispatcher
-        self.chip_being_dragged = False
-        self.selecting_multiple_chips = False
-        self.chip_tracker.dragging_multiple_chips = False
-        self.dragging_multiple_chips = False
+        self.mouse_x = 0
+        self.mouse_y = 0
+
 
     def handle_event(self, event):
         if event.type == pygame.MOUSEBUTTONDOWN:
             self.mouse_button_down(event)
 
-        elif event.type == pygame.MOUSEMOTION: # this is currently fed through API
-            mouse_x, mouse_y = event.pos
-            self.dispatcher.dispatch('mouse_movement', mouse_x=mouse_x, mouse_y=mouse_y)
-            # if self.selecting_multiple_chips:
-            #     self.dispatcher.dispatch('selecting multiple slots',(mouse_x, mouse_y) )
+        elif event.type == pygame.MOUSEMOTION: 
+            self.update_self_mouse_coordinates(event)
+            if self.chip_tracker.dragging_one_chip:
+                self.chip_tracker.on_choose_next_slot(*event.pos)
+            elif self.chip_tracker.dragging_multiple_chips:
+                self.chip_tracker.on_choose_next_slot(*event.pos)
+                self.chip_tracker.choose_multiple_hovering_slots()
 
         elif event.type == pygame.MOUSEBUTTONUP:
             self.mouse_button_up(event)
 
+    def update_self_mouse_coordinates(self, event):
+        mouse_x, mouse_y = event.pos
+        self.mouse_x = mouse_x
+        self.mouse_y = mouse_y 
 
-    def mouse_button_down(self, event):           # reworking due to dispatcher # currently checks a chip is in place
+    def mouse_button_down(self, event):           
         if event.type == pygame.MOUSEBUTTONDOWN:
             mouse_x, mouse_y = event.pos
             if pygame.Rect(C.right_rect).collidepoint(mouse_x, mouse_y):
@@ -39,16 +44,9 @@ class PlayerInteraction:
                 self.dispatcher.dispatch('button next player pressed')
                 return
             
-            if self.chip_tracker.selected_chips: # and self.chip_tracker.mouse_over_selected_chip(mouse_x, mouse_y):
+            if self.chip_tracker.selected_chips: 
                 if self.chip_tracker.start_dragging_selected_chips(mouse_x, mouse_y):
                     return
-                    # self.chip_being_dragged = True
-                    # self.chip_tracker.selection_start = None
-                    # self.dragging_multiple_chips = True
-                #     self.chip_tracker.dragging_multiple_chips = True
-                #     return
-                # else:
-                #     self.chip_being_dragged = False
 
 
             if self.is_mouse_over_slot(event):
@@ -58,7 +56,7 @@ class PlayerInteraction:
                         if self.chip_tracker.board_grid.slots[(row, col)]:
                             slot_rect = pygame.Rect(x, y, C.chip_width, C.chip_height)
                             if slot_rect.collidepoint(mouse_x, mouse_y):
-                                self.chip_being_dragged = True
+                                self.chip_tracker.dragging_one_chip = True
                                 self.dispatcher.dispatch('start dragging chip', slot_type=slot_type_selected, slot=slot_selected)
                                 return
                             
@@ -67,29 +65,27 @@ class PlayerInteraction:
                         if self.chip_tracker.tray_grid.slots[(row, col)]:         #these checks seem redundant
                             slot_rect = pygame.Rect(x, y, C.chip_width, C.chip_height)
                             if slot_rect.collidepoint(mouse_x, mouse_y):
-                                self.chip_being_dragged = True
+                                self.chip_tracker.dragging_one_chip = True
                                 self.dispatcher.dispatch('start dragging chip', slot_type=slot_type_selected, slot=slot_selected)
                                 return
                         
 
             
             if not self.chip_tracker.dragging_chip.chips:
-                starting_x_y = (mouse_x, mouse_y)
-                self.selecting_multiple_chips = starting_x_y
-                # self.dispatcher.dispatch('start selecting multiple slots', starting_x_y=starting_x_y )
-                self.chip_tracker.select_multiple_slots(starting_x_y)
-                self.selecting_multiple_chips = True
+                self.chip_tracker.select_multiple_slots(mouse_x, mouse_y)
+             
 
     def mouse_button_up(self, event):
         x_y = event.pos
-        if self.chip_being_dragged and self.dragging_multiple_chips == False:
+        if self.chip_tracker.dragging_one_chip: 
             self.dispatcher.dispatch('chip_drag_end')
-            self.chip_being_dragged = False
-        elif self.chip_tracker.select_multiple_slots:
+            return
+  
+        if self.chip_tracker.selection_start:
             self.chip_tracker.multiple_slots_selected(x_y)
-            self.selecting_multiple_chips = False
-        if self.chip_tracker.dragging_multiple_chips == True:
-            self.chip_tracker.place_dragging_chips()
+
+        if self.chip_tracker.dragging_multiple_chips: # to add event dispatcher for validation
+            self.chip_tracker.place_multiple_chips_in_slots()
 
 
     def is_mouse_over_slot(self, event):
