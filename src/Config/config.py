@@ -7,7 +7,7 @@ class C:
     board_rows = 5
     board_cols = 29
     tray_rows = 2
-    tray_cols = 13
+    tray_cols = 16
 
     board_horizontal_edge = 15 # border edge of the slots, left and right
     board_vertical_edge = 20  # border edge of the slots, top and bottom

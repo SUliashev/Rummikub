@@ -1,10 +1,12 @@
 class ChipValidator:
-    def __init__(self, chip_tracker):    
+    def __init__(self, chip_tracker, dispatcher):    
         self.chip_tracker = chip_tracker
+        self.dispatcher = dispatcher
         self.slots = {}
         self.slots_on_board = {}
         self.slot_next_to_chip = {}
         self.validate_current_state()
+        self.subscribe_events()
 
     def validate_current_state(self):
         self.slots_on_board = {}
@@ -31,7 +33,7 @@ class ChipValidator:
                 return False
             self.slots[slot_to_check] = chip_to_check
 
-        elif self.chip_tracker.dragging_multiple_chips == True:
+        elif self.chip_tracker.dragging_multiple_chips == True and self.chip_tracker.multiple_hovering_slots[0] == 'board':
             chips = self.chip_tracker.dragging_chip.chips
             slots = self.chip_tracker.multiple_hovering_slots[1]
 
@@ -111,7 +113,8 @@ class ChipValidator:
     def validate_combination(self, chips):
         jokers = [chip for chip in chips if getattr(chip, 'is_joker', False)]
         non_jokers = [chip for chip in chips if not getattr(chip, 'is_joker', False)]
-
+        if not non_jokers:
+            return True
         # Check for same color, increasing numbers
         if all(chip.color == non_jokers[0].color for chip in non_jokers):
 
@@ -155,9 +158,15 @@ class ChipValidator:
             chips.append(self.slots[(row, col + i)])
             i += 1
         return chips
-        
 
-    
+    def undo_move(self):
+        self.chip_tracker.undo_last_move()
+        self.validate_current_state()
+
+        
+    def subscribe_events(self):
+        self.dispatcher.subscribe('button Undo Move pressed', self.undo_move)
+       
 
     
 

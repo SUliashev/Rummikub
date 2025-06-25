@@ -1,18 +1,9 @@
 To do:
 
 
-
-add chip validation for multiple slots
-chip_validation should be done via PI instead of game_controller
-
-validation turned off at:
-    gameui 98
-    GC 113
-    GC 100
-
-tray sortation currenltly only works for the first tray
-
-add undo button actions
+undo button actions sometimes rocord when the chip is returned (i think)
+add undo multiple buttons thing
+undo all moves method
 
 to adjust the sprite generator
 
@@ -21,6 +12,7 @@ add rules for the game:
     one chip can be drawn, otherwise next player turn
     next turn cannot be done if the combinations are not correct on the board
     chips can only be placed from tray to board
+    chips can be placed back to tray if player placed them in the current move
     each player gets 14 chips from start
     sort grid only available after a few turns
     

@@ -35,7 +35,8 @@ class PlayerInteraction:
                     if button_rect.collidepoint(mouse_x, mouse_y):
                         self.dispatcher.dispatch(f'button {button_name} pressed')
                         return
-                
+                    
+            
             if pygame.Rect(C.next_player_button[0]).collidepoint(mouse_x, mouse_y):
                 self.dispatcher.dispatch('button next player pressed')
                 return
@@ -95,15 +96,15 @@ class PlayerInteraction:
         next_slot = self.chip_tracker.hovering_slot
         if next_slot == None:
             self.chip_tracker.return_chip_to_origin_pos()
-            # self.chip_validator.validate_current_state()
+            self.chip_validator.validate_current_state()
         elif next_slot[0] == 'board':
             valid = self.chip_validator.valid_move()
             if valid:
                 self.chip_tracker.chip_from_dragging_to_board(next_slot[1])
-                # self.chip_validator.validate_current_state()
+                self.chip_validator.validate_current_state()
             else:
                 self.chip_tracker.return_chip_to_origin_pos()
-                # self.chip_validator.validate_current_state()
+                self.chip_validator.validate_current_state()
  
         elif next_slot[0] == 'tray':
             self.chip_tracker.chip_from_dragging_to_tray(next_slot[1])
@@ -116,10 +117,13 @@ class PlayerInteraction:
             valid = self.chip_validator.valid_move()
             if valid:
                 self.chip_tracker.place_multiple_chips_in_slots()
+                self.chip_validator.validate_current_state()
             else:
                 self.chip_tracker.return_multiple_chips_to_original_pos()
+                self.chip_validator.validate_current_state()
         else:
             self.chip_tracker.return_multiple_chips_to_original_pos()
+            self.chip_validator.validate_current_state()
 
 
     def is_mouse_over_slot(self, event):
@@ -148,24 +152,6 @@ class PlayerInteraction:
         tray_rect = pygame.Rect(C.tray_background_x, C.tray_background_y, C.tray_background_width, C.tray_background_height)
         return tray_rect.collidepoint(mouse_x, mouse_y)
 
-
-    def draw_button_interaction(self, event):
-        if event.type == pygame.MOUSEBUTTONDOWN:
-            button_rect = pygame.Rect(C.draw_button_x, C.draw_button_y, C.right_buttons_width, C.right_buttons_height)
-            mouse_x, mouse_y = event.pos
-            if button_rect.collidepoint(mouse_x, mouse_y):
-                self.chip_tracker.place_chip_in_tray_from_hidden()
-                return True
-            
-
-    def next_player_button_interaction(self, event):        # This can be improved
-        if event.type == pygame.MOUSEBUTTONDOWN:
-            button_rect = pygame.Rect(C.next_player_button_x, C.next_player_button_y, C.right_buttons_width, C.right_buttons_height)
-            mouse_x, mouse_y = event.pos
-            if button_rect.collidepoint(mouse_x, mouse_y):
-                return True
-            return False
-    
 
     def update_self_mouse_coordinates(self, event):
         mouse_x, mouse_y = event.pos

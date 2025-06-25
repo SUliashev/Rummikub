@@ -26,7 +26,7 @@ class GameController:
         self.chip_tracker = ChipTracker(self.board_grid, self.players[self.current_player_index].tray_grid, self.moving_chip, self.dispatcher)
         self.generate_and_shuffle_hidden_chips()
         self.test_draw_from_hidden()  # can be removed later 
-        self.chip_validator = ChipValidator(self.chip_tracker)
+        self.chip_validator = ChipValidator(self.chip_tracker, self.dispatcher)
 
         self.player_interaction = PlayerInteraction(self.chip_tracker, self.chip_validator, self.dispatcher) 
         self.game_ui = GameUI(self.chip_tracker, self.chip_validator, self.current_player, self.dispatcher, self.player_interaction) 
@@ -92,41 +92,10 @@ class GameController:
 
 
     def subscribe_events(self):
-        self.dispatcher.subscribe('start dragging chip', self.on_chip_drag_start)
-        self.dispatcher.subscribe('chip_drag_end', self.on_chip_drag_end)
         self.dispatcher.subscribe('button next player pressed', self.next_turn)
+
+        pass
  
 
-    def on_chip_drag_start(self, slot_type, slot, **kwargs):
-        if slot_type == 'tray':
-            if self.chip_tracker.tray_grid.slots[slot]:
-                self.chip_tracker.chip_from_tray_to_dragging(slot)
-                # self.chip_validator.validate_dragging_chip()
-                
-        elif slot_type == 'board':
-            if self.chip_tracker.board_grid.slots[slot]:
-                self.chip_tracker.chip_from_board_to_dragging(slot)
-                # self.chip_validator.validate_dragging_chip()
-                # self.chip_validator.validate_current_state()
 
 
-    def on_chip_drag_end(self, **kwargs):
-        if not self.chip_tracker.dragging_chip.chips:
-            return
-        next_slot = self.chip_tracker.hovering_slot
-        if next_slot == None:
-            self.chip_tracker.return_chip_to_origin_pos()
-            # self.chip_validator.validate_current_state()
-        elif next_slot[0] == 'board':
-            # if self.chip_validator.slots[next_slot[1]]:
-                self.chip_tracker.chip_from_dragging_to_board(next_slot[1])
-                # self.chip_validator.validate_current_state()
-            # else:
-            #     self.chip_tracker.return_chip_to_origin_pos()
-                # self.chip_validator.validate_current_state()
- 
-        elif next_slot[0] == 'tray':
-            self.chip_tracker.chip_from_dragging_to_tray(next_slot[1])
-         
-        else:
-            print('error with releasing chip')

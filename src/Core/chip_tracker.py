@@ -23,6 +23,8 @@ class ChipTracker:
         self.dragging_one_chip = False
         self.dragging_multiple_chips = False
 
+        self.move_history = [] 
+
 
     def place_multiple_chips_in_slots(self):
         if self.multiple_hovering_slots:
@@ -49,12 +51,43 @@ class ChipTracker:
         for indx, chip in enumerate(chip for chip in chips if chip is not None):
             grid_slots[target_slots[indx]] = chip
 
+        self.move_history.append({
+            'action': 'place_multiple_chips',
+            'chip': chip,
+            'from': self.origin_pos_multiple_slots,
+            'to': (grid_type, target_slots)
+        })
+
         self.dragging_chip.clear()
         self.dragging_multiple_chips = False
         self.origin_pos_multiple_slots = None
         self.hovering_slot = None
         return True
     
+    def undo_last_move(self):
+        if not self.move_history:
+            print("No moves to undo.")
+            return
+        print('one undone')
+        last_move = self.move_history.pop()
+        action = last_move['action']
+
+        if action == 'place_on_board':
+            # Remove chip from board, return to origin
+            _, to_coords = last_move['to']
+            self.board_grid.slots[to_coords] = None
+            if last_move['from'][0] == 'tray':
+                self.tray_grid.slots[last_move['from'][1]] = last_move['chip']
+            elif last_move['from'][0] == 'board':
+                self.board_grid.slots[last_move['from'][1]] = last_move['chip']
+        elif action == 'place_in_tray':
+            _, to_coords = last_move['to']
+            self.tray_grid.slots[to_coords] = None
+            if last_move['from'][0] == 'tray':
+                self.tray_grid.slots[last_move['from'][1]] = last_move['chip']
+            elif last_move['from'][0] == 'board':
+                self.board_grid.slots[last_move['from'][1]] = last_move['chip']
+   
 
     def start_dragging_selected_chips(self, mouse_x, mouse_y):
         row_type, chip_positions, chips = self.selected_chips
@@ -309,6 +342,13 @@ class ChipTracker:
     def chip_from_dragging_to_board(self, coordinates: tuple ):# update later with validation
         chip = self.dragging_chip.main_chip
         if self.board_grid.slots[coordinates] is None:
+
+            self.move_history.append({
+            'action': 'place_on_board',
+            'chip': chip,
+            'from': self.origin_pos,
+            'to': ('board', coordinates)
+        })
             self.dragging_chip.clear()
             self.dragging_one_chip = False
             self.origin_pos = None
@@ -321,6 +361,13 @@ class ChipTracker:
     def chip_from_dragging_to_tray(self, coordinates): #update later with chips moving to the side while hovering
         chip = self.dragging_chip.main_chip
         if self.tray_grid.slots[coordinates] is None:
+
+            self.move_history.append({
+            'action': 'place_in_tray',
+            'chip': chip,
+            'from': self.origin_pos,
+            'to': ('tray', coordinates)
+        })
             self.dragging_chip.clear()
             self.dragging_one_chip = False
             self.origin_pos = None
@@ -341,9 +388,10 @@ class ChipTracker:
 
     def subscribe_events(self):
         self.dispatcher.subscribe('button Draw Chip pressed', self.place_chip_in_tray_from_hidden)
-        self.dispatcher.subscribe('button Sort Chips pressed', self.tray_grid.sort_chips_in_tray)
+        self.dispatcher.subscribe('button Sort Chips pressed', lambda: self.tray_grid.sort_chips_in_tray())
         self.dispatcher.subscribe('start selecting multiple slots', self.select_multiple_slots)
         self.dispatcher.subscribe('multiple slots selected', self.multiple_slots_selected)
+        
 
 
 
