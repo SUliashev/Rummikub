@@ -14,28 +14,18 @@ class GameUI:
         self.player_interaction = player_interaction
         self.multiple_chips_dragged = False
 
-    # def subscribe_events(self):
-    #     self.dispatcher.subscribe('start selecting multiple slots', self.initiate_selection)
-    #     self.dispatcher.subscribe('multiple slots selected', self.end_selection )
-        
-    # def initiate_selection(self, starting_x_y):
-    #     self.selection_start = starting_x_y
 
-    # def end_selection(self, **kwargs):
-    #     self.selection_start = None
-    
     def draw_selection_rectangle(self):
         if self.chip_tracker.selection_start:
             x1, y1 = self.chip_tracker.selection_start
             x2 = self.player_interaction.mouse_x
             y2 = self.player_interaction.mouse_y
             rect = pygame.Rect(min(x1, x2), min(y1, y2), abs(x2 - x1), abs(y2 - y1))
-            # Draw a semi-transparent fill
             s = pygame.Surface((rect.width, rect.height), pygame.SRCALPHA)
-            s.fill((0, 120, 255, 60))  # RGBA: blue with alpha
+            s.fill((0, 120, 255, 60))  
             self.window.blit(s, rect.topleft)
-            # Draw the border
             pygame.draw.rect(self.window, (0, 120, 255), rect, 2)
+
 
     def draw(self):
         self.window.fill((39,105,127))  # Clear the screen
@@ -55,6 +45,7 @@ class GameUI:
         self.draw_selection_rectangle()
         self.show_selected_chips()
     
+
     def show_selected_chips(self):
         if self.chip_tracker.selected_chips:
             if not self.chip_tracker.dragging_multiple_chips:
@@ -65,7 +56,6 @@ class GameUI:
                     slots_to_highlight = C.board_slot_coordinates
                 for slot in self.chip_tracker.selected_chips[1]:
                     self.draw_chip_hue(*slots_to_highlight[slot])
-
 
         
     def draw_side_rectangle(self):
@@ -89,7 +79,6 @@ class GameUI:
             text = font.render(button_name, True, (255, 255, 255))
             text_rect = text.get_rect(center=(rect[0] + rect[2] // 2, rect[1] + rect[3] // 2))
 
-
             self.window.blit(text, text_rect)
 
 
@@ -104,31 +93,34 @@ class GameUI:
             if item_in_slot is None:
                 # if self.chip_tracker.dragging_chip.chips == None :    #testing multiple chips movement
                     self.draw_empty_slot(x, y)
-                # else:
-                #     if draw_validation_for_all_slots:
-                #         validation_slot = self.chip_validator.slots.get((row, col), None)
-                #         if validation_slot == False:
-                #             self.draw_validation_slot(x, y, False)
-                #         else: 
-                #             self.draw_validation_slot(x, y, True)
-                #     else:           # Code for when draw_validation_for_all_slots is False
-                #         if not self.chip_validator.slot_next_to_chip[(row, col)]:
-                #             self.draw_empty_slot(x, y)
-                #             if draw_numbers_next_to_slots:
-                #                 col_text = font.render(str(col + 1), True, (200, 200, 0))
-                #                 self.window.blit(col_text, (x + 4, y + 2))
-                #             continue
-                #         validation_slot = self.chip_validator.slots[(row, col)]
-                #         if validation_slot == False:
-                #             self.draw_validation_slot(x, y, False)
-                #         else: 
-                #             self.draw_validation_slot(x, y, True)
-               
+                    
+            # else:
+            #     if draw_validation_for_all_slots:
+            #         validation_slot = self.chip_validator.slots.get((row, col), None)
+            #         if validation_slot == False:
+            #             self.draw_validation_slot(x, y, False)
+            #         else: 
+            #             self.draw_validation_slot(x, y, True)
+            #     else:           # Code for when draw_validation_for_all_slots is False
+            #         if not self.chip_validator.slot_next_to_chip[(row, col)]:
+            #             self.draw_empty_slot(x, y)
+            #             if draw_numbers_next_to_slots:
+            #                 col_text = font.render(str(col + 1), True, (200, 200, 0))
+            #                 self.window.blit(col_text, (x + 4, y + 2))
+            #             continue
+            #         validation_slot = self.chip_validator.slots[(row, col)]
+            #         if validation_slot == False:
+            #             self.draw_validation_slot(x, y, False)
+            #         else: 
+            #             self.draw_validation_slot(x, y, True)
+            
             else:
                 self.draw_chip(item_in_slot, x, y)
+            
             if draw_numbers_next_to_slots:
                 col_text = font.render(str(col + 1), True, (200, 200, 0))
                 self.window.blit(col_text, (x + 4, y + 2))
+
 
     def draw_chip(self, chip, x, y):
         chip_drawing = self.window.blit(chip.sprite, (x, y))
@@ -249,6 +241,7 @@ class GameUI:
             else:
                 self.draw_multiple_moving_chips()
         
+
     def draw_multiple_moving_chips(self):
         dc = self.chip_tracker.dragging_chip
         if not hasattr(dc, "main_chip") or dc.main_chip is None:
@@ -261,7 +254,6 @@ class GameUI:
         mouse_x = self.player_interaction.mouse_x
         mouse_y = self.player_interaction.mouse_y
 
-        # Draw left chips (from closest to main to farthest)
         for i, chip in enumerate(reversed(dc.left_chips)):
             if chip is None:
                 continue
@@ -270,13 +262,11 @@ class GameUI:
             self.draw_chip_hue(x, y)
             self.draw_chip(chip, x, y)
 
-        # Draw main chip
         x_main = mouse_x - chip_w // 2
         y_main = mouse_y - chip_h // 2
         self.draw_chip_hue(x_main, y_main)
         self.draw_chip(dc.main_chip, x_main, y_main)
 
-        # Draw right chips (from closest to main to farthest)
         for i, chip in enumerate(dc.right_chips):
             if chip is None:
                 continue
