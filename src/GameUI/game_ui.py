@@ -11,24 +11,24 @@ class GameUI:
         self.chip_validator = chip_validator
         self.current_player = current_player
         self.dispatcher = dispatcher
-        self.subscribe_events()
+        # self.subscribe_events()
         # self.draw_selection = False
-        self.selection_start = None
+        # self.selection_start = None
         self.multiple_chips_dragged = False
 
-    def subscribe_events(self):
-        self.dispatcher.subscribe('start selecting multiple slots', self.initiate_selection)
-        self.dispatcher.subscribe('multiple slots selected', self.end_selection )
+    # def subscribe_events(self):
+    #     self.dispatcher.subscribe('start selecting multiple slots', self.initiate_selection)
+    #     self.dispatcher.subscribe('multiple slots selected', self.end_selection )
         
-    def initiate_selection(self, starting_x_y):
-        self.selection_start = starting_x_y
+    # def initiate_selection(self, starting_x_y):
+    #     self.selection_start = starting_x_y
 
-    def end_selection(self, **kwargs):
-        self.selection_start = None
+    # def end_selection(self, **kwargs):
+    #     self.selection_start = None
     
     def draw_selection_rectangle(self):
-        if self.selection_start:
-            x1, y1 = self.selection_start
+        if self.chip_tracker.draw_selection:
+            x1, y1 = self.chip_tracker.selection_start
             x2 = self.chip_tracker.mouse_x
             y2 = self.chip_tracker.mouse_y
             rect = pygame.Rect(min(x1, x2), min(y1, y2), abs(x2 - x1), abs(y2 - y1))

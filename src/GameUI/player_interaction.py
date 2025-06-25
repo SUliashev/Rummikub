@@ -41,14 +41,15 @@ class PlayerInteraction:
             
             if self.chip_tracker.selected_chips: # and self.chip_tracker.mouse_over_selected_chip(mouse_x, mouse_y):
                 if self.chip_tracker.start_dragging_selected_chips(mouse_x, mouse_y):
-                    self.chip_being_dragged = True
-                    self.dragging_multiple_chips = True
-                    self.chip_tracker.dragging_multiple_chips = True
                     return
-                else:
-                    self.chip_being_dragged = False
+                    # self.chip_being_dragged = True
+                    # self.chip_tracker.selection_start = None
+                    # self.dragging_multiple_chips = True
+                #     self.chip_tracker.dragging_multiple_chips = True
+                #     return
+                # else:
+                #     self.chip_being_dragged = False
 
-            
 
             if self.is_mouse_over_slot(event):
                 slot_selected, slot_type_selected = self.is_mouse_over_slot(event)
@@ -72,23 +73,23 @@ class PlayerInteraction:
                         
 
             
-            
-            starting_x_y = (mouse_x, mouse_y)
-            self.selecting_multiple_chips = starting_x_y
-            self.dispatcher.dispatch('start selecting multiple slots', starting_x_y=starting_x_y )
-         
-
+            if not self.chip_tracker.dragging_chip.chips:
+                starting_x_y = (mouse_x, mouse_y)
+                self.selecting_multiple_chips = starting_x_y
+                # self.dispatcher.dispatch('start selecting multiple slots', starting_x_y=starting_x_y )
+                self.chip_tracker.select_multiple_slots(starting_x_y)
+                self.selecting_multiple_chips = True
 
     def mouse_button_up(self, event):
-        starting_x_y = event.pos
+        x_y = event.pos
         if self.chip_being_dragged and self.dragging_multiple_chips == False:
             self.dispatcher.dispatch('chip_drag_end')
             self.chip_being_dragged = False
-        elif self.selecting_multiple_chips:
-            self.dispatcher.dispatch('multiple slots selected',  starting_x_y=starting_x_y )
+        elif self.chip_tracker.select_multiple_slots:
+            self.chip_tracker.multiple_slots_selected(x_y)
             self.selecting_multiple_chips = False
-        elif self.chip_being_dragged and self.dragging_multiple_chips == True:
-            self.chip_tracker.place_dragging_chips
+        if self.chip_tracker.dragging_multiple_chips == True:
+            self.chip_tracker.place_dragging_chips()
 
 
     def is_mouse_over_slot(self, event):
