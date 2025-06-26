@@ -7,9 +7,12 @@ class ChipTracker:
         self.board_grid = board_grid
         self.tray_grid = tray_grid
         self.dispatcher = dispatcher
+
         self.subscribe_events()
 
         self.hidden_chips = [] 
+
+        self.undo_warning_window = False
 
         self.origin_pos = None
         self.origin_pos_multiple_slots = None
@@ -41,10 +44,10 @@ class ChipTracker:
         else:
             grid_slots = self.tray_grid.slots
 
-        for slot in target_slots:
-            if grid_slots[slot] is not None:
-                self.place_dragging_chips(*self.origin_pos_multiple_slots)
-                return
+        # for slot in target_slots:
+        #     if grid_slots[slot] is not None:
+        #         self.place_dragging_chips(*self.origin_pos_multiple_slots)
+        #         return
             
         chips = self.dragging_chip.left_chips + [self.dragging_chip.main_chip] + self.dragging_chip.right_chips
 
@@ -53,7 +56,7 @@ class ChipTracker:
 
         self.move_history.append({
             'action': 'place_multiple_chips',
-            'chip': chip,
+            'chip': chips,
             'from': self.origin_pos_multiple_slots,
             'to': (grid_type, target_slots)
         })
@@ -87,7 +90,18 @@ class ChipTracker:
                 self.tray_grid.slots[last_move['from'][1]] = last_move['chip']
             elif last_move['from'][0] == 'board':
                 self.board_grid.slots[last_move['from'][1]] = last_move['chip']
-   
+        elif action == 'place_multiple_chips':
+            from_type, from_coords = last_move['to']    #from as in we're undoing from 
+            to_type, to_coords = last_move['from']
+            from_slots = self.board_grid.slots if from_type == 'board' else self.tray_grid.slots
+            to_slots = self.board_grid.slots if to_type == 'board' else self.tray_grid.slots
+
+            for coord in from_coords:
+                from_slots[coord] = None
+            for indx, chip in enumerate(last_move['chip']):
+                to_slots[to_coords[indx]] = chip
+                
+
 
     def start_dragging_selected_chips(self, mouse_x, mouse_y):
         row_type, chip_positions, chips = self.selected_chips
@@ -309,10 +323,10 @@ class ChipTracker:
     def return_chip_to_origin_pos(self):
         chip = self.dragging_chip.main_chip
         if self.origin_pos[0] == 'tray':
-            self.chip_from_dragging_to_tray(self.origin_pos[1])
+            self.chip_from_dragging_to_tray(self.origin_pos[1], True)
             
         elif self.origin_pos[0] == 'board':
-            self.chip_from_dragging_to_board(self.origin_pos[1])
+            self.chip_from_dragging_to_board(self.origin_pos[1], True)
         self.origin_pos = None
         self.dragging_chip.clear()
 
@@ -339,16 +353,16 @@ class ChipTracker:
             return chip
         
 
-    def chip_from_dragging_to_board(self, coordinates: tuple ):# update later with validation
+    def chip_from_dragging_to_board(self, coordinates: tuple, returned=False ):# update later with validation
         chip = self.dragging_chip.main_chip
         if self.board_grid.slots[coordinates] is None:
-
-            self.move_history.append({
-            'action': 'place_on_board',
-            'chip': chip,
-            'from': self.origin_pos,
-            'to': ('board', coordinates)
-        })
+            if not returned:
+                self.move_history.append({
+                'action': 'place_on_board',
+                'chip': chip,
+                'from': self.origin_pos,
+                'to': ('board', coordinates)
+            })
             self.dragging_chip.clear()
             self.dragging_one_chip = False
             self.origin_pos = None
@@ -389,11 +403,19 @@ class ChipTracker:
     def subscribe_events(self):
         self.dispatcher.subscribe('button Draw Chip pressed', self.place_chip_in_tray_from_hidden)
         self.dispatcher.subscribe('button Sort Chips pressed', lambda: self.tray_grid.sort_chips_in_tray())
+        self.dispatcher.subscribe('button Undo All Moves pressed', self.undo_all_moves_warning)
         self.dispatcher.subscribe('start selecting multiple slots', self.select_multiple_slots)
         self.dispatcher.subscribe('multiple slots selected', self.multiple_slots_selected)
         
 
-
+    def undo_all_moves_warning(self):
+        if len(self.move_history) > 0:
+            self.undo_warning_window = True
+        
+    def undo_all_moves(self):
+        for i in range(len(self.move_history)):
+            self.undo_last_move()
+        self.undo_warning_window = False
 
 
 

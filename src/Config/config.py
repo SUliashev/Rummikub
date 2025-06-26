@@ -52,6 +52,8 @@ class C:
 
     '''Undo All Moves'''
     undo_all_moves_button_color = (69, 69, 69) 
+    undo_cofirmation_button = None
+    
 
     '''STATIC VARIABLES'''
 
@@ -80,6 +82,8 @@ class C:
     tray_background_height = None
     tray_background_x = None
     tray_background_y = None
+
+    '''Undo all moves waring window'''
 
 
     '''Buttons To The Right Ratio'''
@@ -120,6 +124,8 @@ class C:
         C.setup_slot_coordinates()
 
         C.setup_next_player_button()
+
+        C.set_up_confirmation_button()
       
         C.right_buttons_width =  C.tray_background_x // 2 * 0.8
         C.right_buttons_height = C.right_buttons_width // 3
@@ -165,7 +171,10 @@ class C:
                 C.tray_slot_coordinates[(row, col)] = (x, y)
                
 
-
+    @staticmethod
+    def set_up_confirmation_button():
+        C.undo_cofirmation_button = ((C.window_width - 400) // 2 + 50, (C.window_height - 200) // 2 + 120, 100, 40)
+    
     @staticmethod
     def setup_right_rectangle():
         # Position rectangle to the right of the tray background
@@ -176,6 +185,19 @@ class C:
         C.right_rect = (x, y, width, height)
         print('calculated')
 
+    def calculate_font_size(self,text: str, button_width: int, button_height: int):
+        font_size = int(button_width)   
+        font = pygame.font.SysFont(None, font_size)
+        text = font.render(text, True, (255, 255, 255))
+        text_rect = text.get_rect(center=(button_width, button_width))
+        while text_rect.width > button_width * 0.8 and font_size > 10:
+            font_size -= 1
+            font = pygame.font.SysFont(None, font_size)
+            text = font.render(text, True, (255, 255, 255))
+            text_rect = text.get_rect(center=(button_width, button_width))
+
+        return font_size
+    
     @staticmethod
     def setup_right_buttons():
 
@@ -195,7 +217,7 @@ class C:
             for col in range(button_cols):
                 x = C.right_rect[0] + button_margin_x + col * (button_width + button_margin_x)
                 y = C.right_rect[1] + button_margin_y + row * (button_height + button_margin_y)
-                C.right_buttons[button_names[name_index]] = ((x, y, button_width, button_height))
+                C.right_buttons[button_names[name_index]] = (x, y, button_width, button_height)
                 
                 rect = (x, y, button_width, button_height)
                 font_size = int(rect[2] )   

@@ -44,7 +44,7 @@ class GameUI:
 
         self.draw_selection_rectangle()
         self.show_selected_chips()
-    
+        self.draw_undo_all_confirmation()
 
     def show_selected_chips(self):
         if self.chip_tracker.selected_chips:
@@ -303,8 +303,35 @@ class GameUI:
                 self.draw_chip(item_in_slot, x, y)
     
     
+    def draw_undo_all_confirmation(self):
+        if self.chip_tracker.undo_warning_window == True:
+            width, height = 400, 200
+            x = (C.window_width - width) // 2
+            y = (C.window_height - height) // 2
+            pygame.draw.rect(self.window, (240, 240, 240), (x, y, width, height), border_radius=15)
+            pygame.draw.rect(self.window, (0, 0, 0), (x, y, width, height), 3, border_radius=15)
 
-        
+            # Text
+            font = pygame.font.SysFont(None, 24)
+            text = font.render("Are you sure you want to undo all the moves?", True, (0, 0, 0))
+            self.window.blit(text, (x + 20, y + 40))
+
+            # Yes button (green)
+            yes_rect = pygame.Rect(x + 50, y + 120, 100, 40)
+            pygame.draw.rect(self.window, (0, 200, 0), yes_rect, border_radius=10)
+            yes_text = font.render("Yes", True, (255, 255, 255))
+            self.window.blit(yes_text, (yes_rect.x + 25, yes_rect.y + 5))
+
+            # No button (red)
+            no_rect = pygame.Rect(x + 250, y + 120, 100, 40)
+            pygame.draw.rect(self.window, (200, 0, 0), no_rect, border_radius=10)
+            no_text = font.render("No", True, (255, 255, 255))
+            self.window.blit(no_text, (no_rect.x + 30, no_rect.y + 5))
+
+            # Save button rects for click detection
+            self.undo_all_yes_rect = yes_rect
+            self.undo_all_no_rect = no_rect
+                
 
 
 

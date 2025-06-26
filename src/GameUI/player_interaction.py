@@ -29,6 +29,12 @@ class PlayerInteraction:
     def mouse_button_down(self, event):           
         if event.type == pygame.MOUSEBUTTONDOWN:
             mouse_x, mouse_y = event.pos
+            if self.chip_tracker.undo_warning_window:
+                if pygame.Rect(C.undo_cofirmation_button).collidepoint(mouse_x, mouse_y):
+                    self.chip_tracker.undo_all_moves()
+                    self.chip_validator.validate_current_state()
+
+
             if pygame.Rect(C.right_rect).collidepoint(mouse_x, mouse_y):
                 for button_name, (x, y, w, h) in C.right_buttons.items():
                     button_rect = pygame.Rect(x, y, w, h)
