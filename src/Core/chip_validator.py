@@ -10,11 +10,12 @@ class ChipValidator:
 
     def validate_current_state(self):
         self.slots_on_board = {}
-
+        print("validating state:")
         for (row, col), item_in_slot in self.chip_tracker.board_grid.slots.items():
             if item_in_slot is None:
                 self.slots_on_board[(row, col)] = True
             else:
+                print(item_in_slot)
                 if len(self.get_validation_chips(row, col)) == 1 or len(self.get_validation_chips(row, col)) < 3:
                     self.slots_on_board[(row, col)] = False
                     continue
@@ -53,66 +54,9 @@ class ChipValidator:
 
 
 
-    def validate_dragging_chip(self):
-        self.slots = {}
-        self.slot_next_to_chip = {}
-
-        for (row, col), item_in_slot in self.chip_tracker.board_grid.slots.items():
-
-            if item_in_slot is not None:
-                self.slots[(row, col)] = False
-                continue
-
-            self.slot_next_to_chip[(row, col)] = False
-            valid = True
-
-            chip_to_right = self.chip_tracker.board_grid.slots.get((row, col + 1))
-            if chip_to_right:
-                self.slot_next_to_chip[(row, col)] = True
-                if not self.validate_combination(self.get_validation_chips(row, col)):
-                    valid = False
-
-            chip_to_left = self.chip_tracker.board_grid.slots.get((row, col - 1))
-            if chip_to_left:
-                self.slot_next_to_chip[(row, col)] = True
-                if not self.validate_combination(self.get_validation_chips(row, col)):
-                    valid = False
-
-            self.slots[(row, col)] = valid
-
-
-    def validate_dragging_chip(self):
-        self.slots = {}
-        self.slot_next_to_chip = {}
-
-        for (row, col), item_in_slot in self.chip_tracker.board_grid.slots.items():
-
-            if item_in_slot is not None:
-                self.slots[(row, col)] = False
-                continue
-
-            self.slot_next_to_chip[(row, col)] = False
-            valid = True
-
-            chip_to_right = self.chip_tracker.board_grid.slots.get((row, col + 1))
-            if chip_to_right:
-                self.slot_next_to_chip[(row, col)] = True
-                if not self.validate_combination(self.get_validation_chips(row, col)):
-                    valid = False
-
-            chip_to_left = self.chip_tracker.board_grid.slots.get((row, col - 1))
-            if chip_to_left:
-                self.slot_next_to_chip[(row, col)] = True
-                if not self.validate_combination(self.get_validation_chips(row, col)):
-                    valid = False
-
-            self.slots[(row, col)] = valid
- 
- 
-
     def validate_combination(self, chips):
-        jokers = [chip for chip in chips if getattr(chip, 'is_joker', False)]
-        non_jokers = [chip for chip in chips if not getattr(chip, 'is_joker', False)]
+        jokers = [chip for chip in chips if chip is not None and getattr(chip, 'is_joker', False)]
+        non_jokers = [chip for chip in chips if chip is not None and not getattr(chip, 'is_joker', False)]
         if not non_jokers:
             return True
         # Check for same color, increasing numbers

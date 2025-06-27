@@ -7,6 +7,7 @@ from src.GameUI.game_ui import GameUI
 from src.Core.chip_tracker import ChipTracker
 from src.Grids.board_grid import BoardGrid
 from src.Grids.tray_grid import TrayGrid
+from src.Core.game_rules import GameRules
 from src.Core.chip_validator import ChipValidator
 from src.GameUI.player_interaction import PlayerInteraction  
 import random
@@ -18,6 +19,7 @@ class GameController:
         self.sprites = sprites
         self.board_grid = BoardGrid()
         self.moving_chip = DraggingChip()  
+        
 
         self.players = self.create_players(2)
         self.current_player_index = 0
@@ -28,6 +30,7 @@ class GameController:
         self.test_draw_from_hidden()  # can be removed later 
         self.chip_validator = ChipValidator(self.chip_tracker, self.dispatcher)
 
+        self.game_rules = GameRules(self.players, self.chip_tracker, self.chip_validator)
         self.player_interaction = PlayerInteraction(self.chip_tracker, self.chip_validator, self.dispatcher) 
         self.game_ui = GameUI(self.chip_tracker, self.chip_validator, self.current_player, self.dispatcher, self.player_interaction) 
         
@@ -59,10 +62,18 @@ class GameController:
 
 
     def next_turn(self):
+        can_end, msg = self.game_rules.can_end_turn(self.current_player)
+        if not can_end:
+            print(msg)
+            return
+        self.game_rules.on_turn_end(self.current_player)
         self.current_player_index = (self.current_player_index + 1) % len(self.players)
         self.current_player = self.players[self.current_player_index]
         self.chip_tracker.tray_grid = self.current_player.tray_grid
         self.game_ui.current_player = self.current_player
+        self.current_player.reset_current_move()
+        self.chip_tracker.move_history = []
+        self.chip_tracker.chips_placed_this_turn = None
         print(f"Switched to {self.current_player.name}")
 
 
@@ -73,12 +84,12 @@ class GameController:
 
         for color in colors:
             for number in numbers:
-                for _ in range(2):  # Two of each chip
-                    chip = Chip(self.sprites[f"{color}_{number}_1"], color=color, number=number)
+                for copy in range(2):  # Two of each chip
+                    chip = Chip(self.sprites[f"{color}_{number}_1"], color=color, number=number, is_joker= False, copy=copy)
                     hidden_chips.append(chip)
 
         for i in range(2):
-            chip = Chip(self.sprites['joker'], 'purple', None, True) 
+            chip = Chip(self.sprites['joker'], 'purple', None, True, copy=i) 
             hidden_chips.append(chip)
 
         random.shuffle(hidden_chips)

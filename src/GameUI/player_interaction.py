@@ -76,13 +76,11 @@ class PlayerInteraction:
         if slot_type == 'tray':
             if self.chip_tracker.tray_grid.slots[slot]:
                 self.chip_tracker.chip_from_tray_to_dragging(slot)
-                # self.chip_validator.validate_dragging_chip()
                 
         elif slot_type == 'board':
             if self.chip_tracker.board_grid.slots[slot]:
                 self.chip_tracker.chip_from_board_to_dragging(slot)
-                # self.chip_validator.validate_dragging_chip()
-                # self.chip_validator.validate_current_state()  
+                self.chip_validator.validate_current_state()  
 
 
     def mouse_button_up(self, event):
@@ -113,13 +111,29 @@ class PlayerInteraction:
                 self.chip_validator.validate_current_state()
  
         elif next_slot[0] == 'tray':
-            self.chip_tracker.chip_from_dragging_to_tray(next_slot[1])
-         
-        else:
-            print('error with releasing chip')
+            if self.chip_tracker.dragging_chip.main_chip in self.chip_tracker.chips_placed_this_turn or self.chip_tracker.origin_pos[0] == 'tray':
+                    self.chip_tracker.chip_from_dragging_to_tray(next_slot[1])
+                    self.chip_validator.validate_current_state()
+            else:
+                self.chip_tracker.return_chip_to_origin_pos()
+                self.chip_validator.validate_current_state()
+                self.dispatcher.dispatch('cannot take chips from the board')
+
+        # print('current state')
+        # for slot, chip in self.chip_tracker.board_grid.slots.items():
+        #     if chip is not None:
+        #         print(f'{chip} on {slot}')
 
     def multiple_chip_drag_end(self):
         if self.chip_tracker.multiple_hovering_slots:
+            if self.chip_tracker.multiple_hovering_slots[0] == 'tray':     #returns chips if the were on the board before the players move
+                for chip in self.dragging_chip.chips:
+                    if chip not in self.chips_placed_this_turn:
+                        self.chip_tracker.return_multiple_chips_to_original_pos()
+                        self.chip_validator.validate_current_state()
+                        self.dispatcher.dispatch('cannot take chips from the board')
+                        return
+                    
             valid = self.chip_validator.valid_move()
             if valid:
                 self.chip_tracker.place_multiple_chips_in_slots()

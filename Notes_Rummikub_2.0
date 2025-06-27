@@ -1,11 +1,6 @@
 To do:
 
-
-undo button actions sometimes rocord when the chip is returned (i think)
-add undo multiple buttons thing
-undo all moves method
-
-to adjust the sprite generator
+for undoing all moves, need to keep track of the draw chip, if all moves are returned, make sure the chip is placed in the first available slot
 
 add rules for the game:
     first turn needs to have 30 points total
@@ -15,9 +10,16 @@ add rules for the game:
     chips can be placed back to tray if player placed them in the current move
     each player gets 14 chips from start
     sort grid only available after a few turns
+
+
+to adjust the sprite generator
+
+
+can work a bit on the warning window
     
 
-add menu 
+add menu with selection of the player amount
+
 
 
 Notes for improvement:
