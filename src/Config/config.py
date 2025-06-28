@@ -82,6 +82,7 @@ class C:
     tray_background_height = None
     tray_background_x = None
     tray_background_y = None
+    tray_background = None
 
     '''Undo all moves waring window'''
 
@@ -249,4 +250,4 @@ class C:
         C.tray_grid_y = int(C.window_height - C.tray_space_from_bottom_of_the_screen) - C.tray_background_extra_height - C.tray_grid_height
         C.tray_background_x =  int(C.window_width * 0.5 - C.tray_background_width / 2)
         C.tray_background_y = C.tray_grid_y - C.tray_background_extra_height 
-
+        C.tray_background = (C.tray_background_x , C.tray_background_y, C.tray_background_width, C.tray_background_height)

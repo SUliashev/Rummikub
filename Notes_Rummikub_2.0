@@ -1,6 +1,10 @@
 To do:
 
+upgrading the move_tracker, single chip logic is done, multiple chips to be updated
+
+
 for undoing all moves, need to keep track of the draw chip, if all moves are returned, make sure the chip is placed in the first available slot
+    can actualy add this to move history, if the action is chip drawn, the move is skiped and deleted 
 
 add rules for the game:
     first turn needs to have 30 points total

@@ -3,11 +3,12 @@ from src.Core.chip import Chip
 from src.Config.config import C
 
 class GameUI:
-    def __init__(self, chip_tracker, chip_validator, current_player, dispatcher, player_interaction):
+    def __init__(self, chip_tracker, chip_validator, current_player, dispatcher, player_interaction, drag_manager):
         self.window = C.window 
         print('size', self.window.get_size())
         pygame.display.set_caption("Rummikub")
         self.chip_tracker = chip_tracker  # Use ChipTracker for chip management
+        self.drag_manager = drag_manager
         self.chip_validator = chip_validator
         self.current_player = current_player
         self.dispatcher = dispatcher
@@ -16,8 +17,8 @@ class GameUI:
 
 
     def draw_selection_rectangle(self):
-        if self.chip_tracker.selection_start:
-            x1, y1 = self.chip_tracker.selection_start
+        if self.drag_manager.selection_start:
+            x1, y1 = self.drag_manager.selection_start
             x2 = self.player_interaction.mouse_x
             y2 = self.player_interaction.mouse_y
             rect = pygame.Rect(min(x1, x2), min(y1, y2), abs(x2 - x1), abs(y2 - y1))
@@ -38,17 +39,17 @@ class GameUI:
         self.draw_board_slots()
         self.draw_side_rectangle()
         self.draw_right_side_buttons()
-        self.draw_incorrect_chip_combination()      # shows which combinations on the board are not valid
-        self.draw_hovering_slot()
+        # self.draw_incorrect_chip_combination()      # shows which combinations on the board are not valid
+        # self.draw_hovering_slot()
         self.draw_moving_chip()
 
-        self.draw_selection_rectangle()
-        self.show_selected_chips()
-        self.draw_undo_all_confirmation()
+        # self.draw_selection_rectangle()
+        # self.show_selected_chips()
+        # self.draw_undo_all_confirmation()
 
     def show_selected_chips(self):
-        if self.chip_tracker.selected_chips:
-            if not self.chip_tracker.dragging_multiple_chips:
+        if self.drag_manager.selected_chips:
+            if not self.drag_manager.dragging_multiple_chips:
             
                 if self.chip_tracker.selected_chips[0] == 'tray':
                     slots_to_highlight = C.tray_slot_coordinates
@@ -136,24 +137,24 @@ class GameUI:
         thickness, border_radius=border_radius)
         
     
-    def draw_validation_slot(self, x: int, y: int, correct: bool):
-        if correct:
-            color =(0, 255, 0)
-        else:
-            color = (255, 0, 0)
-        border_radius = 9
-        pygame.draw.rect(
-            self.window, color,
-            (x, y, C.chip_width, C.chip_height),
-            2, border_radius=border_radius)
+    # def draw_validation_slot(self, x: int, y: int, correct: bool):
+    #     if correct:
+    #         color =(0, 255, 0)
+    #     else:
+    #         color = (255, 0, 0)
+    #     border_radius = 9
+    #     pygame.draw.rect(
+    #         self.window, color,
+    #         (x, y, C.chip_width, C.chip_height),
+    #         2, border_radius=border_radius)
             
         
     def draw_hovering_slot(self):
-        if not self.chip_tracker.hovering_slot:
+        if not self.drag_manager.hovering_slot:
             return
         
-        if not self.chip_tracker.dragging_multiple_chips:
-            slot_type, slot = self.chip_tracker.hovering_slot       
+        if not self.drag_manager.dragging_multiple_chips:
+            slot_type, slot = self.drag_manager.hovering_slot       
             if slot_type == 'tray':
                 x, y = C.tray_slot_coordinates[slot]
             elif slot_type == 'board':
@@ -165,13 +166,13 @@ class GameUI:
                     (x, y, C.chip_width, C.chip_height),
                     3, border_radius=border_radius)
     
-        if self.chip_tracker.dragging_multiple_chips:
+        if self.drag_manager.dragging_multiple_chips:
             self.draw_multiple_hovering_slots()
         
 
     def draw_multiple_hovering_slots(self):
-        if self.chip_tracker.multiple_hovering_slots:
-            slot_type , slots = self.chip_tracker.multiple_hovering_slots
+        if self.drag_manager.multiple_hovering_slots:
+            slot_type , slots = self.drag_manager.multiple_hovering_slots
             if slot_type == 'tray':
                 slot_coordinates = C.tray_slot_coordinates
             else:
@@ -225,10 +226,10 @@ class GameUI:
 
 
     def draw_moving_chip(self):
-        if self.chip_tracker.dragging_chip.main_chip:
-            chips = self.chip_tracker.dragging_chip.chips
+        if self.drag_manager.dragging_chip.main_chip:
+            chips = self.drag_manager.dragging_chip.chips
             if len(chips) == 1 or chips is None:
-                chip = self.chip_tracker.dragging_chip.main_chip
+                chip = self.drag_manager.dragging_chip.main_chip
                 x = self.player_interaction.mouse_x - C.chip_width / 2
                 y = self.player_interaction.mouse_y - C.chip_height / 2
 
@@ -243,7 +244,7 @@ class GameUI:
         
 
     def draw_multiple_moving_chips(self):
-        dc = self.chip_tracker.dragging_chip
+        dc = self.drag_manager.dragging_chip
         if not hasattr(dc, "main_chip") or dc.main_chip is None:
             return
 

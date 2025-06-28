@@ -1,7 +1,9 @@
 class ChipValidator:
-    def __init__(self, chip_tracker, dispatcher):    
+    def __init__(self, chip_tracker, drag_manager, dispatcher):    
         self.chip_tracker = chip_tracker
+        self.drag_manager = drag_manager
         self.dispatcher = dispatcher
+    
         self.slots = {}
         self.slots_on_board = {}
         self.slot_next_to_chip = {}
@@ -21,22 +23,25 @@ class ChipValidator:
                     continue
                 self.slots_on_board[(row, col)] = self.validate_combination(self.get_validation_chips(row, col))
 
-    def valid_move(self):
+    def validate_move(self):
+        if self.drag_manager.hovering_slot[0] == 'tray':
+            return True
+        
         self.slots = {}
 
         for (row, col), item_in_slot in self.chip_tracker.board_grid.slots.items():
             self.slots[(row, col)] = item_in_slot   # copy current game state
 
-        if self.chip_tracker.dragging_one_chip == True:
-            slot_to_check = self.chip_tracker.hovering_slot[1]
-            chip_to_check = self.chip_tracker.dragging_chip.main_chip
+        if self.drag_manager.dragging_one_chip == True:
+            slot_to_check = self.drag_manager.hovering_slot[1]
+            chip_to_check = self.drag_manager.dragging_chip.main_chip
             if self.slots[slot_to_check] != None:
                 return False
             self.slots[slot_to_check] = chip_to_check
 
-        elif self.chip_tracker.dragging_multiple_chips == True and self.chip_tracker.multiple_hovering_slots[0] == 'board':
-            chips = self.chip_tracker.dragging_chip.chips
-            slots = self.chip_tracker.multiple_hovering_slots[1]
+        elif self.drag_manager.dragging_multiple_chips == True and self.drag_manager.multiple_hovering_slots[0] == 'board':
+            chips = self.drag_manager.dragging_chip.chips
+            slots = self.drag_manager.multiple_hovering_slots[1]
 
             for indx, slot in enumerate(slots):
                 if self.slots[slot] != None:
@@ -102,6 +107,9 @@ class ChipValidator:
             chips.append(self.slots[(row, col + i)])
             i += 1
         return chips
+    
+
+    
 
     def undo_move(self):
         self.chip_tracker.undo_last_move()

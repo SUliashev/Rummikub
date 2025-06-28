@@ -9,7 +9,9 @@ from src.Grids.board_grid import BoardGrid
 from src.Grids.tray_grid import TrayGrid
 from src.Core.game_rules import GameRules
 from src.Core.chip_validator import ChipValidator
-from src.GameUI.player_interaction import PlayerInteraction  
+from src.GameUI.player_interaction import PlayerInteraction
+from src.Core.move_manager import MoveManager
+from src.GameUI.drag_manager import DragManager
 import random
 
 class GameController:
@@ -17,23 +19,48 @@ class GameController:
         self.dispatcher = dispatcher
         self.subscribe_events()
         self.sprites = sprites
+
         self.board_grid = BoardGrid()
-        self.moving_chip = DraggingChip()  
-        
+        self.dragging_chip = DraggingChip()
 
         self.players = self.create_players(2)
         self.current_player_index = 0
         self.current_player = self.players[self.current_player_index]
 
-        self.chip_tracker = ChipTracker(self.board_grid, self.players[self.current_player_index].tray_grid, self.moving_chip, self.dispatcher)
-        self.generate_and_shuffle_hidden_chips()
-        self.test_draw_from_hidden()  # can be removed later 
-        self.chip_validator = ChipValidator(self.chip_tracker, self.dispatcher)
-
-        self.game_rules = GameRules(self.players, self.chip_tracker, self.chip_validator)
-        self.player_interaction = PlayerInteraction(self.chip_tracker, self.chip_validator, self.dispatcher) 
-        self.game_ui = GameUI(self.chip_tracker, self.chip_validator, self.current_player, self.dispatcher, self.player_interaction) 
+        self.chip_tracker = ChipTracker(
+            self.board_grid,
+            self.players[self.current_player_index].tray_grid,
+            self.dragging_chip,
+            self.dispatcher
+        )
         
+        self.generate_and_shuffle_hidden_chips()
+        self.test_draw_from_hidden()  # can be removed later
+
+        self.move_manager = MoveManager(self.chip_tracker)
+        self.drag_manager = DragManager(self.chip_tracker,
+            self.dragging_chip,
+            self.chip_validator,
+            self.move_manager)
+        self.chip_validator = ChipValidator(self.chip_tracker, self.drag_manager, self.dispatcher)
+        self.game_rules = GameRules(self.players, self.chip_tracker, self.chip_validator)
+        self.player_interaction = PlayerInteraction(
+            self.chip_tracker,
+            self.chip_validator,
+            self.dispatcher,
+            self.move_manager,
+            self.drag_manager
+        )
+        self.game_ui = GameUI(
+            self.chip_tracker,
+            self.chip_validator,
+            self.current_player,
+            self.dispatcher,
+            self.player_interaction,
+            self.drag_manager
+        )
+
+
 
     def run(self):
         clock = pygame.time.Clock()
@@ -69,9 +96,11 @@ class GameController:
         self.game_rules.on_turn_end(self.current_player)
         self.current_player_index = (self.current_player_index + 1) % len(self.players)
         self.current_player = self.players[self.current_player_index]
+        
         self.chip_tracker.tray_grid = self.current_player.tray_grid
+        # self.current_player.tray_grid.
         self.game_ui.current_player = self.current_player
-        self.current_player.reset_current_move()
+        self.current_player.end_turn()
         self.chip_tracker.move_history = []
         self.chip_tracker.chips_placed_this_turn = None
         print(f"Switched to {self.current_player.name}")
@@ -100,11 +129,13 @@ class GameController:
         for i in range(14):
             self.chip_tracker.place_chip_in_tray_from_hidden()
 
-
+    def sort_chips_in_tray(self):
+        if self.current_player.turn >= 3:
+            self.current_player.tray_grid.sort_chips_in_tray()
 
     def subscribe_events(self):
         self.dispatcher.subscribe('button next player pressed', self.next_turn)
-
+        self.dispatcher.subscribe('button Sort Chips pressed', self.sort_chips_in_tray)
         pass
  
 
