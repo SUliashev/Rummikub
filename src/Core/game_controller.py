@@ -31,25 +31,23 @@ class GameController:
             self.dispatcher
         )
         self.generate_and_shuffle_hidden_chips()
-        self.test_draw_from_hidden()
+        self.deal_initial_chips()
+        self.subscribe_events()
 
         self.drag_manager = DragManager(self.chip_tracker, self.dragging_chip, self.dispatcher)  # move_manager is None for now
         self.chip_validator = ChipValidator(self.chip_tracker, self.drag_manager, self.dispatcher)
         self.move_manager = MoveManager(self.chip_tracker, self.chip_validator, self.dispatcher)
-        self.drag_manager.move_manager = self.move_manager
 
-        self.game_rules = GameRules(self.players, self.chip_tracker, self.chip_validator)
+
+        self.game_rules = GameRules(self.players, self.chip_tracker, self.chip_validator, self.move_manager, self.dispatcher)
         self.player_interaction = PlayerInteraction(
             self.chip_tracker,
-            self.chip_validator,
             self.dispatcher,
-            self.move_manager,
             self.drag_manager
         )
         self.game_ui = GameUI(
             self.chip_tracker,
             self.chip_validator,
-            self.current_player,
             self.dispatcher,
             self.player_interaction,
             self.drag_manager
@@ -84,10 +82,11 @@ class GameController:
 
     def next_turn(self):
         can_end, msg = self.game_rules.can_end_turn(self.current_player)
+ 
         if not can_end:
             print(msg)
             return
-        self.game_rules.on_turn_end(self.current_player)
+        self.game_rules.on_turn_end(self)
         self.current_player_index = (self.current_player_index + 1) % len(self.players)
         self.current_player = self.players[self.current_player_index]
         
@@ -95,8 +94,7 @@ class GameController:
         # self.current_player.tray_grid.
         self.game_ui.current_player = self.current_player
         self.current_player.end_turn()
-        self.chip_tracker.move_history = []
-        self.chip_tracker.chips_placed_this_turn = None
+        self.move_manager.end_turn()
         print(f"Switched to {self.current_player.name}")
 
 
@@ -119,13 +117,18 @@ class GameController:
         self.chip_tracker.hidden_chips = hidden_chips
 
 
-    def test_draw_from_hidden(self):
-        for i in range(14):
-            self.chip_tracker.place_chip_in_tray_from_hidden()
-
+    def deal_initial_chips(self):
+        for _ in range(14):
+            for player in self.players:
+                # Temporarily set the tray_grid to the current player
+                self.chip_tracker.tray_grid = player.tray_grid
+                self.chip_tracker.place_chip_in_tray_from_hidden()
+    
     def sort_chips_in_tray(self):
         if self.current_player.turn >= 3:
             self.current_player.tray_grid.sort_chips_in_tray()
+            return
+        self.dispatcher.dispatch('error', message='Can only sort tray after 3 moves')
 
     def subscribe_events(self):
         self.dispatcher.subscribe('button next player pressed', self.next_turn)

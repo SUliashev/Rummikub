@@ -3,18 +3,34 @@ from src.Core.chip import Chip
 from src.Config.config import C
 
 class GameUI:
-    def __init__(self, chip_tracker, chip_validator, current_player, dispatcher, player_interaction, drag_manager):
+    def __init__(self, chip_tracker, chip_validator, dispatcher, player_interaction, drag_manager):
         self.window = C.window 
         print('size', self.window.get_size())
         pygame.display.set_caption("Rummikub")
         self.chip_tracker = chip_tracker  # Use ChipTracker for chip management
         self.drag_manager = drag_manager
         self.chip_validator = chip_validator
-        self.current_player = current_player
         self.dispatcher = dispatcher
         self.player_interaction = player_interaction
-        self.multiple_chips_dragged = False
+        self.message = ""
+        self.message_timer = 0 
+        self.subscribe_events()
+    
+    def subscribe_events(self):
+        self.dispatcher.subscribe('error', self.set_message)
 
+    def set_message(self, message):
+        self.message = message
+        self.message_timer = 120
+
+    def draw_message(self):
+        if self.message and self.message_timer > 0:
+            font = pygame.font.SysFont(None, 36)
+            text = font.render(self.message, True, (200, 50, 0))
+            self.window.blit(text, C.error_message_coord)
+            self.message_timer -= 1
+        elif self.message_timer <= 0:
+            self.message = ""
 
 
     def draw_selection_rectangle(self):
@@ -47,6 +63,7 @@ class GameUI:
         self.draw_selection_rectangle()
         self.show_selected_chips()
         self.draw_undo_all_confirmation()
+        self.draw_message()
 
     def show_selected_chips(self):
         if self.drag_manager.selected_chips:

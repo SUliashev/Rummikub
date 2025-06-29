@@ -1,25 +1,19 @@
 To do:
 
+issue in draggin multiple chips to tray from tray, (perhaps from board also)
 
+issue in going to the next move (says that len of chips_placed_this_turn is 0)
 for undoing all moves, need to keep track of the draw chip, if all moves are returned, make sure the chip is placed in the first available slot
     can actualy add this to move history, if the action is chip drawn, the move is skiped and deleted 
 
-to check if the current_move_chips_drawn is correctly with the moves and returns
 
-add rules for the game:
-    first turn needs to have 30 points total
-    one chip can be drawn, otherwise next player turn
+from tray to tray
+multiple chips disappear
+one chip needs to be drawn before ending the move
 
-    chips cannot placed from board to tray if they were not in the players current move
-    chips can be placed back to tray if player placed them in the current move
-    each player gets 14 chips from start
-    sort grid only available after a few turns
-    to add a message terminal for the player of the errors:
-        invalid move
-        sort chips after 3 turns
-        cannot take chips from board
-        cannot proceed to next move as the combinations on the board are invalid
+next player hides the current tray and displays the next one once the next player presses go
 
+tray grid sc
 
 to adjust the sprite generator
 

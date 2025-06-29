@@ -99,6 +99,8 @@ class C:
     '''Next Player Button'''
     next_player_button = None
 
+    error_message_coord = None
+
     @staticmethod
     def setup_config():
 
@@ -127,11 +129,17 @@ class C:
         C.setup_next_player_button()
 
         C.set_up_confirmation_button()
+
+        C.setup_error_message_coord()
       
         C.right_buttons_width =  C.tray_background_x // 2 * 0.8
         C.right_buttons_height = C.right_buttons_width // 3
 
-    
+    @staticmethod
+    def setup_error_message_coord():
+        x =  C.next_player_button[0][0] //3
+        y = C.board_slot_coordinates[(C.board_rows-1,0)][1] + C.chip_height + C.board_vertical_edge //2
+        C.error_message_coord = (x,y)
 
     @staticmethod 
     def setup_next_player_button():
@@ -184,7 +192,6 @@ class C:
         width = C.window_width - x - C.side_rectangle_space_from_window
         height = C.tray_background_height
         C.right_rect = (x, y, width, height)
-        print('calculated')
 
     def calculate_font_size(self,text: str, button_width: int, button_height: int):
         font_size = int(button_width)   

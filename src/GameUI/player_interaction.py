@@ -2,11 +2,9 @@ import pygame
 from src.Config.config import C as C
 
 class PlayerInteraction:
-    def __init__(self,  chip_tracker, chip_validator, dispatcher, move_manager, drag_manager):
+    def __init__(self,  chip_tracker, dispatcher, drag_manager):
         self.chip_tracker = chip_tracker
-        self.chip_validator = chip_validator
         self.dispatcher = dispatcher
-        self.move_manager = move_manager
         self.drag_manager = drag_manager
         self.warning_window = False
         self.mouse_x = 0

@@ -8,11 +8,10 @@ class ChipTracker:
         self.tray_grid = tray_grid
         self.dispatcher = dispatcher
 
-        self.subscribe_events()
 
         self.hidden_chips = [] 
         
-        self.chips_placed_this_turn = []
+
 
         self.undo_warning_window = False
 
@@ -34,13 +33,17 @@ class ChipTracker:
         grid_to_choose_from = self.board_grid.slots if slot_type == 'board' else self.tray_grid.slots
         return grid_to_choose_from[slot]
 
+    def get_position_of_chip(self, search_chip):
+        for slot, chip in self.board_grid.slots.items():
+            if chip == search_chip:
+                return slot
+        
 
 
       
 
 
     def place_chip_in_tray_from_hidden(self):
-        print('called')
         if not self.hidden_chips:
             print("No hidden chips left!")
             return
@@ -49,12 +52,7 @@ class ChipTracker:
         self.tray_grid.put_chip_in_tray_from_hidden(chip)
 
 
-    def subscribe_events(self):
-        self.dispatcher.subscribe('button Draw Chip pressed', self.place_chip_in_tray_from_hidden)
-        # self.dispatcher.subscribe('button Undo All Moves pressed', self.undo_all_moves_warning)
-        # self.dispatcher.subscribe('start selecting multiple slots', self.select_multiple_slots)
-        # self.dispatcher.subscribe('multiple slots selected', self.multiple_slots_selected)
-        
+  
 
 
 
@@ -62,10 +60,7 @@ class ChipTracker:
         if len(self.move_history) > 0:
             self.undo_warning_window = True
         
-    def undo_all_moves(self):
-        for i in range(len(self.move_history)):
-            self.undo_last_move()
-        self.undo_warning_window = False
+
 
 
 

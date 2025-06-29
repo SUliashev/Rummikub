@@ -73,10 +73,8 @@ class DragManager:
     def place_dragging_chips(self):
         chips = self.dragging_chip.chips
 
-        if not self.multiple_hovering_slots:
-            pass
-        else:
-            self.dispatcher.dispatch('multiple chips placed', hovering_slots=self.multiple_hovering_slots,  chips=chips, origin_pos=self.origin_pos_multiple_slots )
+
+        self.dispatcher.dispatch('multiple chips placed', hovering_slots=self.multiple_hovering_slots,  chips=chips, origin_pos=self.origin_pos_multiple_slots )
 
         self.dragging_chip.clear()
         self.dragging_multiple_chips = False

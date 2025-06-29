@@ -41,6 +41,10 @@ class ChipValidatorTestCase(unittest.TestCase):
         ]
         self.assertTrue(self.chip_validator.validate_combination(chips))
 
+    def test_chip_number_counting(self):
+        chips = [DummyChip(5, "red"), DummyChip(6, "red"), DummyChip(None, None, is_joker=True)]
+
+        # self.assertEqual(self.)
     def test_invalid_run(self):
         # Place an invalid run: 5-red, 7-red, 8-red (gap too big)
         self.board_grid.slots[(0,0)] = DummyChip(5, "red")
