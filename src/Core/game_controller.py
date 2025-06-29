@@ -15,14 +15,11 @@ from src.GameUI.drag_manager import DragManager
 import random
 
 class GameController:
-    def __init__(self, sprites: Dict[str, pygame.Surface], dispatcher):
-        self.dispatcher = dispatcher
-        self.subscribe_events()
+    def __init__(self, sprites: Dict[str, pygame.Surface], dispathcer):
         self.sprites = sprites
-
         self.board_grid = BoardGrid()
         self.dragging_chip = DraggingChip()
-
+        self.dispatcher = dispathcer
         self.players = self.create_players(2)
         self.current_player_index = 0
         self.current_player = self.players[self.current_player_index]
@@ -33,16 +30,14 @@ class GameController:
             self.dragging_chip,
             self.dispatcher
         )
-        
         self.generate_and_shuffle_hidden_chips()
-        self.test_draw_from_hidden()  # can be removed later
+        self.test_draw_from_hidden()
 
-        self.move_manager = MoveManager(self.chip_tracker)
-        self.drag_manager = DragManager(self.chip_tracker,
-            self.dragging_chip,
-            self.chip_validator,
-            self.move_manager)
+        self.drag_manager = DragManager(self.chip_tracker, self.dragging_chip, self.dispatcher)  # move_manager is None for now
         self.chip_validator = ChipValidator(self.chip_tracker, self.drag_manager, self.dispatcher)
+        self.move_manager = MoveManager(self.chip_tracker, self.chip_validator, self.dispatcher)
+        self.drag_manager.move_manager = self.move_manager
+
         self.game_rules = GameRules(self.players, self.chip_tracker, self.chip_validator)
         self.player_interaction = PlayerInteraction(
             self.chip_tracker,
@@ -59,7 +54,6 @@ class GameController:
             self.player_interaction,
             self.drag_manager
         )
-
 
 
     def run(self):

@@ -8,7 +8,7 @@ class ChipTracker:
         self.tray_grid = tray_grid
         self.dispatcher = dispatcher
 
-        # self.subscribe_events()
+        self.subscribe_events()
 
         self.hidden_chips = [] 
         
@@ -40,6 +40,7 @@ class ChipTracker:
 
 
     def place_chip_in_tray_from_hidden(self):
+        print('called')
         if not self.hidden_chips:
             print("No hidden chips left!")
             return
@@ -49,8 +50,7 @@ class ChipTracker:
 
 
     def subscribe_events(self):
-        pass
-        # self.dispatcher.subscribe('button Draw Chip pressed', self.place_chip_in_tray_from_hidden)
+        self.dispatcher.subscribe('button Draw Chip pressed', self.place_chip_in_tray_from_hidden)
         # self.dispatcher.subscribe('button Undo All Moves pressed', self.undo_all_moves_warning)
         # self.dispatcher.subscribe('start selecting multiple slots', self.select_multiple_slots)
         # self.dispatcher.subscribe('multiple slots selected', self.multiple_slots_selected)

@@ -2,10 +2,10 @@ from src.Config.config import C
 import pygame
 
 class DragManager:
-    def __init__(self, chip_tracker, dragging_chip, move_manager):
+    def __init__(self, chip_tracker, dragging_chip, dispatcher):
         self.chip_tracker = chip_tracker
         self.dragging_chip = dragging_chip
-        self.move_manager = move_manager
+        self.dispatcher = dispatcher
         self.dragging_one_chip = False
         self.dragging_multiple_chips = False
         self.origin_pos = None
@@ -18,70 +18,77 @@ class DragManager:
     def get_grid(self, grid_type: str):
         return self.chip_tracker.board_grid.slots if grid_type == 'board' else self.chip_tracker.tray_grid.slots
 
+    def mouse_button_down_actions(self, mouse_x, mouse_y):
+        if self.is_mouse_over_slot(mouse_x, mouse_y):
+            slot_type, slot = self.is_mouse_over_slot(mouse_x, mouse_y)
+            chip = self.chip_tracker.get_chip_at(slot_type, slot)
+            if chip:
+                if self.selected_chips:
+                    self.start_dragging_selected_chips(chip)
+                else:
+                    self.start_dragging_chip(slot_type, slot, chip)
+                return True
+            else:
+                self.select_multiple_slots(mouse_x, mouse_y)
+        else:
+            self.select_multiple_slots(mouse_x, mouse_y)
+
+
+    def mouse_button_up_actions(self, mouse_x, mouse_y):
+        if self.dragging_one_chip: 
+            self.chip_from_dragging_to_grid()
+            return
+        
+        elif self.dragging_multiple_chips: # to add event dispatcher for validation
+            self.place_dragging_chips()
+            return
+  
+        if self.selection_start:
+            self.multiple_slots_selected((mouse_x, mouse_y))
+
+
+    def is_mouse_over_slot(self, mouse_x, mouse_y ):
+        if self.is_mouse_over_board(mouse_x, mouse_y):
+            for (row, col), (x, y) in C.board_slot_coordinates.items():
+                slot_rect = pygame.Rect(x, y, C.chip_width, C.chip_height)
+                if slot_rect.collidepoint(mouse_x, mouse_y):
+                    return ('board', (row, col))
+        if self.is_mouse_over_tray(mouse_x, mouse_y):
+            for (row, col), (x, y) in C.tray_slot_coordinates.items():
+                slot_rect = pygame.Rect(x, y, C.chip_width, C.chip_height)
+                if slot_rect.collidepoint(mouse_x, mouse_y):
+                    return ( 'tray', (row, col))
+        return False
+
+
+    def is_mouse_over_board(self, mouse_x, mouse_y):
+        y_correct = mouse_y < C.tray_background_y
+        return y_correct
+       
+
+    def is_mouse_over_tray(self, mouse_x, mouse_y):
+        tray_rect = pygame.Rect(C.tray_background_x, C.tray_background_y, C.tray_background_width, C.tray_background_height)
+        return tray_rect.collidepoint(mouse_x, mouse_y)
 
     def place_dragging_chips(self):
         chips = self.dragging_chip.chips
 
         if not self.multiple_hovering_slots:
-            valid_move = False
-        if not self.chip_validator.validate_move():
-            valid_move = False
-        if self.multiple_hovering_slots[0] == 'tray':
-            for chip in chips:
-                if chip not in self.move_manager.chips_placed_this_turn:
-                    valid_move =False
-                    self.dispatcher.dispatch('cannot take chips from the board')
-                    break
-
-        if valid_move:
-            grid_type, target_slots = self.multiple_hovering_slots
+            pass
         else:
-            grid_type, target_slots = self.origin_pos_multiple_slots
-    
-        grid_slots = self.get_grid(grid_type)
+            self.dispatcher.dispatch('multiple chips placed', hovering_slots=self.multiple_hovering_slots,  chips=chips, origin_pos=self.origin_pos_multiple_slots )
 
-        # for slot in target_slots:
-        #     if grid_slots[slot] is not None:
-        #         self.place_dragging_chips(*self.origin_pos_multiple_slots)
-        #         return
-            
-        
-        if valid_move:
-            self.move_manager.move_history.append({
-                'action': 'place_multiple_chips',
-                'chip': chips,
-                'from': self.origin_pos_multiple_slots,
-                'to': (grid_type, target_slots)
-            })
-
-        for indx, chip in enumerate(chip for chip in chips if chip is not None):
-            grid_slots[target_slots[indx]] = chip
-
-
-        if grid_type == 'board':
-            for chip in chips:
-                if chip not in self.move_managerchips_placed_this_turn:
-                    self.move_manager.chips_placed_this_turn.append(chip)
-        elif grid_type == 'tray':
-            for chip in chips:
-                if chip in self.chips_placed_this_turn:
-                    self.move_manager.chips_placed_this_turn.remove(chip)
-        
         self.dragging_chip.clear()
         self.dragging_multiple_chips = False
         self.origin_pos_multiple_slots = None
         self.hovering_slot = None
-        self.chip_validator.validate_current_state()
-        return True
-    
-    
-    
+ 
 
-    def chip_from_dragging_to_grid(self, returned=False ):
+    def chip_from_dragging_to_grid(self):
         chip = self.dragging_chip.main_chip
-
-        self.move_manager.move_single_chip_to(self.hovering_slot, chip, self.origin_pos)
-
+        # self.move_manager.move_single_chip_to(self.hovering_slot, chip, self.origin_pos)
+      
+        self.dispatcher.dispatch('chip placed on slot', hovering_slot=self.hovering_slot, chip=chip, origin_pos=self.origin_pos )
         self.dragging_chip.clear()
         self.dragging_one_chip = False   #perhaps can be removed
         self.origin_pos = None
@@ -93,21 +100,22 @@ class DragManager:
         self.dragging_one_chip = True
         self.dragging_chip.set_one_chip(chip)
         self.origin_pos = (grid_type, slot)
-        self.move_manager.chip_picked_up(grid_type, slot)
+        # print(f' disp: grid_type= {grid_type}, slot= {slot}')
+        self.dispatcher.dispatch('chip_picked_up', grid_type=grid_type, slot=slot )
+        # self.move_manager.chip_picked_up(grid_type, slot)
     
                  
 
     def start_dragging_selected_chips(self, chip):
         self.selection_start = None
 
-        grid_type, chip_positions, chips = self.selected_chips
-
-        if chip not in chips:
+        if chip not in self.selected_chips[2]:
             self.selected_chips = None
             return
         
-        grid = self.get_grid(grid_type)
-        
+        grid_type, chip_positions, chips = self.selected_chips
+
+       
         selected_chip_index = next((indx for indx, item in enumerate(chips) if chip == item))
         leftmost_chip_index = min(indx for indx, item in enumerate(chips) if item is not None)
         rightmost_chip_index = max(indx for indx, item in enumerate(chips) if item is not None)
@@ -120,26 +128,26 @@ class DragManager:
         main_chip = chips[selected_chip_index]
 
         right_chips = []
-        for indx in range(selected_chip_index + 1, rightmost_chip_index):
+        for indx in range(selected_chip_index + 1, rightmost_chip_index +1):
             right_chips.append(chips[indx])
         
-        chip_positions = chip_positions[leftmost_chip_index:rightmost_chip_index]
-    
-        for slot in chip_positions:
-            grid[slot] = None
+        chip_positions = chip_positions[leftmost_chip_index:rightmost_chip_index +1]
+
+        self.dispatcher.dispatch('multiple chips picked up',grid_type=grid_type, chip_positions=chip_positions )
+        
 
         chips = left_chips + [main_chip] + right_chips
 
         self.dragging_chip.chips = chips  # All in-range chips (including None)
         self.dragging_chip.main_chip = main_chip
-        self.dragging_chip.left_chips = left_chips
-        self.dragging_chip.right_chips = right_chips
-        self.dragging_chip.chip_positions = chip_positions
-        self.dragging_chip.main_chip_index = selected_chip_index
+        self.dragging_chip.chips_to_left = left_chips
+        self.dragging_chip.chips_to_right = right_chips
+        self.dragging_chip.chip_positions = chip_positions  #not sure
+        self.dragging_chip.main_chip_index = selected_chip_index    # not sure
         self.origin_pos_multiple_slots = (grid_type, chip_positions)
         self.selected_chips = None
-        self.dragging_multiple_chips = True
-        self.chip_validator.validate_current_state()
+        self.dragging_multiple_chips = True # can be improved i think
+
 
     def select_chips_in_rectangle(self, selection_start, selection_end):    # I think None chips are added now, might not work at first yet
         x1, y1 = selection_start
@@ -167,8 +175,8 @@ class DragManager:
                     if rect.colliderect(chip_rect):
                         chips_in_row.append(chip)
                         chip_positions.append((row, col))
-
-                if chips_in_row:
+                # Only add row if it contains at least one non-None chip
+                if any(chip is not None for chip in chips_in_row):
                     _, row_y = slot_coord[i][(row, 0)]
                     row_center_y = row_y + C.chip_height // 2
                     candidate_rows.append((grid_type[i], row, row_center_y, chip_positions, chips_in_row))
@@ -208,7 +216,7 @@ class DragManager:
 
 
     def choose_multiple_hovering_slots(self):
-        if not self.hovering_slot:
+        if not self.hovering_slot or self.hovering_slot[1] is None:
             return
         
         grid_type, (hovering_row, hovering_col) = self.hovering_slot  
@@ -219,8 +227,8 @@ class DragManager:
         slots_to_draw = []
         chips_to_choose_from = self.dragging_chip.chips
 
-        if self.dragging_chip.left_chips:
-            left_most_col = hovering_col - len(self.dragging_chip.left_chips)
+        if self.dragging_chip.chips_to_left:
+            left_most_col = hovering_col - len(self.dragging_chip.chips_to_left)
         else:
             left_most_col = hovering_col
 
@@ -257,7 +265,6 @@ class DragManager:
                 slot_distances.sort(key=lambda x: x[0])
                 return slot_distances[0][1]
             return None
-
 
         slots_to_check = None
         if mouse_y <= C.tray_background_y:

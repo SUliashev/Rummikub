@@ -8,39 +8,27 @@ class PlayerInteraction:
         self.dispatcher = dispatcher
         self.move_manager = move_manager
         self.drag_manager = drag_manager
+        self.warning_window = False
         self.mouse_x = 0
         self.mouse_y = 0
 
     def mouse_button_down(self, mouse_x : int, mouse_y: int):
+        if self.warning_window == True:
+            self.handle_warning_window(mouse_x, mouse_y)
+
         if self.button_in_right_rect_pressed(mouse_x, mouse_y):
             return
         
         if self.handle_next_turn_button_pressed(mouse_x, mouse_y):
             return
-        
-        slot_type, slot = self.is_mouse_over_slot(mouse_x, mouse_y)
-        chip = self.chip_tracker.get_chip_at(slot_type, slot)
-        if chip:
-            if self.drag_manager.selected_chips:
-                self.drag_manager.start_dragging_selected_chips(chip)
-            else:
-                self.drag_manager.start_dragging_chip(slot_type, slot, chip)
-        else:
-            self.drag_manager.select_multiple_slots()
 
-    def mouse_button_up(self, mouse_x: int, mouse_y: int):
-        if self.drag_manager.dragging_one_chip: 
-            self.drag_manager.chip_from_dragging_to_grid()
-            return
-        
-        elif self.drag_manager.dragging_multiple_chips: # to add event dispatcher for validation
-            self.multiple_chip_drag_end()
-            return
-  
-        if self.chip_tracker.selection_start:
-            self.chip_tracker.multiple_slots_selected((mouse_x, mouse_y))
+        self.drag_manager.mouse_button_down_actions(mouse_x, mouse_y)
 
 
+    def handle_warning_window(self, mouse_x, mouse_y):
+        if pygame.Rect(C.undo_cofirmation_button).collidepoint(mouse_x, mouse_y):
+            self.dispatcher.dispatch('undo all moves')
+        self.warning_window = False
         
     def handle_event(self, event):
         if event.type in [pygame.MOUSEBUTTONDOWN, pygame.MOUSEMOTION, pygame.MOUSEBUTTONUP]:
@@ -54,7 +42,7 @@ class PlayerInteraction:
                 self.drag_manager.choose_next_slots(mouse_x, mouse_y)
 
             elif event.type == pygame.MOUSEBUTTONUP:
-                self.mouse_button_up(mouse_x, mouse_y )
+                self.drag_manager.mouse_button_up_actions(mouse_x, mouse_y )
         
         else:
             pass
@@ -73,34 +61,16 @@ class PlayerInteraction:
             for button_name, (x, y, w, h) in C.right_buttons.items():
                 button_rect = pygame.Rect(x, y, w, h)
                 if button_rect.collidepoint(mouse_x, mouse_y):
+                    if button_name == 'Undo All Moves':
+                        self.warning_window = True
+                        continue
                     self.dispatcher.dispatch(f'button {button_name} pressed')
                     return True
         return False
         
 
 
-    def is_mouse_over_slot(self, mouse_x, mouse_y ):
-        if self.is_mouse_over_board(mouse_x, mouse_y):
-            for (row, col), (x, y) in C.board_slot_coordinates.items():
-                slot_rect = pygame.Rect(x, y, C.chip_width, C.chip_height)
-                if slot_rect.collidepoint(mouse_x, mouse_y):
-                    return ('board', (row, col))
-        if self.is_mouse_over_tray(mouse_x, mouse_y):
-            for (row, col), (x, y) in C.tray_slot_coordinates.items():
-                slot_rect = pygame.Rect(x, y, C.chip_width, C.chip_height)
-                if slot_rect.collidepoint(mouse_x, mouse_y):
-                    return ( 'tray', (row, col))
-        return False
 
-
-    def is_mouse_over_board(self, mouse_x, mouse_y):
-        y_correct = mouse_y < C.tray_background_y
-        return y_correct
-       
-
-    def is_mouse_over_tray(self, mouse_x, mouse_y):
-        tray_rect = pygame.Rect(C.tray_background_x, C.tray_background_y, C.tray_background_width, C.tray_background_height)
-        return tray_rect.collidepoint(mouse_x, mouse_y)
 
 
 

@@ -8,23 +8,21 @@ class ChipValidator:
         self.slots_on_board = {}
         self.slot_next_to_chip = {}
         self.validate_current_state()
-        self.subscribe_events()
+       
 
     def validate_current_state(self):
         self.slots_on_board = {}
-        print("validating state:")
         for (row, col), item_in_slot in self.chip_tracker.board_grid.slots.items():
             if item_in_slot is None:
                 self.slots_on_board[(row, col)] = True
             else:
-                print(item_in_slot)
                 if len(self.get_validation_chips(row, col)) == 1 or len(self.get_validation_chips(row, col)) < 3:
                     self.slots_on_board[(row, col)] = False
                     continue
                 self.slots_on_board[(row, col)] = self.validate_combination(self.get_validation_chips(row, col))
 
-    def validate_move(self):
-        if self.drag_manager.hovering_slot[0] == 'tray':
+    def validate_move(self, hovering_slots, chips: list):
+        if hovering_slots[0] == 'tray':
             return True
         
         self.slots = {}
@@ -32,16 +30,16 @@ class ChipValidator:
         for (row, col), item_in_slot in self.chip_tracker.board_grid.slots.items():
             self.slots[(row, col)] = item_in_slot   # copy current game state
 
-        if self.drag_manager.dragging_one_chip == True:
-            slot_to_check = self.drag_manager.hovering_slot[1]
-            chip_to_check = self.drag_manager.dragging_chip.main_chip
+        if len(chips) == 1:
+            hovering_slot = hovering_slots[1]
+            slot_to_check = hovering_slot[0] if isinstance(hovering_slot, list) else hovering_slot
+            chip_to_check = chips[0]
             if self.slots[slot_to_check] != None:
                 return False
             self.slots[slot_to_check] = chip_to_check
 
-        elif self.drag_manager.dragging_multiple_chips == True and self.drag_manager.multiple_hovering_slots[0] == 'board':
-            chips = self.drag_manager.dragging_chip.chips
-            slots = self.drag_manager.multiple_hovering_slots[1]
+        elif len(chips) > 1 and hovering_slots[0] == 'board':
+            slots = hovering_slots[1]
 
             for indx, slot in enumerate(slots):
                 if self.slots[slot] != None:
@@ -108,17 +106,6 @@ class ChipValidator:
             i += 1
         return chips
     
-
-    
-
-    def undo_move(self):
-        self.chip_tracker.undo_last_move()
-        self.validate_current_state()
-
-        
-    def subscribe_events(self):
-        self.dispatcher.subscribe('button Undo Move pressed', self.undo_move)
-       
 
     
 
