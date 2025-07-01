@@ -15,12 +15,12 @@ from src.GameUI.drag_manager import DragManager
 import random
 
 class GameController:
-    def __init__(self, sprites: Dict[str, pygame.Surface], dispathcer):
+    def __init__(self, sprites: Dict[str, pygame.Surface], dispathcer, players: int):
         self.sprites = sprites
         self.board_grid = BoardGrid()
         self.dragging_chip = DraggingChip()
         self.dispatcher = dispathcer
-        self.players = self.create_players(2)
+        self.players = self.create_players(players)
         self.current_player_index = 0
         self.current_player = self.players[self.current_player_index]
 
@@ -70,6 +70,9 @@ class GameController:
 
         self.first_player_initiated()
 
+ 
+    
+
     def run(self):
         clock = pygame.time.Clock()
         while True:
@@ -78,6 +81,7 @@ class GameController:
                     exit()
                 self.player_interaction.handle_event(event) #testing stage
             
+           
 
             self.draw()
             clock.tick(60)  
@@ -137,15 +141,27 @@ class GameController:
     
     def sort_chips_in_tray(self):
         if self.current_player.turn >= 3:
-            self.current_player.tray_grid.sort_chips_in_tray()
+            (from_slots, from_chips, to_coordinates) = self.current_player.tray_grid.sort_chips_in_tray()
+            if len(from_slots) > 0:
+                self.move_manager.move_history.append({
+                    'action': f'chips_sorted',
+                    'chip': from_chips,
+                    'from': from_slots,
+                    'to': to_coordinates
+                })
+            
             return
         self.dispatcher.dispatch('error', message='Can only sort tray after 3 moves')
 
     def subscribe_events(self):
         self.dispatcher.subscribe('next player turn', self.next_turn)
         self.dispatcher.subscribe('button Sort Chips pressed', self.sort_chips_in_tray)
-        pass
- 
+        self.dispatcher.subscribe('Exit Game', self.exit_game)
+        
+    def exit_game(self):
+        print('exited')
+        pygame.quit()
+        exit()
 
     def first_player_initiated(self):
         self.game_rules.on_turn_end(self)

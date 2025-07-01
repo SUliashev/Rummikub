@@ -11,7 +11,11 @@ class PlayerInteraction:
         self.mouse_y = 0
         self.next_player_turn_wait = False
 
+
     def mouse_button_down(self, mouse_x : int, mouse_y: int):
+        self.handle_end_game_buttons(mouse_x, mouse_y)
+        
+        
         if self.next_player_turn_wait == True:
             self.handle_next_player_ready_button(mouse_x, mouse_y)
             return
@@ -29,6 +33,14 @@ class PlayerInteraction:
             return
 
         self.drag_manager.mouse_button_down_actions(mouse_x, mouse_y)
+
+    def handle_end_game_buttons(self, mouse_x, mouse_y):
+        if self.chip_tracker.end_game == True:
+            if pygame.Rect(C.exit_game_button).collidepoint(mouse_x, mouse_y):
+                self.dispatcher.dispatch('Exit Game')
+        return False
+         
+
 
     def hanlde_change_of_tray_grid(self, mouse_x, mouse_y):
         if pygame.Rect(C.tray_up_button).collidepoint(mouse_x, mouse_y):

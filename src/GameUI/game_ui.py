@@ -18,7 +18,7 @@ class GameUI:
         self.message_timer = 0 
         self.fireworks = []
         self.next_firework_time = pygame.time.get_ticks() + random.randint(500, 600)
-    
+        self.end_the_game = False
         self.subscribe_events()
 
     def schedule_fireworks(self):
@@ -104,7 +104,6 @@ class GameUI:
         font_size = int(C.window_height * 0.05)
         font = pygame.font.SysFont(None, font_size)
         text = font.render(player_name, True, (255, 255, 255))
-        text_rect = text.get_rect(center=(C.window_width // 2, int(C.window_height * 0.06)))
         self.window.blit(text, C.current_player_xy)
 
     def draw_next_player_ready_overlay(self):
@@ -129,7 +128,11 @@ class GameUI:
 
     def subscribe_events(self):
         self.dispatcher.subscribe('error', self.set_message)
+        self.dispatcher.subscribe('end of game', self.end_game)
  
+    def end_game(self):
+        self.end_the_game = True
+        
     def set_message(self, message):
         self.message = message
         self.message_timer = 120
@@ -183,10 +186,36 @@ class GameUI:
         self.draw_undo_all_confirmation()
         self.draw_next_player_ready_overlay()
         self.draw_tray_arrows()
-        # self.schedule_fireworks()
-        # self.update_fireworks()
-        # self.draw_fireworks()
+        self.end_of_game()
+   
         
+    def end_of_game(self):
+        if self.end_the_game == True:
+            overlay = pygame.Surface((C.window_width, C.window_height), pygame.SRCALPHA)
+            overlay.fill((0, 0, 0, 120))  # RGBA, alpha=120 for shade
+            self.window.blit(overlay, (0, 0))
+
+            self.schedule_fireworks()
+            self.update_fireworks()
+            self.draw_fireworks()
+            if hasattr(self, "current_player"):
+                player_name = self.current_player.name
+            elif hasattr(self.chip_tracker, "current_player"):
+                player_name = self.chip_tracker.current_player.name
+        
+            message = f"{player_name} has won!"
+            font = pygame.font.SysFont(None, 72)  # You can change size
+            text_surface = font.render(message, True, (255, 255, 255))  # white text
+            text_rect = text_surface.get_rect(center=(self.window.get_width() // 2, self.window.get_height() // 2))
+            self.window.blit(text_surface, text_rect)
+        
+            pygame.draw.rect(self.window, (69, 69, 69), C.exit_game_button, border_radius=15)
+            font_btn = pygame.font.SysFont(None, int(C.exit_game_button[3] * 0.5))
+            exit_game_text = font_btn.render("Exit Game", True, (255, 255, 255))
+            exit_game_text_rect = exit_game_text.get_rect(center=C.exit_game_button.center)
+            self.window.blit(exit_game_text, exit_game_text_rect)
+        
+       
 
 
     def show_selected_chips(self):

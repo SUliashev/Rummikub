@@ -99,7 +99,7 @@ class ChipSpriteGenerator:
             text_width = bbox[2] - bbox[0]
             text_height = bbox[3] - bbox[1]
             text_x = (chip_width - text_width) // 2
-            text_y = circle_center_y - text_height // 2 - 2
+            text_y = circle_center_y - text_height // 2 - 8
             draw.text((text_x, text_y), "J", font=font, fill=colors["purple"])
             result['joker'] = pygame.image.fromstring(chip.tobytes(), chip.size, chip.mode)
             

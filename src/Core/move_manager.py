@@ -6,7 +6,11 @@ class MoveManager:
         self.move_history = []
         self.chips_placed_this_turn = set()
         self.one_chip_drawn = False
+        self.many_chips_drawn = []
         self.subscribe_events()
+
+       
+      
         
     def draw_one_chip(self):
         if self.one_chip_drawn == None:
@@ -100,7 +104,7 @@ class MoveManager:
             valid_move = False
 
         self.get_grid(grid_type)[slot] = chip
-        if valid_move == True:
+        if valid_move == True:  # perhaps can do without this check
             self.chip_validator.validate_current_state()
 
         if valid_move == True:
@@ -133,74 +137,81 @@ class MoveManager:
         if not self.move_history:
             self.dispatcher.dispatch('error', message="No moves to be undone")
             return
+
         last_move = self.move_history.pop()
         action = last_move['action']
 
-        draw_chip_factor = True
-        if self.chip_tracker.get_position_in_tray(self.one_chip_drawn) is not None:
-            drawn_chip_slot = self.chip_tracker.get_position_in_tray(self.one_chip_drawn)
-            self.get_grid('tray')[drawn_chip_slot] = None
-        else:
-            draw_chip_factor = False
-
         if action in ['place_on_board', 'place_on_tray']:
-            to_grid_type, from_coords = last_move['to']
-            from_grid_type, to_coords = last_move['from']
-            self.get_grid(to_grid_type)[from_coords] = None
-            self.get_grid(from_grid_type)[to_coords] = last_move['chip']
+            to_grid_type, to_coords = last_move['to']
+            from_grid_type, from_coords = last_move['from']
+
+            self.get_grid(to_grid_type)[to_coords] = None
+
+            if self.get_grid(from_grid_type)[from_coords] is not None:
+                slot = self.chip_tracker.tray_grid.get_first_open_slot()
+                self.get_grid(from_grid_type)[slot] = last_move['chip']
+            else:
+                self.get_grid(from_grid_type)[from_coords] = last_move['chip']
+
+            # if self.chip_tracker.get_position_in_tray(self.one_chip_drawn) is None:
+            #     slot = self.chip_tracker.tray_grid.get_first_open_slot()
+            #     self.get_grid('tray')[slot] = self.one_chip_drawn
+
             if to_grid_type == 'board' and from_grid_type == 'tray':
-                if last_move['chip'] in self.chips_placed_this_turn:
-                    self.chips_placed_this_turn.discard(last_move['chip'])
+                self.chips_placed_this_turn.discard(last_move['chip'])
             elif to_grid_type == 'tray' and from_grid_type == 'board':
-                if last_move['chip'] not in self.chips_placed_this_turn:
-                    self.chips_placed_this_turn.add(last_move['chip'])
-            
+                self.chips_placed_this_turn.add(last_move['chip'])
+
             self.chip_validator.validate_current_state()
 
         elif action == 'place_multiple_chips':
-            to_grid_type, to_coords = last_move['to']    
+            to_grid_type, to_coords = last_move['to']
             from_grid_type, from_coords = last_move['from']
+            chips = last_move['chip']
 
             for coord in to_coords:
                 self.get_grid(to_grid_type)[coord] = None
-            chips = last_move['chip']
-            for indx, chip in enumerate(chips):
-                self.get_grid(from_grid_type)[from_coords[indx]] = chip
+
+            for i, chip in enumerate(chips):
+                if self.get_grid(from_grid_type)[from_coords[i]] is not None:
+                    slot = self.chip_tracker.tray_grid.get_first_open_slot()
+                    self.get_grid('tray')[slot] = chip
+                else:
+                    self.get_grid('tray')[from_coords[i]] = chip
+
+ 
             if to_grid_type == 'board' and from_grid_type == 'tray':
                 for chip in chips:
-                    if chip in self.chips_placed_this_turn and chip is not None:
+                    if chip is not None:
                         self.chips_placed_this_turn.discard(chip)
             elif to_grid_type == 'tray' and from_grid_type == 'board':
                 for chip in chips:
-                    if chip not in self.chips_placed_this_turn and chip is not None:
+                    if chip is not None:
                         self.chips_placed_this_turn.add(chip)
-        
-        
+
             self.chip_validator.validate_current_state()
 
-        print(self.chips_placed_this_turn)
 
-        if draw_chip_factor:
-            if self.get_grid('tray')[drawn_chip_slot] == None:
-                self.get_grid('tray')[drawn_chip_slot] = self.one_chip_drawn
-            else:
-                slot = self.chip_tracker.tray_grid.get_first_open_slot()
-                self.get_grid('tray')[slot] = self.one_chip_drawn
+        elif action == 'chips_sorted':
+            from_coords = last_move['from']
+            to_coords = last_move['to']
+            chips = last_move['chip']
+            for coord in to_coords:
+                self.get_grid('tray')[coord] = None
 
+            for i, chip in enumerate(chips):
+                    self.get_grid('tray')[from_coords[i]] = chip
+            self.dispatcher.dispatch('error', message='Chips un-sorted')
+    
         if action == 'place_chip_from_hidden':
-            drawn_chip_slot = self.chip_tracker.get_position_in_tray(self.one_chip_drawn)
-            self.get_grid('tray')[drawn_chip_slot] = None
-            self.undo_last_move()
-            if self.get_grid('tray')[drawn_chip_slot] == None:
-                self.get_grid('tray')[drawn_chip_slot] = last_move['chip']
-            else:
-                slot = self.chip_tracker.tray_grid.get_first_open_slot()
-                self.get_grid('tray')[slot] = last_move['chip']
+            self.dispatcher.dispatch('error', message='Drawn chip not returned. Please continue')
+
                 
     def undo_all_moves(self):
         for i in range(len(self.move_history)):
             self.undo_last_move()
         self.undo_warning_window = False
+
 
     def subscribe_events(self):
         self.dispatcher.subscribe('chip_picked_up', self.chip_picked_up)

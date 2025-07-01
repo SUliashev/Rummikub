@@ -114,16 +114,19 @@ class C:
     current_player_background_w = None
     current_player_background_b = None
 
+    exit_game_button = None
+  
+
     @staticmethod
     def setup_config():
 
         pygame.init()
         info = pygame.display.Info()
 
-        # C.window = pygame.display.set_mode((info.current_w, info.current_h), pygame.RESIZABLE)
+        C.window = pygame.display.set_mode((info.current_w, info.current_h), pygame.RESIZABLE)
 
         # for testing to see the terminal
-        C.window = pygame.display.set_mode((1600, 800), pygame.RESIZABLE)
+        # C.window = pygame.display.set_mode((1600, 800), pygame.RESIZABLE)
 
         C.window_width = C.window.get_width()
         C.window_height = C.window.get_height()
@@ -152,13 +155,25 @@ class C:
         C.setup_tray_up_and_down_buttons()
 
         C.setup_current_player_display()
+
+        C.setup_end_of_game_buttons()
+
+    @staticmethod
+    def setup_end_of_game_buttons():
+        button_width = int(C.window_width * 0.25)
+        button_height = int(C.window_height * 0.1)
+        center_x = C.window_width // 2
+        button_y = C.window_height // 2 + 80
+        C.exit_game_button = pygame.Rect(center_x - button_width //2, button_y, button_width, button_height)
+      
+
     @staticmethod
     def setup_current_player_display():
         x = C.tray_background_x + C.tray_background_width - C.chip_width * 3
         y = C.board_slot_coordinates[(C.board_rows-1,0)][1] + C.chip_height + C.board_vertical_edge //2 + 5
-        C.current_player_background_b = (x-6, y-6,  C.chip_width *2 + 22, C.board_vertical_edge + 15)
-        C.current_player_background_w = (x-7, y-7, C.chip_width *2 + 24, C.board_vertical_edge + 17)
-        C.current_player_xy = (x, y)
+        C.current_player_background_b = (x-13, y-10,  C.chip_width *2 + 17, C.board_vertical_edge + 17)
+        C.current_player_background_w = (x-14, y-11, C.chip_width *2 + 20, C.board_vertical_edge + 19)
+        C.current_player_xy = (x -10, y-10)
 
     @staticmethod
     def setup_next_player_ready_button():

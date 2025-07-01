@@ -8,6 +8,7 @@ class ChipTracker:
         self.tray_grid = tray_grid
         self.dispatcher = dispatcher
         self.hidden_chips = [] 
+        self.end_game = False
 
 
     def get_chip_at(self, slot_type, slot):
@@ -19,11 +20,13 @@ class ChipTracker:
         for slot, chip in self.board_grid.slots.items():
             if chip == search_chip:
                 return slot
+        return None
         
     def get_position_in_tray(self, search_chip):
         for slot, chip in self.tray_grid.slots.items():
             if chip == search_chip:
                 return slot
+        return None
 
     def place_chip_in_tray_from_hidden(self):
         if not self.hidden_chips:

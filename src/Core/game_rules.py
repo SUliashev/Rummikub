@@ -27,8 +27,18 @@ class GameRules:
                     self.dispatcher.dispatch('error', message="You must place at least 30 points on your first turn." )
                     return False, "You must place at least 30 points on your first turn."
         # ... other rules
+        if self.game_won() == True:
+            self.chip_tracker.end_game = True
+            self.dispatcher.dispatch('end of game')
+            return
         self.dispatcher.dispatch('next player turn')
 
+    def game_won(self):
+        for slot, chip in self.chip_tracker.tray_grid.slots.items():
+            if chip is not None:
+                return False
+        return True
+    
     def validate_first_move(self):
         if len(self.move_manager.chips_placed_this_turn) == 0:
             return False

@@ -61,11 +61,23 @@ class TrayGrid:
             if jokers:
                 sorted_chips += jokers
 
+            from_slots = []
+            from_chips = []
+            
             for slot, chip in self.slots.items():
+                if self.slots[slot] is not None:
+                    chip = self.slots[slot]
+                    from_slots.append(slot)
+                    from_chips.append(chip)
                 self.slots[slot] = None
+
+            to_slots = []
             for chip in sorted_chips:
-                self.slots[self.get_first_open_slot()] = chip
+                to_slot = self.get_first_open_slot()
+                to_slots.append(to_slot)
+                self.slots[to_slot] = chip
                         
+            return (from_slots, from_chips, to_slots)
 
 
 
