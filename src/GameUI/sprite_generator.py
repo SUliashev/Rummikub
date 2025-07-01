@@ -9,8 +9,8 @@ class ChipSpriteGenerator:
     def generate_all_chips() -> Dict[str, Surface]:
         # === Settings: scale relative to screen size ===
         result = {}
-        chip_width = C.chip_width   # ~65px for 1920px width
-        chip_height = C.chip_height # ~90px for 1080px height
+        chip_width = C.chip_width   
+        chip_height = C.chip_height 
         chip_bg_color = (235, 220, 180)
         corner_radius = int(chip_width * 0.13)
         circle_radius = int(chip_width * 0.40)

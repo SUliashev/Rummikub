@@ -12,33 +12,27 @@ class GameRules:
     def subscribe_events(self):
         self.dispatcher.subscribe('button next player pressed', self.can_end_turn)
 
-    def can_end_turn(self):
 
+    def can_end_turn(self):
         if self.chip_validator.validate_current_state() == False:
             self.dispatcher.dispatch('error', message="Invalid board state")
-            return False, "Invalid board state"
+            return False
         if len(self.move_manager.chips_placed_this_turn) == 0 and self.move_manager.one_chip_drawn == None:
             self.dispatcher.dispatch('error', message='One chip must be drawn if a move cannot be made')
-            return False, 'one chip is not drawn'
+            return False
         if not self.current_player.first_turn_completed:
             if self.validate_first_move() == True:
                 self.current_player.first_turn_completed = True
             elif len(self.move_manager.chips_placed_this_turn) > 0:
                     self.dispatcher.dispatch('error', message="You must place at least 30 points on your first turn." )
-                    return False, "You must place at least 30 points on your first turn."
-        # ... other rules
+                    return False
         if self.game_won() == True:
             self.chip_tracker.end_game = True
             self.dispatcher.dispatch('end of game')
             return
         self.dispatcher.dispatch('next player turn')
 
-    def game_won(self):
-        for slot, chip in self.chip_tracker.tray_grid.slots.items():
-            if chip is not None:
-                return False
-        return True
-    
+
     def validate_first_move(self):
         if len(self.move_manager.chips_placed_this_turn) == 0:
             return False
@@ -57,15 +51,14 @@ class GameRules:
         else:
             return False
 
-    def on_chip_drawn(self):
-        self.current_player.has_drawn_chip = True
-
-    def can_draw_chip(self, player):
-        return not player.has_drawn_chip
 
     def on_turn_end(self, player):
         self.turn_counter += 1
      
-        
 
-    # ... more methods for other rules
+    def game_won(self):
+            for slot, chip in self.chip_tracker.tray_grid.slots.items():
+                if chip is not None:
+                    return False
+            return True
+    

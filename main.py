@@ -51,6 +51,7 @@ def select_number_of_players():
                     return selected
 
         clock.tick(30)
+        
 
 if __name__ == "__main__":
     players = select_number_of_players()

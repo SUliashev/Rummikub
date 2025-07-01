@@ -27,9 +27,7 @@ class GameController:
         self.chip_tracker = ChipTracker(
             self.board_grid,
             self.players[self.current_player_index].tray_grid,
-            self.dragging_chip,
-            self.dispatcher
-        )
+            self.dispatcher)
         self.generate_and_shuffle_hidden_chips()
         self.deal_initial_chips()
         self.subscribe_events()
@@ -37,7 +35,7 @@ class GameController:
         self.drag_manager = DragManager(
             self.chip_tracker, 
             self.dragging_chip, 
-            self.dispatcher)  # 
+            self.dispatcher)  
        
         self.chip_validator = ChipValidator(
             self.chip_tracker, 
@@ -71,7 +69,6 @@ class GameController:
         self.first_player_initiated()
 
  
-    
 
     def run(self):
         clock = pygame.time.Clock()
@@ -80,9 +77,7 @@ class GameController:
                 if event.type == pygame.QUIT:
                     exit()
                 self.player_interaction.handle_event(event) #testing stage
-            
            
-
             self.draw()
             clock.tick(60)  
 
@@ -110,7 +105,6 @@ class GameController:
         self.current_player.end_turn()
         self.move_manager.end_turn()
         self.player_interaction.next_player_turn_wait = True
-        print(f"Switched to {self.current_player.name}")
 
 
     def generate_and_shuffle_hidden_chips(self):
@@ -133,12 +127,13 @@ class GameController:
 
 
     def deal_initial_chips(self):
-        for _ in range(14):
+        for _ in range(24):
             for player in self.players:
                 # Temporarily set the tray_grid to the current player
                 self.chip_tracker.tray_grid = player.tray_grid
                 self.chip_tracker.place_chip_in_tray_from_hidden()
     
+
     def sort_chips_in_tray(self):
         if self.current_player.turn >= 3:
             (from_slots, from_chips, to_coordinates) = self.current_player.tray_grid.sort_chips_in_tray()
@@ -147,21 +142,23 @@ class GameController:
                     'action': f'chips_sorted',
                     'chip': from_chips,
                     'from': from_slots,
-                    'to': to_coordinates
-                })
+                    'to': to_coordinates})
             
             return
         self.dispatcher.dispatch('error', message='Can only sort tray after 3 moves')
+
 
     def subscribe_events(self):
         self.dispatcher.subscribe('next player turn', self.next_turn)
         self.dispatcher.subscribe('button Sort Chips pressed', self.sort_chips_in_tray)
         self.dispatcher.subscribe('Exit Game', self.exit_game)
         
+
     def exit_game(self):
         print('exited')
         pygame.quit()
         exit()
+
 
     def first_player_initiated(self):
         self.game_rules.on_turn_end(self)

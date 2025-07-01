@@ -2,8 +2,7 @@ from src.Config.config import C
 import pygame
 
 class ChipTracker:
-    def __init__(self, board_grid, tray_grid, dragging_chip, dispatcher):
-        self.dragging_chip = dragging_chip  #can be removed
+    def __init__(self, board_grid, tray_grid, dispatcher):
         self.board_grid = board_grid
         self.tray_grid = tray_grid
         self.dispatcher = dispatcher

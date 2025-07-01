@@ -8,17 +8,6 @@ class TrayGrid:
         self.visible_rows = 2
         self.create_coordinates()
 
-    def update_visible_slot_coordinates(self):
-        C.tray_slot_coordinates = {}
-        start_row = self.visible_row_start
-        print(self.visible_row_start)
-        for visible_row in range(self.visible_rows):
-            actual_row = start_row + visible_row
-            for col in range(C.tray_cols):
-                x = C.tray_grid_x + col * (C.chip_width + C.tray_slot_horizontal_spacing)
-                y = C.tray_grid_y + visible_row * (C.chip_height + C.tray_slot_vertical_spacing)
-                C.tray_slot_coordinates[(actual_row, col)] = (x, y)
-
 
     def get_first_open_slot(self):
         for row in range(C.tray_rows):
@@ -32,7 +21,6 @@ class TrayGrid:
         try:
             row, col = self.get_first_open_slot()
             self.slots[(row, col)] = chip
-
         except ValueError as e:
             print('Chip cannot be placed in tray from hidden:', e)
 
@@ -41,8 +29,20 @@ class TrayGrid:
         for row in range(C.tray_rows):
             for col in range(C.tray_cols):
                 self.slots[(row, col)] = None
-          
 
+
+    def update_visible_slot_coordinates(self):
+        C.tray_slot_coordinates = {}
+        start_row = self.visible_row_start
+        print(self.visible_row_start)
+        for visible_row in range(self.visible_rows):
+            actual_row = start_row + visible_row
+            for col in range(C.tray_cols):
+                x = C.tray_grid_x + col * (C.chip_width + C.tray_slot_horizontal_spacing)
+                y = C.tray_grid_y + visible_row * (C.chip_height + C.tray_slot_vertical_spacing)
+                C.tray_slot_coordinates[(actual_row, col)] = (x, y)
+
+          
     def sort_chips_in_tray(self):
         all_chips_in_tray = [chip for chip in self.slots.values() if chip is not None]
         if all_chips_in_tray:

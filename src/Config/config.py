@@ -37,11 +37,8 @@ class C:
     side_rectangle_vertical_space_from_button_to_tray = 20
 
 
-    
-
     '''Draw Button'''
     draw_button_color = (69, 69, 69) 
-
 
     '''Sort Tray Button'''
     sort_tray_button_color = (69, 69, 69) 
@@ -66,7 +63,6 @@ class C:
     chip_height = None
     chip_sufrace = None
     FONT_PATH = os.path.join(os.path.dirname(__file__), '../../assets/fonts/Ubuntu-B.ttf')
-    
 
     '''Slot Coordinates'''
     board_slot_coordinates = None
@@ -106,14 +102,18 @@ class C:
     '''Next Player Button'''
     next_player_button = None
 
+    '''Treminal'''
     error_message_coord = None
     error_message_rect = None
     error_message_behind = None
-    next_player_ready_button = None
+
+    '''Current Player Display'''
     current_player_xy = None
     current_player_background_w = None
     current_player_background_b = None
 
+    '''Extra Buttons'''
+    next_player_ready_button = None
     exit_game_button = None
   
 
@@ -125,134 +125,44 @@ class C:
 
         C.window = pygame.display.set_mode((info.current_w, info.current_h), pygame.RESIZABLE)
 
-        # for testing to see the terminal
-        # C.window = pygame.display.set_mode((1600, 800), pygame.RESIZABLE)
-
         C.window_width = C.window.get_width()
         C.window_height = C.window.get_height()
 
-
         C.setup_chip_dimentions()
-
         C.setup_tray()
-
         C.setup_right_rectangle()
-        
         C.setup_right_buttons()
-
         C.setup_slot_coordinates()
-
         C.setup_next_player_button()
-
         C.set_up_confirmation_button()
-
         C.setup_error_message_coord()
-
         C.setup_undo_all_moves_confirmation()
-
         C.setup_next_player_ready_button()
-      
         C.setup_tray_up_and_down_buttons()
-
         C.setup_current_player_display()
-
         C.setup_end_of_game_buttons()
 
     @staticmethod
-    def setup_end_of_game_buttons():
-        button_width = int(C.window_width * 0.25)
-        button_height = int(C.window_height * 0.1)
-        center_x = C.window_width // 2
-        button_y = C.window_height // 2 + 80
-        C.exit_game_button = pygame.Rect(center_x - button_width //2, button_y, button_width, button_height)
-      
+    def setup_chip_dimentions():
+        C.chip_width = int(((C.window_width - C.board_horizontal_edge * 2) - C.slot_horizontal_spacing * (C.board_cols - 1)) / C.board_cols) 
+        C.chip_height = int((((C.window_height - C.board_vertical_edge * 2) - C.tray_background_extra_height * 2 ) - C.slot_vertical_spacing * C.board_rows)  / (C.board_rows + C.tray_visible_rows))
+        C.chip_sufrace = pygame.Surface((C.chip_width, C.chip_height))
+
 
     @staticmethod
-    def setup_current_player_display():
-        x = C.tray_background_x + C.tray_background_width - C.chip_width * 3
-        y = C.board_slot_coordinates[(C.board_rows-1,0)][1] + C.chip_height + C.board_vertical_edge //2 + 5
-        C.current_player_background_b = (x-13, y-10,  C.chip_width *2 + 17, C.board_vertical_edge + 17)
-        C.current_player_background_w = (x-14, y-11, C.chip_width *2 + 20, C.board_vertical_edge + 19)
-        C.current_player_xy = (x -10, y-10)
+    def setup_tray():
+        C.tray_grid_width = (C.chip_width * C.tray_cols) + C.tray_slot_horizontal_spacing * (C.tray_cols - 1) 
+        C.tray_grid_height = (C.chip_height * C.tray_visible_rows) + C.tray_slot_vertical_spacing * (C.tray_visible_rows - 1)
+        C.tray_background_width = C.tray_grid_width + (C.tray_background_extra_width * 2)
+        C.tray_background_height = C.tray_grid_height + (C.tray_background_extra_height * 2)
 
-    @staticmethod
-    def setup_next_player_ready_button():
-        button_width = int(C.window_width * 0.4)
-        button_height = int(C.window_height * 0.15)
-        button_x = (C.window_width - button_width) // 2
-        button_y = (C.window_height - button_height) // 3
-        C.next_player_ready_button = (button_x, button_y, button_width, button_height)
-    
-    @staticmethod
-    def setup_error_message_coord():
-        x =  C.next_player_button[0][0] //3
-        y = C.board_slot_coordinates[(C.board_rows-1,0)][1] + C.chip_height + C.board_vertical_edge //2 + 5
-        C.error_message_coord = (x,y)
+        C.tray_grid_x = int(C.window_width * 0.5 -  C.tray_grid_width / 2) 
+        C.tray_grid_y = int(C.window_height - C.tray_space_from_bottom_of_the_screen) - C.tray_background_extra_height - C.tray_grid_height
+        C.tray_background_x =  int(C.window_width * 0.5 - C.tray_background_width / 2)
+        C.tray_background_y = C.tray_grid_y - C.tray_background_extra_height 
+        C.tray_background = (C.tray_background_x , C.tray_background_y, C.tray_background_width, C.tray_background_height)
 
-        x = C.next_player_button[0][0] //4
-        y = C.board_slot_coordinates[(C.board_rows-1,0)][1] + C.chip_height + C.board_vertical_edge // 4
-        width = C.chip_width * 13
-        height = C.board_vertical_edge * 2
-        C.error_message_rect = (x, y, width, height)
-        C.error_message_behind = (x-2, y-2, width+ 4, height+4)
 
-    @staticmethod
-    def setup_tray_up_and_down_buttons():
-        arrow_width = 35
-        arrow_height = 30
-        x = C.tray_background_x + C.tray_background_width - C.tray_background_extra_width + 10
-        y_up = C.tray_grid_y + int(C.chip_height *0.5 - arrow_height // 2) 
-        y_down =  C.tray_grid_y + int(C.chip_height *1.5 - arrow_height // 2) 
-        C.tray_down_button = (x, y_down, arrow_width, arrow_height)
-        C.tray_up_button = (x, y_up, arrow_width, arrow_height)
-   
-    @staticmethod 
-    def setup_next_player_button():
-        width = C.tray_background_x // 2
-        height = width // 3
-        x = width // 2
-        y = (C.window_height + C.tray_background_y) // 2 - (height // 2)
-
-        rect = (x, y, width, height)
-        font_size = int(rect[2] )   
-        font = pygame.font.SysFont(None, font_size)
-        text = font.render('Next Player', True, (255, 255, 255))
-        text_rect = text.get_rect(center=(rect[0] + rect[2] // 2, rect[1] + rect[3] // 2))
-        while text_rect.width > rect[2] * 0.8 and font_size > 10:
-            font_size -= 1
-            font = pygame.font.SysFont(None, font_size)
-            text = font.render("Next Player", True, (255, 255, 255))
-            text_rect = text.get_rect(center=(rect[0] + rect[2] //2 , rect[1] + rect[3] // 2))
-            
-        C.next_player_button = (rect, font_size)
-
-    @staticmethod
-    def setup_slot_coordinates():
-        C.board_slot_coordinates = {}
-
-        start_x = C.board_horizontal_edge + C.slot_horizontal_spacing / 2
-        for row in range(C.board_rows):
-            for col in range(C.board_cols):
-                x = start_x + (C.chip_width + C.slot_horizontal_spacing) * col
-                y = C.board_vertical_edge +  (C.chip_height + C.slot_vertical_spacing) * row
-                C.board_slot_coordinates[(row, col)] = (x, y)
-                
-        C.tray_slot_coordinates = {}
-        for row in range(C.tray_rows):
-            for col in range(C.tray_cols):
-                x = C.tray_grid_x + col * (C.chip_width + C.tray_slot_horizontal_spacing)
-                y = C.tray_grid_y + row * (C.chip_height + C.tray_slot_vertical_spacing) 
-                C.tray_slot_coordinates[(row, col)] = (x, y)
-               
-
-    @staticmethod
-    def set_up_confirmation_button():
-        width = C.window_width // 3
-        height = C.window_height // 3
-        x = (C.window_width - width) // 2
-        y = (C.window_height - height) // 2
-        C.undo_cofirmation_button = (x  + 50, y + int(height* 0.8) , 100, 40)
-    
     @staticmethod
     def setup_right_rectangle():
         # Position rectangle to the right of the tray background
@@ -262,43 +172,7 @@ class C:
         height = C.tray_background_height
         C.right_rect = (x, y, width, height)
 
-    @staticmethod 
-    def calculate_font_size(str_text: str, button_width: int, button_height: int):
-        font_size = int(button_height)   
-        font = pygame.font.SysFont(None, font_size)
-        text = font.render(str_text, True, (255, 255, 255))
-        text_rect = text.get_rect(center=(button_width, button_width))
-        while text_rect.width > button_width * 0.8 and font_size > 10:
-            font_size -= 1
-            font = pygame.font.SysFont(None, font_size)
-            text = font.render(str_text, True, (255, 255, 255))
-            text_rect = text.get_rect(center=(button_width, button_width))
 
-        return font_size
-
-    @staticmethod
-    def setup_undo_all_moves_confirmation():
-        width = C.window_width // 3
-        height = C.window_height // 3
-        x = (C.window_width - width) // 2
-        y = (C.window_height - height) // 2
-        C.undo_all_white_rect = (x, y, width, height)
-        C.undo_all_black_rect = (x, y, width, height)
-        C.undo_all_main_text_fontsize = C.calculate_font_size("Are you sure you want to undo all the moves?",width, height )
-
-        button_width = int(width * 0.28)
-        button_height = int(height * 0.18)
-        button_y = y + int(height * 0.65)
-
-        # Yes button (left side)
-        yes_x = x + int(width * 0.12)
-        C.undo_all_yes_rect = (yes_x, button_y, button_width, button_height)
-        C.undo_all_yes_text_size = C.calculate_font_size("Yes", button_width, button_height)
-
-    # No button (right side)
-        no_x = x + width - int(width * 0.12) - button_width
-        C.undo_all_no_rect = (no_x, button_y, button_width, button_height)
-        
     @staticmethod
     def setup_right_buttons():
 
@@ -333,21 +207,143 @@ class C:
                 C.right_buttons_font_size[button_names[name_index]] = font_size
                 name_index += 1
 
-    @staticmethod
-    def setup_chip_dimentions():
-        C.chip_width = int(((C.window_width - C.board_horizontal_edge * 2) - C.slot_horizontal_spacing * (C.board_cols - 1)) / C.board_cols) 
-        C.chip_height = int((((C.window_height - C.board_vertical_edge * 2) - C.tray_background_extra_height * 2 ) - C.slot_vertical_spacing * C.board_rows)  / (C.board_rows + C.tray_visible_rows))
-        C.chip_sufrace = pygame.Surface((C.chip_width, C.chip_height))
 
     @staticmethod
-    def setup_tray():
-        C.tray_grid_width = (C.chip_width * C.tray_cols) + C.tray_slot_horizontal_spacing * (C.tray_cols - 1) 
-        C.tray_grid_height = (C.chip_height * C.tray_visible_rows) + C.tray_slot_vertical_spacing * (C.tray_visible_rows - 1)
-        C.tray_background_width = C.tray_grid_width + (C.tray_background_extra_width * 2)
-        C.tray_background_height = C.tray_grid_height + (C.tray_background_extra_height * 2)
+    def setup_slot_coordinates():
+        C.board_slot_coordinates = {}
 
-        C.tray_grid_x = int(C.window_width * 0.5 -  C.tray_grid_width / 2) 
-        C.tray_grid_y = int(C.window_height - C.tray_space_from_bottom_of_the_screen) - C.tray_background_extra_height - C.tray_grid_height
-        C.tray_background_x =  int(C.window_width * 0.5 - C.tray_background_width / 2)
-        C.tray_background_y = C.tray_grid_y - C.tray_background_extra_height 
-        C.tray_background = (C.tray_background_x , C.tray_background_y, C.tray_background_width, C.tray_background_height)
+        start_x = C.board_horizontal_edge + C.slot_horizontal_spacing / 2
+        for row in range(C.board_rows):
+            for col in range(C.board_cols):
+                x = start_x + (C.chip_width + C.slot_horizontal_spacing) * col
+                y = C.board_vertical_edge +  (C.chip_height + C.slot_vertical_spacing) * row
+                C.board_slot_coordinates[(row, col)] = (x, y)
+                
+        C.tray_slot_coordinates = {}
+        for row in range(C.tray_rows):
+            for col in range(C.tray_cols):
+                x = C.tray_grid_x + col * (C.chip_width + C.tray_slot_horizontal_spacing)
+                y = C.tray_grid_y + row * (C.chip_height + C.tray_slot_vertical_spacing) 
+                C.tray_slot_coordinates[(row, col)] = (x, y)
+
+
+    @staticmethod 
+    def setup_next_player_button():
+        width = C.tray_background_x // 2
+        height = width // 3
+        x = width // 2
+        y = (C.window_height + C.tray_background_y) // 2 - (height // 2)
+
+        rect = (x, y, width, height)
+        font_size = int(rect[2] )   
+        font = pygame.font.SysFont(None, font_size)
+        text = font.render('Next Player', True, (255, 255, 255))
+        text_rect = text.get_rect(center=(rect[0] + rect[2] // 2, rect[1] + rect[3] // 2))
+        while text_rect.width > rect[2] * 0.8 and font_size > 10:
+            font_size -= 1
+            font = pygame.font.SysFont(None, font_size)
+            text = font.render("Next Player", True, (255, 255, 255))
+            text_rect = text.get_rect(center=(rect[0] + rect[2] //2 , rect[1] + rect[3] // 2))
+            
+        C.next_player_button = (rect, font_size)
+
+
+    @staticmethod
+    def set_up_confirmation_button():
+        width = C.window_width // 3
+        height = C.window_height // 3
+        x = (C.window_width - width) // 2
+        y = (C.window_height - height) // 2
+        C.undo_cofirmation_button = (x  + 50, y + int(height* 0.8) , 100, 40)
+    
+
+    @staticmethod
+    def setup_error_message_coord():
+        x =  C.next_player_button[0][0] //3
+        y = C.board_slot_coordinates[(C.board_rows-1,0)][1] + C.chip_height + C.board_vertical_edge //2 + 5
+        C.error_message_coord = (x,y)
+
+        x = C.next_player_button[0][0] //4
+        y = C.board_slot_coordinates[(C.board_rows-1,0)][1] + C.chip_height + C.board_vertical_edge // 4
+        width = C.chip_width * 13
+        height = C.board_vertical_edge * 2
+        C.error_message_rect = (x, y, width, height)
+        C.error_message_behind = (x-2, y-2, width+ 4, height+4)
+
+    @staticmethod
+    def setup_undo_all_moves_confirmation():
+        width = C.window_width // 3
+        height = C.window_height // 3
+        x = (C.window_width - width) // 2
+        y = (C.window_height - height) // 2
+        C.undo_all_white_rect = (x, y, width, height)
+        C.undo_all_black_rect = (x, y, width, height)
+        C.undo_all_main_text_fontsize = C.calculate_font_size("Are you sure you want to undo all the moves?",width, height )
+
+        button_width = int(width * 0.28)
+        button_height = int(height * 0.18)
+        button_y = y + int(height * 0.65)
+
+        # Yes button (left side)
+        yes_x = x + int(width * 0.12)
+        C.undo_all_yes_rect = (yes_x, button_y, button_width, button_height)
+        C.undo_all_yes_text_size = C.calculate_font_size("Yes", button_width, button_height)
+
+    # No button (right side)
+        no_x = x + width - int(width * 0.12) - button_width
+        C.undo_all_no_rect = (no_x, button_y, button_width, button_height)
+        
+ 
+    @staticmethod
+    def setup_next_player_ready_button():
+        button_width = int(C.window_width * 0.4)
+        button_height = int(C.window_height * 0.15)
+        button_x = (C.window_width - button_width) // 2
+        button_y = (C.window_height - button_height) // 3
+        C.next_player_ready_button = (button_x, button_y, button_width, button_height)
+    
+
+    @staticmethod
+    def setup_tray_up_and_down_buttons():
+        arrow_width = 35
+        arrow_height = 30
+        x = C.tray_background_x + C.tray_background_width - C.tray_background_extra_width + 10
+        y_up = C.tray_grid_y + int(C.chip_height *0.5 - arrow_height // 2) 
+        y_down =  C.tray_grid_y + int(C.chip_height *1.5 - arrow_height // 2) 
+        C.tray_down_button = (x, y_down, arrow_width, arrow_height)
+        C.tray_up_button = (x, y_up, arrow_width, arrow_height)
+
+
+    @staticmethod
+    def setup_current_player_display():
+        x = C.tray_background_x + C.tray_background_width - C.chip_width * 3
+        y = C.board_slot_coordinates[(C.board_rows-1,0)][1] + C.chip_height + C.board_vertical_edge //2 + 5
+        C.current_player_background_b = (x-13, y-10,  C.chip_width *2 + 17, C.board_vertical_edge + 17)
+        C.current_player_background_w = (x-14, y-11, C.chip_width *2 + 20, C.board_vertical_edge + 19)
+        C.current_player_xy = (x -10, y-10)
+
+
+    @staticmethod
+    def setup_end_of_game_buttons():
+        button_width = int(C.window_width * 0.25)
+        button_height = int(C.window_height * 0.1)
+        center_x = C.window_width // 2
+        button_y = C.window_height // 2 + 80
+        C.exit_game_button = pygame.Rect(center_x - button_width //2, button_y, button_width, button_height)
+
+
+    @staticmethod 
+    def calculate_font_size(str_text: str, button_width: int, button_height: int):
+        font_size = int(button_height)   
+        font = pygame.font.SysFont(None, font_size)
+        text = font.render(str_text, True, (255, 255, 255))
+        text_rect = text.get_rect(center=(button_width, button_width))
+        while text_rect.width > button_width * 0.8 and font_size > 10:
+            font_size -= 1
+            font = pygame.font.SysFont(None, font_size)
+            text = font.render(str_text, True, (255, 255, 255))
+            text_rect = text.get_rect(center=(button_width, button_width))
+
+        return font_size
+
+ 
