@@ -42,16 +42,19 @@ class MoveManager:
             valid_move = True
             if hovering_slots[0] == None:
                 valid_move = False
-            if not self.chip_validator.validate_move(hovering_slots, chips):
+            if self.chip_validator.validate_move(hovering_slots, chips) == False :
                 valid_move = False
             if valid_move == True:
                 if hovering_slots[0] == 'tray' and origin_pos[0] == 'board':
                     for chip in chips:
-                        if chip not in self.chips_placed_this_turn:
-                            valid_move =False
-                            break
+                        if chip is not None:
+                            if chip not in self.chips_placed_this_turn:
+                                valid_move =False
+                                break
         else:
             valid_move = False
+
+
 
         if not valid_move:
             # Restore chips to their original positions
@@ -88,6 +91,7 @@ class MoveManager:
                         self.chips_placed_this_turn.discard(chip)
             self.chip_validator.validate_current_state()
 
+        print(self.chips_placed_this_turn)
     def move_single_chip_to(self, hovering_slot, chip, origin_pos):
         valid_move = True
         if hovering_slot is not None and hovering_slot[1] is not None:
@@ -213,6 +217,9 @@ class MoveManager:
         self.move_history.clear()
         self.chips_placed_this_turn.clear()
         self.one_chip_drawn = None
+
+
+       
 
 
     def subscribe_events(self):

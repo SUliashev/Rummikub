@@ -147,12 +147,29 @@ class GameController:
             return
         self.dispatcher.dispatch('error', message='Can only sort tray after 3 moves')
 
+    def error_manager(self, **kwargs):
+        total_chips = 0
+        total_chips += len(self.chip_tracker.hidden_chips)
+        for chip in self.chip_tracker.board_grid.slots.values():
+            if chip is not None:
+                total_chips += 1
+        for player in self.players:
+            for chip in player.tray_grid.slots.values():
+                if chip is not None:
+                    total_chips += 1 
+        if total_chips == 106:
+            print('we gucci')
+        else:
+            print(f"total chips: {total_chips}")
 
     def subscribe_events(self):
         self.dispatcher.subscribe('next player turn', self.next_turn)
         self.dispatcher.subscribe('button Sort Chips pressed', self.sort_chips_in_tray)
         self.dispatcher.subscribe('Exit Game', self.exit_game)
         
+        self.dispatcher.subscribe('multiple chips placed', self.error_manager)
+        self.dispatcher.subscribe('chip_picked_up', self.error_manager)
+
 
     def exit_game(self):
         print('exited')

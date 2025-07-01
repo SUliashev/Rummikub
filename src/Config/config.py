@@ -123,8 +123,11 @@ class C:
         pygame.init()
         info = pygame.display.Info()
 
-        C.window = pygame.display.set_mode((info.current_w, info.current_h), pygame.RESIZABLE)
+        # C.window = pygame.display.set_mode((info.current_w, info.current_h), pygame.RESIZABLE)
 
+
+        #small window 
+        C.window = pygame.display.set_mode((1500, 800), pygame.RESIZABLE)
         C.window_width = C.window.get_width()
         C.window_height = C.window.get_height()
 
@@ -318,8 +321,8 @@ class C:
     def setup_current_player_display():
         x = C.tray_background_x + C.tray_background_width - C.chip_width * 3
         y = C.board_slot_coordinates[(C.board_rows-1,0)][1] + C.chip_height + C.board_vertical_edge //2 + 5
-        C.current_player_background_b = (x-13, y-10,  C.chip_width *2 + 17, C.board_vertical_edge + 17)
-        C.current_player_background_w = (x-14, y-11, C.chip_width *2 + 20, C.board_vertical_edge + 19)
+        C.current_player_background_b = (x-13, y-10,  C.chip_width *2 + 27, C.board_vertical_edge + 17)
+        C.current_player_background_w = (x-14, y-11, C.chip_width *2 + 30, C.board_vertical_edge + 19)
         C.current_player_xy = (x -10, y-10)
 
 

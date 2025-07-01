@@ -7,7 +7,7 @@ import math
 class GameUI:
     def __init__(self, chip_tracker, chip_validator, dispatcher, player_interaction, drag_manager):
         self.window = C.window 
-        print('size', self.window.get_size())
+
         pygame.display.set_caption("Rummikub")
         self.chip_tracker = chip_tracker  # Use ChipTracker for chip management
         self.drag_manager = drag_manager
@@ -410,7 +410,7 @@ class GameUI:
     def end_game(self):
         self.end_the_game = True
 
-        
+
     def end_of_game(self):
         if self.end_the_game == True:
             overlay = pygame.Surface((C.window_width, C.window_height), pygame.SRCALPHA)
