@@ -127,7 +127,7 @@ class GameController:
 
 
     def deal_initial_chips(self):
-        for _ in range(24):
+        for _ in range(14):
             for player in self.players:
                 # Temporarily set the tray_grid to the current player
                 self.chip_tracker.tray_grid = player.tray_grid
@@ -149,18 +149,28 @@ class GameController:
 
     def error_manager(self, **kwargs):
         total_chips = 0
-        total_chips += len(self.chip_tracker.hidden_chips)
+        hidden_chips = len(self.chip_tracker.hidden_chips)
+        total_chips += hidden_chips
+        chips_on_board = 0
         for chip in self.chip_tracker.board_grid.slots.values():
             if chip is not None:
-                total_chips += 1
+                chips_on_board += 1
+        total_chips += chips_on_board
+        chip_in_trays = 0
         for player in self.players:
             for chip in player.tray_grid.slots.values():
                 if chip is not None:
-                    total_chips += 1 
-        if total_chips == 106:
-            print('we gucci')
-        else:
-            print(f"total chips: {total_chips}")
+                    chip_in_trays += 1
+        total_chips += chip_in_trays
+        dragging_chip = len([chip for chip in self.drag_manager.dragging_chip.chips if chip != None])
+        total_chips += dragging_chip
+    
+        print(f"total chips: {total_chips} should be 106")
+        print(f'hidden chips: {hidden_chips}')
+        print(f'chip on board: {chips_on_board}')
+        print(f'chips in trays: {chip_in_trays}')
+        print(f'dragging_chip: {dragging_chip}')
+
 
     def subscribe_events(self):
         self.dispatcher.subscribe('next player turn', self.next_turn)

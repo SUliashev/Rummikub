@@ -1,10 +1,14 @@
 To do:
 
+debug
+ - an issue is happening when the next player adds a chip to an existing combination, then moves the combination, and undoes the move: chip appear in his tray 
+ - looks like chips are being duplicated somewere still 
+ 
 
 improve code
 
 
-debug
+
 
 
 
