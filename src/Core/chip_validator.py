@@ -6,7 +6,6 @@ class ChipValidator:
     
         self.slots = {}
         self.slots_on_board = {}
-        self.slot_next_to_chip = {}
         self.validate_current_state()
        
 
@@ -104,8 +103,6 @@ class ChipValidator:
 
 
         if all(chip.color == non_jokers[0].color for chip in non_jokers):
-            checked_combinations = []
-            
             def get_list_of_numbers(chips, i):  
                 output = []
                 previous_number = None

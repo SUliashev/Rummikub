@@ -156,14 +156,16 @@ class DragManager:
 
         candidate_rows = []
 
-        rows = (C.board_rows, C.tray_rows)
+        visible_tray_rows_start, visible_tray_rows_end = self.chip_tracker.tray_grid.visible_row_start, self.chip_tracker.tray_grid.visible_row_start + 2
+        range_of_rows = range(visible_tray_rows_start, visible_tray_rows_end)
+        rows = (range(C.board_rows), range_of_rows)
         cols = (C.board_cols, C.tray_cols)
         grid = (self.chip_tracker.board_grid.slots, self.chip_tracker.tray_grid.slots)
         slot_coord = (C.board_slot_coordinates, C.tray_slot_coordinates)
         grid_type = ('board', 'tray')
         # Check all rows
         for i in range(2):
-            for row in range(rows[i]):
+            for row in rows[i]:
                 chips_in_row = []
                 chip_positions = []
                 for col in range(cols[i]):

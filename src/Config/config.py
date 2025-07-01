@@ -6,8 +6,9 @@ class C:
     '''Board'''
     board_rows = 5
     board_cols = 29
-    tray_rows = 2
+    tray_rows = 5
     tray_cols = 16
+    tray_visible_rows = 2
 
     board_horizontal_edge = 15 # border edge of the slots, left and right
     board_vertical_edge = 20  # border edge of the slots, top and bottom
@@ -82,6 +83,9 @@ class C:
     tray_background_y = None
     tray_background = None
 
+    tray_up_button = None
+    tray_down_button = None
+
     '''Undo all moves waring window'''
     undo_all_white_rect = None
     undo_all_black_rect = None
@@ -104,9 +108,11 @@ class C:
 
     error_message_coord = None
     error_message_rect = None
-
+    error_message_behind = None
     next_player_ready_button = None
-
+    current_player_xy = None
+    current_player_background_w = None
+    current_player_background_b = None
 
     @staticmethod
     def setup_config():
@@ -114,10 +120,10 @@ class C:
         pygame.init()
         info = pygame.display.Info()
 
-        C.window = pygame.display.set_mode((info.current_w, info.current_h), pygame.RESIZABLE)
+        # C.window = pygame.display.set_mode((info.current_w, info.current_h), pygame.RESIZABLE)
 
         # for testing to see the terminal
-        # C.window = pygame.display.set_mode((1600, 800), pygame.RESIZABLE)
+        C.window = pygame.display.set_mode((1600, 800), pygame.RESIZABLE)
 
         C.window_width = C.window.get_width()
         C.window_height = C.window.get_height()
@@ -143,9 +149,18 @@ class C:
 
         C.setup_next_player_ready_button()
       
+        C.setup_tray_up_and_down_buttons()
 
+        C.setup_current_player_display()
+    @staticmethod
+    def setup_current_player_display():
+        x = C.tray_background_x + C.tray_background_width - C.chip_width * 3
+        y = C.board_slot_coordinates[(C.board_rows-1,0)][1] + C.chip_height + C.board_vertical_edge //2 + 5
+        C.current_player_background_b = (x-6, y-6,  C.chip_width *2 + 22, C.board_vertical_edge + 15)
+        C.current_player_background_w = (x-7, y-7, C.chip_width *2 + 24, C.board_vertical_edge + 17)
+        C.current_player_xy = (x, y)
 
-    
+    @staticmethod
     def setup_next_player_ready_button():
         button_width = int(C.window_width * 0.4)
         button_height = int(C.window_height * 0.15)
@@ -156,7 +171,7 @@ class C:
     @staticmethod
     def setup_error_message_coord():
         x =  C.next_player_button[0][0] //3
-        y = C.board_slot_coordinates[(C.board_rows-1,0)][1] + C.chip_height + C.board_vertical_edge //2
+        y = C.board_slot_coordinates[(C.board_rows-1,0)][1] + C.chip_height + C.board_vertical_edge //2 + 5
         C.error_message_coord = (x,y)
 
         x = C.next_player_button[0][0] //4
@@ -164,7 +179,18 @@ class C:
         width = C.chip_width * 13
         height = C.board_vertical_edge * 2
         C.error_message_rect = (x, y, width, height)
+        C.error_message_behind = (x-2, y-2, width+ 4, height+4)
 
+    @staticmethod
+    def setup_tray_up_and_down_buttons():
+        arrow_width = 35
+        arrow_height = 30
+        x = C.tray_background_x + C.tray_background_width - C.tray_background_extra_width + 10
+        y_up = C.tray_grid_y + int(C.chip_height *0.5 - arrow_height // 2) 
+        y_down =  C.tray_grid_y + int(C.chip_height *1.5 - arrow_height // 2) 
+        C.tray_down_button = (x, y_down, arrow_width, arrow_height)
+        C.tray_up_button = (x, y_up, arrow_width, arrow_height)
+   
     @staticmethod 
     def setup_next_player_button():
         width = C.tray_background_x // 2
@@ -295,13 +321,13 @@ class C:
     @staticmethod
     def setup_chip_dimentions():
         C.chip_width = int(((C.window_width - C.board_horizontal_edge * 2) - C.slot_horizontal_spacing * (C.board_cols - 1)) / C.board_cols) 
-        C.chip_height = int((((C.window_height - C.board_vertical_edge * 2) - C.tray_background_extra_height * 2 ) - C.slot_vertical_spacing * C.board_rows)  / (C.board_rows + C.tray_rows))
+        C.chip_height = int((((C.window_height - C.board_vertical_edge * 2) - C.tray_background_extra_height * 2 ) - C.slot_vertical_spacing * C.board_rows)  / (C.board_rows + C.tray_visible_rows))
         C.chip_sufrace = pygame.Surface((C.chip_width, C.chip_height))
 
     @staticmethod
     def setup_tray():
         C.tray_grid_width = (C.chip_width * C.tray_cols) + C.tray_slot_horizontal_spacing * (C.tray_cols - 1) 
-        C.tray_grid_height = (C.chip_height * C.tray_rows) + C.tray_slot_vertical_spacing * (C.tray_rows - 1)
+        C.tray_grid_height = (C.chip_height * C.tray_visible_rows) + C.tray_slot_vertical_spacing * (C.tray_visible_rows - 1)
         C.tray_background_width = C.tray_grid_width + (C.tray_background_extra_width * 2)
         C.tray_background_height = C.tray_grid_height + (C.tray_background_extra_height * 2)
 

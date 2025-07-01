@@ -35,6 +35,7 @@ class GameRules:
         chips_checked = []
         total_amount = 0
         for chip in self.move_manager.chips_placed_this_turn:
+            print(f'validation chip: {chip}')
             if chip not in chips_checked:
                 slot = self.chip_tracker.get_position_of_chip(chip)
                 chips_in_combination = self.chip_validator.get_validation_chips(slot)

@@ -4,7 +4,20 @@ from src.Config.config import C
 class TrayGrid:
     def __init__(self):
         self.slots = {}
+        self.visible_row_start = 0  # Index of the first visible row
+        self.visible_rows = 2
         self.create_coordinates()
+
+    def update_visible_slot_coordinates(self):
+        C.tray_slot_coordinates = {}
+        start_row = self.visible_row_start
+        print(self.visible_row_start)
+        for visible_row in range(self.visible_rows):
+            actual_row = start_row + visible_row
+            for col in range(C.tray_cols):
+                x = C.tray_grid_x + col * (C.chip_width + C.tray_slot_horizontal_spacing)
+                y = C.tray_grid_y + visible_row * (C.chip_height + C.tray_slot_vertical_spacing)
+                C.tray_slot_coordinates[(actual_row, col)] = (x, y)
 
 
     def get_first_open_slot(self):

@@ -62,17 +62,18 @@ class MoveManager:
                 'from': origin_pos,
                 'to': (grid_type, target_slots)
             })
-            print(f'logger: origin pos: {origin_pos}, chips: {chips}')
+     
             for indx, chip in enumerate(chip for chip in chips if chip is not None):
                 grid_slots[target_slots[indx]] = chip
 
             if grid_type == 'board' and origin_pos[0] == 'tray':
                 for chip in chips:
-                    self.chips_placed_this_turn.add(chip)
+                    if chip is not None:
+                        self.chips_placed_this_turn.add(chip)
             elif grid_type == 'tray':
                 for chip in chips:
-                    self.chips_placed_this_turn.discard(chip)
-            print(self.chips_placed_this_turn)
+                    if chip is not None:
+                        self.chips_placed_this_turn.discard(chip)
             self.chip_validator.validate_current_state()
 
     def move_single_chip_to(self, hovering_slot, chip, origin_pos):
@@ -125,7 +126,6 @@ class MoveManager:
             self.get_grid(grid_type)[slot] = None
     
     def chip_picked_up(self, grid_type, slot):
-        # print(f'subs: gird_type = {grid_type}, slot = {slot}')
         self.get_grid(grid_type)[slot] = None
 
 
@@ -136,6 +136,13 @@ class MoveManager:
         last_move = self.move_history.pop()
         action = last_move['action']
 
+        draw_chip_factor = True
+        if self.chip_tracker.get_position_in_tray(self.one_chip_drawn) is not None:
+            drawn_chip_slot = self.chip_tracker.get_position_in_tray(self.one_chip_drawn)
+            self.get_grid('tray')[drawn_chip_slot] = None
+        else:
+            draw_chip_factor = False
+
         if action in ['place_on_board', 'place_on_tray']:
             to_grid_type, from_coords = last_move['to']
             from_grid_type, to_coords = last_move['from']
@@ -143,10 +150,10 @@ class MoveManager:
             self.get_grid(from_grid_type)[to_coords] = last_move['chip']
             if to_grid_type == 'board' and from_grid_type == 'tray':
                 if last_move['chip'] in self.chips_placed_this_turn:
-                    self.chips_placed_this_turn.remove(last_move['chip'])
+                    self.chips_placed_this_turn.discard(last_move['chip'])
             elif to_grid_type == 'tray' and from_grid_type == 'board':
                 if last_move['chip'] not in self.chips_placed_this_turn:
-                    self.chips_placed_this_turn.append(last_move['chip'])
+                    self.chips_placed_this_turn.add(last_move['chip'])
             
             self.chip_validator.validate_current_state()
 
@@ -160,19 +167,27 @@ class MoveManager:
             for indx, chip in enumerate(chips):
                 self.get_grid(from_grid_type)[from_coords[indx]] = chip
             if to_grid_type == 'board' and from_grid_type == 'tray':
-                for chips in chips:
-                    if chip in self.chips_placed_this_turn:
-                        self.chips_placed_this_turn.remove(chip)
+                for chip in chips:
+                    if chip in self.chips_placed_this_turn and chip is not None:
+                        self.chips_placed_this_turn.discard(chip)
             elif to_grid_type == 'tray' and from_grid_type == 'board':
                 for chip in chips:
-                    if chip not in self.chips_placed_this_turn:
-                        self.chips_placed_this_turn.append(chip)
-
-            print(self.chips_placed_this_turn)
+                    if chip not in self.chips_placed_this_turn and chip is not None:
+                        self.chips_placed_this_turn.add(chip)
+        
         
             self.chip_validator.validate_current_state()
-        
-        elif action == 'place_chip_from_hidden':
+
+        print(self.chips_placed_this_turn)
+
+        if draw_chip_factor:
+            if self.get_grid('tray')[drawn_chip_slot] == None:
+                self.get_grid('tray')[drawn_chip_slot] = self.one_chip_drawn
+            else:
+                slot = self.chip_tracker.tray_grid.get_first_open_slot()
+                self.get_grid('tray')[slot] = self.one_chip_drawn
+
+        if action == 'place_chip_from_hidden':
             drawn_chip_slot = self.chip_tracker.get_position_in_tray(self.one_chip_drawn)
             self.get_grid('tray')[drawn_chip_slot] = None
             self.undo_last_move()

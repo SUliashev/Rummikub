@@ -19,6 +19,8 @@ class PlayerInteraction:
         if self.warning_window == True:
             self.handle_warning_window(mouse_x, mouse_y)
         
+        if self.hanlde_change_of_tray_grid(mouse_x, mouse_y):
+            return
 
         if self.button_in_right_rect_pressed(mouse_x, mouse_y):
             return
@@ -28,6 +30,19 @@ class PlayerInteraction:
 
         self.drag_manager.mouse_button_down_actions(mouse_x, mouse_y)
 
+    def hanlde_change_of_tray_grid(self, mouse_x, mouse_y):
+        if pygame.Rect(C.tray_up_button).collidepoint(mouse_x, mouse_y):
+            self.chip_tracker.tray_grid.visible_row_start = max(
+                0, self.chip_tracker.tray_grid.visible_row_start - 1)
+            self.chip_tracker.tray_grid.update_visible_slot_coordinates()
+            return True
+        elif pygame.Rect(C.tray_down_button).collidepoint(mouse_x, mouse_y):
+            max_start = C.tray_rows - self.chip_tracker.tray_grid.visible_rows
+            self.chip_tracker.tray_grid.visible_row_start = min(
+                max_start, self.chip_tracker.tray_grid.visible_row_start + 1)
+            self.chip_tracker.tray_grid.update_visible_slot_coordinates()
+            return True
+        return False
 
     def handle_next_player_ready_button(self, mouse_x, mouse_y):
         if self.next_player_turn_wait == True:
