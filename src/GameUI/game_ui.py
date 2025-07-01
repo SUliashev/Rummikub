@@ -15,7 +15,28 @@ class GameUI:
         self.message = ""
         self.message_timer = 0 
         self.subscribe_events()
-    
+
+        
+    def draw_next_player_ready_overlay(self):
+        if self.player_interaction.next_player_turn_wait == True:
+            overlay = pygame.Surface((C.window_width, C.window_height), pygame.SRCALPHA)
+            overlay.fill((0, 0, 0, 120))  # RGBA, alpha=120 for shade
+            self.window.blit(overlay, (0, 0))
+
+
+            button_rect = pygame.Rect(C.next_player_ready_button)
+            pygame.draw.rect(self.window, (69, 69, 69), button_rect, border_radius=20)
+
+            # Draw button text
+            font_size = int(C.next_player_ready_button[3] * 0.5)
+            font = pygame.font.SysFont(None, font_size)
+            text = font.render("Next Player Ready", True, (255, 255, 255))
+            text_rect = text.get_rect(center=button_rect.center)
+            self.window.blit(text, text_rect)
+
+            # Optionally, save the rect for click detection
+            self.next_player_ready_rect = button_rect
+
     def subscribe_events(self):
         self.dispatcher.subscribe('error', self.set_message)
 
@@ -24,9 +45,11 @@ class GameUI:
         self.message_timer = 120
 
     def draw_message(self):
+        error_rect = pygame.Rect(C.error_message_rect)
+        pygame.draw.rect(self.window, (50,100,100), error_rect, border_radius=5)                 
         if self.message and self.message_timer > 0:
-            font = pygame.font.SysFont(None, 36)
-            text = font.render(self.message, True, (200, 50, 0))
+            font = pygame.font.SysFont(None, int(C.error_message_rect[3]*0.9))
+            text = font.render(self.message, True, (255, 255, 255))
             self.window.blit(text, C.error_message_coord)
             self.message_timer -= 1
         elif self.message_timer <= 0:
@@ -52,7 +75,8 @@ class GameUI:
         self.draw_tray_grid()
 
         self.draw_next_player_button()
-
+        self.draw_message()
+       
         self.draw_board_slots()
         self.draw_side_rectangle()
         self.draw_right_side_buttons()
@@ -63,7 +87,9 @@ class GameUI:
         self.draw_selection_rectangle()
         self.show_selected_chips()
         self.draw_undo_all_confirmation()
-        self.draw_message()
+        self.draw_next_player_ready_overlay()
+        
+
 
     def show_selected_chips(self):
         if self.drag_manager.selected_chips:
@@ -278,35 +304,40 @@ class GameUI:
         
 
     def draw_tray_grid(self): 
-        for (row, col), (x, y) in C.tray_slot_coordinates.items():
-            item_in_slot = self.chip_tracker.tray_grid.slots[(row, col)]
-            if item_in_slot is None:
-                self.draw_empty_slot(x, y)
-            elif isinstance(item_in_slot, Chip):
-                self.draw_chip(item_in_slot, x, y)
+        if self.player_interaction.next_player_turn_wait == False:
+            for (row, col), (x, y) in C.tray_slot_coordinates.items():
+                item_in_slot = self.chip_tracker.tray_grid.slots[(row, col)]
+                if item_in_slot is None:
+                    self.draw_empty_slot(x, y)
+                elif isinstance(item_in_slot, Chip):
+                    self.draw_chip(item_in_slot, x, y)
     
     
     def draw_undo_all_confirmation(self):
         if self.player_interaction.warning_window == True:
-            width, height = 400, 200
+            overlay = pygame.Surface((C.window_width, C.window_height), pygame.SRCALPHA)
+            overlay.fill((0, 0, 0, 120)) 
+            self.window.blit(overlay, (0, 0))
+
+            width = C.window_width // 3
+            height = C.window_height // 3
             x = (C.window_width - width) // 2
             y = (C.window_height - height) // 2
-            pygame.draw.rect(self.window, (240, 240, 240), (x, y, width, height), border_radius=15)
-            pygame.draw.rect(self.window, (0, 0, 0), (x, y, width, height), 3, border_radius=15)
+            pygame.draw.rect(self.window, (240, 240, 240), C.undo_all_white_rect, border_radius=15)
+            pygame.draw.rect(self.window, (0, 0, 0), C.undo_all_black_rect, 3, border_radius=15)
 
-            # Text
-            font = pygame.font.SysFont(None, 24)
+        
+            font = pygame.font.SysFont(None, int(C.undo_all_main_text_fontsize))
             text = font.render("Are you sure you want to undo all the moves?", True, (0, 0, 0))
-            self.window.blit(text, (x + 20, y + 40))
+            self.window.blit(text, (x + 60, y + 40))
 
-            # Yes button (green)
-            yes_rect = pygame.Rect(x + 50, y + 120, 100, 40)
+            yes_rect = pygame.Rect(C.undo_cofirmation_button)
             pygame.draw.rect(self.window, (0, 200, 0), yes_rect, border_radius=10)
             yes_text = font.render("Yes", True, (255, 255, 255))
             self.window.blit(yes_text, (yes_rect.x + 25, yes_rect.y + 5))
 
             # No button (red)
-            no_rect = pygame.Rect(x + 250, y + 120, 100, 40)
+            no_rect = pygame.Rect(x + width - 150, y + int(height* 0.8 ), 100, 40)
             pygame.draw.rect(self.window, (200, 0, 0), no_rect, border_radius=10)
             no_text = font.render("No", True, (255, 255, 255))
             self.window.blit(no_text, (no_rect.x + 30, no_rect.y + 5))

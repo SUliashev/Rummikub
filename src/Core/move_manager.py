@@ -9,9 +9,15 @@ class MoveManager:
         self.subscribe_events()
         
     def draw_one_chip(self):
-        if self.one_chip_drawn == False:
-            self.chip_tracker.place_chip_in_tray_from_hidden()
-            self.one_chip_drawn = True
+        if self.one_chip_drawn == None:
+            chip = self.chip_tracker.place_chip_in_tray_from_hidden()
+            self.one_chip_drawn = chip
+            self.move_history.append({
+                'action': 'place_chip_from_hidden',
+                'chip': chip,
+                'from': 'tray',
+                'to': 'tray'
+            })
         else:
             self.dispatcher.dispatch('error', message="Only one chip can be drawn per turn")
 
@@ -27,7 +33,7 @@ class MoveManager:
             if not self.chip_validator.validate_move(hovering_slots, chips):
                 valid_move = False
             if valid_move == True:
-                if hovering_slots[0] == 'tray':
+                if hovering_slots[0] == 'tray' and origin_pos[0] == 'board':
                     for chip in chips:
                         if chip not in self.chips_placed_this_turn:
                             valid_move =False
@@ -42,7 +48,6 @@ class MoveManager:
             for idx, chip in enumerate(chips):
                 if chip is not None:
                     origin_grid[origin_slots[idx]] = chip
-            self.chip_validator.validate_current_state()
             self.dispatcher.dispatch('error', message="Cannot place chip here")
             return
         
@@ -94,8 +99,8 @@ class MoveManager:
             valid_move = False
 
         self.get_grid(grid_type)[slot] = chip
-
-        self.chip_validator.validate_current_state()
+        if valid_move == True:
+            self.chip_validator.validate_current_state()
 
         if valid_move == True:
             self.move_history.append({
@@ -113,17 +118,15 @@ class MoveManager:
         elif grid_type == 'tray':
                     self.chips_placed_this_turn.discard(chip)
         
-        print(self.chips_placed_this_turn)
+
 
     def multiple_chips_picked_up(self, grid_type, chip_positions):
         for slot in chip_positions:
             self.get_grid(grid_type)[slot] = None
-        self.chip_validator.validate_current_state()
-
+    
     def chip_picked_up(self, grid_type, slot):
         # print(f'subs: gird_type = {grid_type}, slot = {slot}')
         self.get_grid(grid_type)[slot] = None
-        self.chip_validator.validate_current_state()
 
 
     def undo_last_move(self):
@@ -148,7 +151,7 @@ class MoveManager:
             self.chip_validator.validate_current_state()
 
         elif action == 'place_multiple_chips':
-            to_grid_type, to_coords = last_move['to']    #from as in we're undoing from 
+            to_grid_type, to_coords = last_move['to']    
             from_grid_type, from_coords = last_move['from']
 
             for coord in to_coords:
@@ -168,7 +171,17 @@ class MoveManager:
             print(self.chips_placed_this_turn)
         
             self.chip_validator.validate_current_state()
-    
+        
+        elif action == 'place_chip_from_hidden':
+            drawn_chip_slot = self.chip_tracker.get_position_in_tray(self.one_chip_drawn)
+            self.get_grid('tray')[drawn_chip_slot] = None
+            self.undo_last_move()
+            if self.get_grid('tray')[drawn_chip_slot] == None:
+                self.get_grid('tray')[drawn_chip_slot] = last_move['chip']
+            else:
+                slot = self.chip_tracker.tray_grid.get_first_open_slot()
+                self.get_grid('tray')[slot] = last_move['chip']
+                
     def undo_all_moves(self):
         for i in range(len(self.move_history)):
             self.undo_last_move()
@@ -186,4 +199,4 @@ class MoveManager:
     def end_turn(self):
         self.move_history.clear()
         self.chips_placed_this_turn.clear()
-        self.one_chip_drawn = False
+        self.one_chip_drawn = None

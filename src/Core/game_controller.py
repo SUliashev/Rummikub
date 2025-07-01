@@ -34,25 +34,41 @@ class GameController:
         self.deal_initial_chips()
         self.subscribe_events()
 
-        self.drag_manager = DragManager(self.chip_tracker, self.dragging_chip, self.dispatcher)  # move_manager is None for now
-        self.chip_validator = ChipValidator(self.chip_tracker, self.drag_manager, self.dispatcher)
-        self.move_manager = MoveManager(self.chip_tracker, self.chip_validator, self.dispatcher)
-
-
-        self.game_rules = GameRules(self.players, self.chip_tracker, self.chip_validator, self.move_manager, self.dispatcher)
+        self.drag_manager = DragManager(
+            self.chip_tracker, 
+            self.dragging_chip, 
+            self.dispatcher)  # 
+       
+        self.chip_validator = ChipValidator(
+            self.chip_tracker, 
+            self.drag_manager, 
+            self.dispatcher)
+       
+        self.move_manager = MoveManager(
+            self.chip_tracker, 
+            self.chip_validator, 
+            self.dispatcher)
+        
+        self.game_rules = GameRules(
+            self.current_player, 
+            self.chip_tracker, 
+            self.chip_validator, 
+            self.move_manager, 
+            self.dispatcher)
+        
         self.player_interaction = PlayerInteraction(
             self.chip_tracker,
             self.dispatcher,
-            self.drag_manager
-        )
+            self.drag_manager)
+        
         self.game_ui = GameUI(
             self.chip_tracker,
             self.chip_validator,
             self.dispatcher,
             self.player_interaction,
-            self.drag_manager
-        )
+            self.drag_manager)
 
+        self.first_player_initiated()
 
     def run(self):
         clock = pygame.time.Clock()
@@ -81,20 +97,15 @@ class GameController:
 
 
     def next_turn(self):
-        can_end, msg = self.game_rules.can_end_turn(self.current_player)
- 
-        if not can_end:
-            print(msg)
-            return
         self.game_rules.on_turn_end(self)
         self.current_player_index = (self.current_player_index + 1) % len(self.players)
         self.current_player = self.players[self.current_player_index]
-        
+        self.game_rules.current_player = self.current_player
         self.chip_tracker.tray_grid = self.current_player.tray_grid
-        # self.current_player.tray_grid.
         self.game_ui.current_player = self.current_player
         self.current_player.end_turn()
         self.move_manager.end_turn()
+        self.player_interaction.next_player_turn_wait = True
         print(f"Switched to {self.current_player.name}")
 
 
@@ -131,10 +142,18 @@ class GameController:
         self.dispatcher.dispatch('error', message='Can only sort tray after 3 moves')
 
     def subscribe_events(self):
-        self.dispatcher.subscribe('button next player pressed', self.next_turn)
+        self.dispatcher.subscribe('next player turn', self.next_turn)
         self.dispatcher.subscribe('button Sort Chips pressed', self.sort_chips_in_tray)
         pass
  
 
+    def first_player_initiated(self):
+        self.game_rules.on_turn_end(self)
+        self.current_player = self.players[0]
+        self.game_rules.current_player = self.current_player
+        self.chip_tracker.tray_grid = self.current_player.tray_grid
+        self.game_ui.current_player = self.current_player
+        self.current_player.end_turn()
+        self.move_manager.end_turn()
 
 

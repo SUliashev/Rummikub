@@ -9,10 +9,16 @@ class PlayerInteraction:
         self.warning_window = False
         self.mouse_x = 0
         self.mouse_y = 0
+        self.next_player_turn_wait = False
 
     def mouse_button_down(self, mouse_x : int, mouse_y: int):
+        if self.next_player_turn_wait == True:
+            self.handle_next_player_ready_button(mouse_x, mouse_y)
+            return
+        
         if self.warning_window == True:
             self.handle_warning_window(mouse_x, mouse_y)
+        
 
         if self.button_in_right_rect_pressed(mouse_x, mouse_y):
             return
@@ -22,6 +28,11 @@ class PlayerInteraction:
 
         self.drag_manager.mouse_button_down_actions(mouse_x, mouse_y)
 
+
+    def handle_next_player_ready_button(self, mouse_x, mouse_y):
+        if self.next_player_turn_wait == True:
+            if pygame.Rect(C.next_player_ready_button).collidepoint(mouse_x, mouse_y):
+                self.next_player_turn_wait = False
 
     def handle_warning_window(self, mouse_x, mouse_y):
         if pygame.Rect(C.undo_cofirmation_button).collidepoint(mouse_x, mouse_y):

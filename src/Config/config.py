@@ -35,8 +35,6 @@ class C:
     side_rectangle_horizontal_space_from_button_to_tray = 40
     side_rectangle_vertical_space_from_button_to_tray = 20
 
-    right_buttons_width = 250
-    right_buttons_height = 70
 
     
 
@@ -85,7 +83,12 @@ class C:
     tray_background = None
 
     '''Undo all moves waring window'''
-
+    undo_all_white_rect = None
+    undo_all_black_rect = None
+    undo_all_main_text_fontsize =None
+    undo_all_yes_rect = None
+    undo_all_no_rect = None
+    undo_all_yes_text_size = None
 
     '''Buttons To The Right Ratio'''
     right_rect = None
@@ -100,6 +103,10 @@ class C:
     next_player_button = None
 
     error_message_coord = None
+    error_message_rect = None
+
+    next_player_ready_button = None
+
 
     @staticmethod
     def setup_config():
@@ -111,7 +118,7 @@ class C:
 
         # for testing to see the terminal
         # C.window = pygame.display.set_mode((1600, 800), pygame.RESIZABLE)
-        
+
         C.window_width = C.window.get_width()
         C.window_height = C.window.get_height()
 
@@ -131,15 +138,32 @@ class C:
         C.set_up_confirmation_button()
 
         C.setup_error_message_coord()
-      
-        C.right_buttons_width =  C.tray_background_x // 2 * 0.8
-        C.right_buttons_height = C.right_buttons_width // 3
 
+        C.setup_undo_all_moves_confirmation()
+
+        C.setup_next_player_ready_button()
+      
+
+
+    
+    def setup_next_player_ready_button():
+        button_width = int(C.window_width * 0.4)
+        button_height = int(C.window_height * 0.15)
+        button_x = (C.window_width - button_width) // 2
+        button_y = (C.window_height - button_height) // 3
+        C.next_player_ready_button = (button_x, button_y, button_width, button_height)
+    
     @staticmethod
     def setup_error_message_coord():
         x =  C.next_player_button[0][0] //3
         y = C.board_slot_coordinates[(C.board_rows-1,0)][1] + C.chip_height + C.board_vertical_edge //2
         C.error_message_coord = (x,y)
+
+        x = C.next_player_button[0][0] //4
+        y = C.board_slot_coordinates[(C.board_rows-1,0)][1] + C.chip_height + C.board_vertical_edge // 4
+        width = C.chip_width * 13
+        height = C.board_vertical_edge * 2
+        C.error_message_rect = (x, y, width, height)
 
     @staticmethod 
     def setup_next_player_button():
@@ -182,7 +206,11 @@ class C:
 
     @staticmethod
     def set_up_confirmation_button():
-        C.undo_cofirmation_button = ((C.window_width - 400) // 2 + 50, (C.window_height - 200) // 2 + 120, 100, 40)
+        width = C.window_width // 3
+        height = C.window_height // 3
+        x = (C.window_width - width) // 2
+        y = (C.window_height - height) // 2
+        C.undo_cofirmation_button = (x  + 50, y + int(height* 0.8) , 100, 40)
     
     @staticmethod
     def setup_right_rectangle():
@@ -193,19 +221,43 @@ class C:
         height = C.tray_background_height
         C.right_rect = (x, y, width, height)
 
-    def calculate_font_size(self,text: str, button_width: int, button_height: int):
-        font_size = int(button_width)   
+    @staticmethod 
+    def calculate_font_size(str_text: str, button_width: int, button_height: int):
+        font_size = int(button_height)   
         font = pygame.font.SysFont(None, font_size)
-        text = font.render(text, True, (255, 255, 255))
+        text = font.render(str_text, True, (255, 255, 255))
         text_rect = text.get_rect(center=(button_width, button_width))
         while text_rect.width > button_width * 0.8 and font_size > 10:
             font_size -= 1
             font = pygame.font.SysFont(None, font_size)
-            text = font.render(text, True, (255, 255, 255))
+            text = font.render(str_text, True, (255, 255, 255))
             text_rect = text.get_rect(center=(button_width, button_width))
 
         return font_size
-    
+
+    @staticmethod
+    def setup_undo_all_moves_confirmation():
+        width = C.window_width // 3
+        height = C.window_height // 3
+        x = (C.window_width - width) // 2
+        y = (C.window_height - height) // 2
+        C.undo_all_white_rect = (x, y, width, height)
+        C.undo_all_black_rect = (x, y, width, height)
+        C.undo_all_main_text_fontsize = C.calculate_font_size("Are you sure you want to undo all the moves?",width, height )
+
+        button_width = int(width * 0.28)
+        button_height = int(height * 0.18)
+        button_y = y + int(height * 0.65)
+
+        # Yes button (left side)
+        yes_x = x + int(width * 0.12)
+        C.undo_all_yes_rect = (yes_x, button_y, button_width, button_height)
+        C.undo_all_yes_text_size = C.calculate_font_size("Yes", button_width, button_height)
+
+    # No button (right side)
+        no_x = x + width - int(width * 0.12) - button_width
+        C.undo_all_no_rect = (no_x, button_y, button_width, button_height)
+        
     @staticmethod
     def setup_right_buttons():
 

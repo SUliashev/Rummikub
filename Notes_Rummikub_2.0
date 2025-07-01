@@ -1,19 +1,6 @@
 To do:
 
-issue in draggin multiple chips to tray from tray, (perhaps from board also)
-
-issue in going to the next move (says that len of chips_placed_this_turn is 0)
-for undoing all moves, need to keep track of the draw chip, if all moves are returned, make sure the chip is placed in the first available slot
-    can actualy add this to move history, if the action is chip drawn, the move is skiped and deleted 
-
-
-from tray to tray
-multiple chips disappear
-one chip needs to be drawn before ending the move
-
-next player hides the current tray and displays the next one once the next player presses go
-
-tray grid sc
+tray needs to have an option with arrows so that the displayed items can be moved up or draw_hovering_slot
 
 to adjust the sprite generator
 
@@ -21,11 +8,8 @@ can work a bit on the warning window
 
 add menu with selection of the player amount
 
+add player winning the game
 
-
-Notes for improvement:
-i did not manage to make the dragging chip be drawn via event of mouse movement, the drawing of it was called prior to the board being drawn, thus I could not draw it correctly
-Ended up dispatching the x and y coordinates or the mouse to the chiptracker, the moving chip is then drawn based on those coordinates
 
 
 Some explanation on the classes: 
