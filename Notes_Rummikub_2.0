@@ -1,8 +1,7 @@
 To do:
 
 
-improve code
-
+chip_validator, still issue with the validation when a wrong turn is made
 
 debug
 - an issue is happening when the next player adds a chip to an existing combination, then moves the combination, and undoes the move: chip appear in his tray 

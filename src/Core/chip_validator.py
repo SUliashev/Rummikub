@@ -27,7 +27,7 @@ class ChipValidator:
             if item_in_slot is None:
                 self.slots_on_board[(row, col)] = True
             else:
-                if len(self.get_validation_chips((row, col))) == 1 or len(self.get_validation_chips((row, col))) < 3:
+                if  len(self.get_validation_chips((row, col))) < 3:
                     self.slots_on_board[(row, col)] = False
                     all_slots_valid = False
                     continue
@@ -64,7 +64,7 @@ class ChipValidator:
         
         valid_move = True
         for slot, item_in_slot in self.slots.items():
-            if not item_in_slot:
+            if item_in_slot == None:
                 continue
             else:
                 if not self.validate_combination(self.get_validation_chips(slot, self.slots)):
@@ -146,21 +146,22 @@ class ChipValidator:
             return total
 
 
-    def get_validation_chips(self, slot: tuple[int, int], grid: dict[tuple, Chip]=None) -> list[Chip]:
+    def get_validation_chips(self, slot: tuple[int, int], grid: dict[tuple[int, int], Chip]=None) -> list[Chip]:
         if grid == None:
             grid = self.chip_tracker.board_grid.slots
         chips = []
         row, col = slot
         i = 1
         while grid.get((row, col - i)) is not None:
-            chips.append(self.slots[(row, col - i)])
+            chips.append(grid[(row, col - i)])
             i += 1
         chips = chips[::-1]
         chips.append(grid[(row,col)])
         i = 1
         while grid.get((row, col + i)) is not None:
-            chips.append(self.slots[(row, col + i)])
+            chips.append(grid[(row, col + i)])
             i += 1
+        print(chips)
         return chips
     
 

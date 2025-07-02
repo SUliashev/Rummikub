@@ -85,7 +85,7 @@ class GameController:
 
         self.first_player_initiated()
 
- 
+
 
     def run(self) -> None:
         clock = pygame.time.Clock()
@@ -192,8 +192,8 @@ class GameController:
         self.dispatcher.subscribe('button Sort Chips pressed', self.sort_chips_in_tray)
         self.dispatcher.subscribe('Exit Game', self.exit_game)
         
-        self.dispatcher.subscribe('multiple chips placed', self.error_manager)
-        self.dispatcher.subscribe('chip_picked_up', self.error_manager)
+        # self.dispatcher.subscribe('multiple chips placed', self.error_manager)
+        # self.dispatcher.subscribe('chip_picked_up', self.error_manager)
 
 
     def exit_game(self) -> None:
