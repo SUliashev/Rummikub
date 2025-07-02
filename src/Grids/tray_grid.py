@@ -5,7 +5,7 @@ class TrayGrid:
     slots: dict[tuple[int, int], Chip]
     visible_row_start: int
     visible_rows: int
-    
+
     def __init__(self):
         self.slots = {}
         self.visible_row_start = 0  # Index of the first visible row

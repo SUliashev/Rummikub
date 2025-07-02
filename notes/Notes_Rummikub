@@ -1,0 +1,25 @@
+
+Some explanation on the classes: 
+
+config: holds data on the sizes of the object(buttons, chips, window width, ect.), uppon starting, it creates sizes of everyting based on the resolution of the window
+
+chip_tracker : contains tray_grids, board_grids and hidden chips, it is the true state of the game
+chip_validator : checks whether chip combinations are valid based on the values in the chip_tracker and values pushed via move manager
+chip: class for the chip itself, holds image, color, number (can be a joker), and the copy
+event_dispatcher: is initiated before the game is setup, communiates between classes(mainly for chip placements and pressing of buttons)
+game_controller: creates the class objects 
+game_rules: rules which determine whether a player can excecute actions (such as draw chips, end his turn)
+move_manager: gets info from dispatecher, communicates with the chipvalidator. based on validation places a chip in a new slot, or returns it to its original position
+players: an individual player, holds one tray_grid and info on the players move amount
+
+drag_manager: gets info from player_interaction, checks if a chip is available in those x/y coordinates, communicates to the dispatecher that chips are picked up and placed. Also holds the dragging_chip class
+dragging_chip: a state of the chip while it is being moved around the board. can hold multiple chips 
+gameUI: renders the current state of the game based on all connected classes
+player_interaction: checks the events and pushes actions to drag_manager and event_dispatcher
+sprite_generation: creates images of all the chips 
+
+board_grid: stores xy coordinates of slot locations and the item within slot
+tray_grid: holds chips and chip coordinates for individual players
+
+
+

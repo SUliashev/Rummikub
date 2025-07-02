@@ -37,7 +37,7 @@ class ChipTracker:
 
     def place_chip_in_tray_from_hidden(self) -> Chip:
         if not self.hidden_chips:
-            print("No hidden chips left!")
+            self.dispatcher.dispatch('error', 'No hidden chips left')
             return
 
         chip = self.hidden_chips.pop()

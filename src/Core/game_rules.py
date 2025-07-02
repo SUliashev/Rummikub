@@ -4,6 +4,13 @@ from src.Core.chip_validator import ChipValidator
 from src.Core.move_manager import MoveManager
 from src.Core.event_dispatcher import EventDispatcher
 class GameRules:
+    current_player:Player
+    chip_tracker: ChipTracker
+    chip_validator: ChipValidator
+    move_manager: MoveManager
+    dispatcher: EventDispatcher
+    turn_counter: int
+
     def __init__(self, current_player: Player, chip_tracker: ChipTracker, chip_validator: ChipValidator, move_manager: MoveManager, dispatcher: EventDispatcher):
         self.current_player = current_player
         self.chip_tracker = chip_tracker

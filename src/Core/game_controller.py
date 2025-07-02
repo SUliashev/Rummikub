@@ -255,8 +255,8 @@ class GameController:
         self.dispatcher.subscribe('button Sort Chips pressed', self.sort_chips_in_tray)
         self.dispatcher.subscribe('Exit Game', self.exit_game)
         
-        self.dispatcher.subscribe('chip placed on slot' , self.check_chip_duplicates_and_missing)
-        self.dispatcher.subscribe('multiple chips placed', self.check_chip_duplicates_and_missing)
+        # self.dispatcher.subscribe('chip placed on slot' , self.check_chip_duplicates_and_missing) # for debugging
+        # self.dispatcher.subscribe('multiple chips placed', self.check_chip_duplicates_and_missing)
 
 
     def exit_game(self) -> None:
