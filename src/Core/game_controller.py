@@ -14,6 +14,7 @@ from src.Core.chip_validator import ChipValidator
 from src.GameUI.player_interaction import PlayerInteraction
 from src.Core.move_manager import MoveManager
 from src.GameUI.drag_manager import DragManager
+from collections import Counter
 import random
 
 class GameController:
@@ -132,7 +133,7 @@ class GameController:
         for color in colors:
             for number in numbers:
                 for copy in range(2):  # Two of each chip
-                    chip = Chip(self.sprites[f"{color}_{number}_1"], color=color, number=number, is_joker= False, copy=copy)
+                    chip = Chip(self.sprites[f"{color}_{number}"], color=color, number=number, is_joker= False, copy=copy)
                     hidden_chips.append(chip)
 
         for i in range(2):
@@ -144,23 +145,85 @@ class GameController:
 
 
     def deal_initial_chips(self) -> None:
-        for _ in range(24):
+        for _ in range(14):
             for player in self.players:
                 self.chip_tracker.tray_grid = player.tray_grid
                 self.chip_tracker.place_chip_in_tray_from_hidden()
     
 
     def sort_chips_in_tray(self) -> None:
-        if self.current_player.turn >= 3:
-            (from_slots, from_chips, to_coordinates) = self.current_player.tray_grid.sort_chips_in_tray()
-            self.move_manager.move_history.append({
-                'action': f'chips_sorted',
-                'chip': from_chips,
-                'from': from_slots,
-                'to': to_coordinates})
+        for chip in self.chip_tracker.tray_grid.slots.values():
+            if chip is not None:
+        # if self.current_player.turn >= 3:
+                (from_slots, from_chips, to_coordinates) = self.current_player.tray_grid.sort_chips_in_tray()
+                self.move_manager.move_history.append({
+                    'action': f'chips_sorted',
+                    'chip': from_chips,
+                    'from': from_slots,
+                    'to': to_coordinates})
 
-            return
-        self.dispatcher.dispatch('error', message='Can only sort tray after 3 moves')
+                return
+        self.dispatcher.dispatch('error', message='No chips to sort')
+# ...existing code...
+
+    def check_chip_duplicates_and_missing(self, **kwargs: Callable[..., Any]) -> None:
+        # Gather all chips from hidden, board, trays, and dragging
+        all_chips = []
+        all_chips.extend(self.chip_tracker.hidden_chips)
+        all_chips.extend([chip for chip in self.chip_tracker.board_grid.slots.values() if chip is not None])
+        for player in self.players:
+            all_chips.extend([chip for chip in player.tray_grid.slots.values() if chip is not None])
+        all_chips.extend([chip for chip in self.drag_manager.dragging_chip.chips if chip is not None])
+
+        # Count chips by (color, number, is_joker)
+        def chip_key(chip):
+            return (chip.color, chip.number, chip.is_joker)
+
+        chip_counts = Counter([chip_key(chip) for chip in all_chips])
+
+        # Build expected set of chips
+        expected_keys = []
+        colors = ["red", "blue", "orange", "black"]
+        numbers = range(1, 14)
+        for color in colors:
+            for number in numbers:
+                expected_keys.append((color, number, False))
+        expected_keys.append(("purple", None, True))  # Joker
+
+        duplicates = []
+        missing = []
+
+        # Check for duplicates and missing chips
+        for key in expected_keys:
+            count = chip_counts.get(key, 0)
+            if key[2]:  # is_joker
+                expected = 2
+            else:
+                expected = 2
+            if count > expected:
+                duplicates.append((key, count))
+            elif count < expected:
+                missing.append((key, count))
+
+        if duplicates:
+            print("Duplicated chips found (more than 2):")
+            for (color, number, is_joker), count in duplicates:
+                if is_joker:
+                    print(f"Joker (count: {count})")
+                else:
+                    print(f"{color} {number} (count: {count})")
+        else:
+            print("No duplicated chips found.")
+
+        if missing:
+            print("Missing chips (less than 2):")
+            for (color, number, is_joker), count in missing:
+                if is_joker:
+                    print(f"Joker (count: {count})")
+                else:
+                    print(f"{color} {number} (count: {count})")
+        else:
+            print("No missing chips. All chips are present in correct quantity.")
 
     def error_manager(self, **kwargs: Callable[..., Any]) -> None:
         total_chips = 0
@@ -179,7 +242,7 @@ class GameController:
         total_chips += chip_in_trays
         dragging_chip = len([chip for chip in self.drag_manager.dragging_chip.chips if chip != None])
         total_chips += dragging_chip
-    
+        print('error message')
         print(f"total chips: {total_chips} should be 106")
         print(f'hidden chips: {hidden_chips}')
         print(f'chip on board: {chips_on_board}')
@@ -192,8 +255,8 @@ class GameController:
         self.dispatcher.subscribe('button Sort Chips pressed', self.sort_chips_in_tray)
         self.dispatcher.subscribe('Exit Game', self.exit_game)
         
-        # self.dispatcher.subscribe('multiple chips placed', self.error_manager)
-        # self.dispatcher.subscribe('chip_picked_up', self.error_manager)
+        self.dispatcher.subscribe('chip placed on slot' , self.check_chip_duplicates_and_missing)
+        self.dispatcher.subscribe('multiple chips placed', self.check_chip_duplicates_and_missing)
 
 
     def exit_game(self) -> None:

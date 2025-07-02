@@ -11,6 +11,7 @@ class TrayGrid:
         self.visible_row_start = 0  # Index of the first visible row
         self.visible_rows = 2
         self.create_coordinates()
+        self.update_visible_slot_coordinates()
 
 
     def get_first_open_slot(self) -> tuple[int, int]:
@@ -38,7 +39,6 @@ class TrayGrid:
     def update_visible_slot_coordinates(self) -> None:
         C.tray_slot_coordinates = {}
         start_row = self.visible_row_start
-        print(self.visible_row_start)
         for visible_row in range(self.visible_rows):
             actual_row = start_row + visible_row
             for col in range(C.tray_cols):

@@ -271,8 +271,9 @@ class GameUI:
         font_size = int(C.window_height * 0.05)
         font = pygame.font.SysFont(None, font_size)
         text = font.render(player_name, True, (255, 255, 255))
-        self.window.blit(text, C.current_player_xy)
-
+        # Center the text in the blue rectangle
+        text_rect = text.get_rect(center=blue.center)
+        self.window.blit(text, text_rect)
 
     def draw_side_rectangle(self) -> None:
         pygame.draw.rect(
@@ -395,13 +396,15 @@ class GameUI:
             yes_rect = pygame.Rect(C.undo_cofirmation_button)
             pygame.draw.rect(self.window, (0, 200, 0), yes_rect, border_radius=10)
             yes_text = font.render("Yes", True, (255, 255, 255))
-            self.window.blit(yes_text, (yes_rect.x + 25, yes_rect.y + 5))
+            yes_text_rect = yes_text.get_rect(center=yes_rect.center)
+            self.window.blit(yes_text, yes_text_rect)
 
             # No button (red)
             no_rect = pygame.Rect(x + width - 150, y + int(height* 0.8 ), 100, 40)
             pygame.draw.rect(self.window, (200, 0, 0), no_rect, border_radius=10)
             no_text = font.render("No", True, (255, 255, 255))
-            self.window.blit(no_text, (no_rect.x + 30, no_rect.y + 5))
+            no_text_rect = no_text.get_rect(center=no_rect.center)
+            self.window.blit(no_text, no_text_rect)
 
             # Save button rects for click detection
             self.undo_all_yes_rect = yes_rect

@@ -66,7 +66,6 @@ class ChipSpriteGenerator:
             if color_name == "purple":
                 continue  # Only for jokers
             for number in range(1, 14):
-                for copy in range(2):  # Two of each tile
                     chip, circle_center_y, circle_pos = create_chip_base()
                     draw = ImageDraw.Draw(chip)
                     draw.ellipse(
@@ -84,7 +83,7 @@ class ChipSpriteGenerator:
                     text_x = chip_width // 2 - text_width // 2
                     text_y = circle_center_y - text_height // 2 - vertical_shift
                     draw.text((text_x, text_y), text, fill=color_value, font=font)
-                    filename = f"{color_name}_{number}_{copy + 1}"
+                    filename = f"{color_name}_{number}"
                     result[filename] = pygame.image.fromstring(chip.tobytes(), chip.size, chip.mode)
               
 

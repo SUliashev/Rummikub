@@ -161,7 +161,6 @@ class ChipValidator:
         while grid.get((row, col + i)) is not None:
             chips.append(grid[(row, col + i)])
             i += 1
-        print(chips)
         return chips
     
 
