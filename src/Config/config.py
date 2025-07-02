@@ -1,5 +1,6 @@
 import os
 import pygame
+
 class C:
     '''CONFIGURATION VARIABLES'''
 
@@ -93,11 +94,9 @@ class C:
     '''Buttons To The Right Ratio'''
     right_rect = None
 
-
     '''Buttons To The Right Coordinates'''
     right_buttons = {}
     right_buttons_font_size = {}
-
 
     '''Next Player Button'''
     next_player_button = None
@@ -124,7 +123,6 @@ class C:
         info = pygame.display.Info()
 
         # C.window = pygame.display.set_mode((info.current_w, info.current_h), pygame.RESIZABLE)
-
 
         #small window 
         C.window = pygame.display.set_mode((1500, 800), pygame.RESIZABLE)
@@ -181,11 +179,9 @@ class C:
 
         button_rows = 2
         button_cols = 2
-        # button_count = button_rows * button_cols
         button_margin_x = 15  # horizontal margin between buttons
         button_margin_y = 15  # vertical margin between buttons
 
-        # Calculate button width and height
         button_width = (C.right_rect[2] - (button_cols + 1) * button_margin_x) // button_cols
         button_height = (C.right_rect[3] - (button_rows + 1) * button_margin_y) // button_rows
         button_names = ['Draw Chip', 'Undo Move', 'Sort Chips', 'Undo All Moves']
@@ -273,6 +269,7 @@ class C:
         C.error_message_rect = (x, y, width, height)
         C.error_message_behind = (x-2, y-2, width+ 4, height+4)
 
+
     @staticmethod
     def setup_undo_all_moves_confirmation():
         width = C.window_width // 3
@@ -292,7 +289,7 @@ class C:
         C.undo_all_yes_rect = (yes_x, button_y, button_width, button_height)
         C.undo_all_yes_text_size = C.calculate_font_size("Yes", button_width, button_height)
 
-    # No button (right side)
+        # No button (right side)
         no_x = x + width - int(width * 0.12) - button_width
         C.undo_all_no_rect = (no_x, button_y, button_width, button_height)
         

@@ -2,6 +2,10 @@ from src.Core.chip import Chip
 from src.Config.config import C
 
 class TrayGrid:
+    slots: dict[tuple[int, int], Chip]
+    visible_row_start: int
+    visible_rows: int
+    
     def __init__(self):
         self.slots = {}
         self.visible_row_start = 0  # Index of the first visible row
@@ -9,7 +13,7 @@ class TrayGrid:
         self.create_coordinates()
 
 
-    def get_first_open_slot(self):
+    def get_first_open_slot(self) -> tuple[int, int]:
         for row in range(C.tray_rows):
             for col in range(C.tray_cols):
                 if self.slots[(row, col)] is None:
@@ -17,7 +21,7 @@ class TrayGrid:
         raise ValueError('No empty trayslots available')
     
 
-    def put_chip_in_tray_from_hidden(self, chip: Chip):
+    def put_chip_in_tray_from_hidden(self, chip: Chip) -> None:
         try:
             row, col = self.get_first_open_slot()
             self.slots[(row, col)] = chip
@@ -25,13 +29,13 @@ class TrayGrid:
             print('Chip cannot be placed in tray from hidden:', e)
 
 
-    def create_coordinates(self):
+    def create_coordinates(self) -> None:
         for row in range(C.tray_rows):
             for col in range(C.tray_cols):
                 self.slots[(row, col)] = None
 
 
-    def update_visible_slot_coordinates(self):
+    def update_visible_slot_coordinates(self) -> None:
         C.tray_slot_coordinates = {}
         start_row = self.visible_row_start
         print(self.visible_row_start)
@@ -43,7 +47,7 @@ class TrayGrid:
                 C.tray_slot_coordinates[(actual_row, col)] = (x, y)
 
           
-    def sort_chips_in_tray(self):
+    def sort_chips_in_tray(self) -> tuple[list[tuple[int,int]], list[Chip], list[tuple[int,int]]]:
         all_chips_in_tray = [chip for chip in self.slots.values() if chip is not None]
         if all_chips_in_tray:
             sorted_chips = []

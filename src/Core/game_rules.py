@@ -1,5 +1,10 @@
+from src.Core.players import Player
+from src.Core.chip_tracker import ChipTracker
+from src.Core.chip_validator import ChipValidator
+from src.Core.move_manager import MoveManager
+from src.Core.event_dispatcher import EventDispatcher
 class GameRules:
-    def __init__(self, current_player, chip_tracker, chip_validator, move_manager, dispatcher):
+    def __init__(self, current_player: Player, chip_tracker: ChipTracker, chip_validator: ChipValidator, move_manager: MoveManager, dispatcher: EventDispatcher):
         self.current_player = current_player
         self.chip_tracker = chip_tracker
         self.chip_validator = chip_validator 
@@ -9,11 +14,11 @@ class GameRules:
         self.subscribe_events()
 
 
-    def subscribe_events(self):
+    def subscribe_events(self) -> None:
         self.dispatcher.subscribe('button next player pressed', self.can_end_turn)
 
 
-    def can_end_turn(self):
+    def can_end_turn(self) -> bool:
         if self.chip_validator.validate_current_state() == False:
             self.dispatcher.dispatch('error', message="Invalid board state")
             return False
@@ -33,7 +38,7 @@ class GameRules:
         self.dispatcher.dispatch('next player turn')
 
 
-    def validate_first_move(self):
+    def validate_first_move(self) -> bool:
         if len(self.move_manager.chips_placed_this_turn) == 0:
             return False
         chips_checked = []
@@ -52,11 +57,11 @@ class GameRules:
             return False
 
 
-    def on_turn_end(self, player):
+    def on_turn_end(self, player: Player) -> None:
         self.turn_counter += 1
      
 
-    def game_won(self):
+    def game_won(self) -> None:
             for slot, chip in self.chip_tracker.tray_grid.slots.items():
                 if chip is not None:
                     return False

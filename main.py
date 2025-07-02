@@ -6,7 +6,7 @@ import pygame
 import sys
 
 
-def main(players):
+def main(players) -> None:
     C.setup_config()
     dispatcher = EventDispatcher()
     chips_sprites = ChipSpriteGenerator.generate_all_chips()
@@ -15,7 +15,7 @@ def main(players):
     game_controller.run()
 
 
-def select_number_of_players():
+def select_number_of_players() -> int:
     pygame.init()
     screen = pygame.display.set_mode((600, 400))
     pygame.display.set_caption("Select Number of Players")
@@ -24,7 +24,7 @@ def select_number_of_players():
 
     selected = 2
 
-    def draw_menu():
+    def draw_menu() -> None:
         screen.fill((30, 30, 30))
         title = font.render("Select Players", True, (200, 200, 0))
         screen.blit(title, (180, 40))

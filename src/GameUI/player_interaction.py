@@ -1,8 +1,19 @@
 import pygame
 from src.Config.config import C as C
+from src.Core.chip_tracker import ChipTracker
+from src.Core.event_dispatcher import EventDispatcher
+from src.GameUI.drag_manager import DragManager
 
 class PlayerInteraction:
-    def __init__(self,  chip_tracker, dispatcher, drag_manager):
+    chip_tracker: ChipTracker
+    dispatcher: EventDispatcher
+    drag_manager: DragManager
+    warning_window: bool
+    mouse_x: int
+    mouse_y: int
+    next_player_turn_wait: bool
+
+    def __init__(self,  chip_tracker: ChipTracker, dispatcher: EventDispatcher, drag_manager: DragManager):
         self.chip_tracker = chip_tracker
         self.dispatcher = dispatcher
         self.drag_manager = drag_manager
@@ -12,7 +23,7 @@ class PlayerInteraction:
         self.next_player_turn_wait = False
 
 
-    def handle_event(self, event):
+    def handle_event(self, event: pygame.event)-> None:
         if event.type in [pygame.MOUSEBUTTONDOWN, pygame.MOUSEMOTION, pygame.MOUSEBUTTONUP]:
             mouse_x, mouse_y = event.pos
 
@@ -30,7 +41,7 @@ class PlayerInteraction:
             pass
 
 
-    def mouse_button_down(self, mouse_x : int, mouse_y: int):
+    def mouse_button_down(self, mouse_x : int, mouse_y: int) -> None:
         self.handle_end_game_buttons(mouse_x, mouse_y)
         
         if self.next_player_turn_wait == True:
@@ -47,32 +58,32 @@ class PlayerInteraction:
         self.drag_manager.mouse_button_down_actions(mouse_x, mouse_y)
 
 
-    def update_self_mouse_coordinates(self, event):
+    def update_self_mouse_coordinates(self, event: pygame.event)-> None:
         mouse_x, mouse_y = event.pos
         self.mouse_x = mouse_x
         self.mouse_y = mouse_y 
         
 
-    def handle_end_game_buttons(self, mouse_x, mouse_y):
+    def handle_end_game_buttons(self, mouse_x: int, mouse_y: int) -> bool:
         if self.chip_tracker.end_game == True:
             if pygame.Rect(C.exit_game_button).collidepoint(mouse_x, mouse_y):
                 self.dispatcher.dispatch('Exit Game')
         return False
     
     
-    def handle_next_player_ready_button(self, mouse_x, mouse_y):
+    def handle_next_player_ready_button(self, mouse_x: int, mouse_y:int) -> None:
         if self.next_player_turn_wait == True:
             if pygame.Rect(C.next_player_ready_button).collidepoint(mouse_x, mouse_y):
                 self.next_player_turn_wait = False
          
          
-    def handle_warning_window(self, mouse_x, mouse_y):
+    def handle_warning_window(self, mouse_x: int, mouse_y: int) -> None:
         if pygame.Rect(C.undo_cofirmation_button).collidepoint(mouse_x, mouse_y):
             self.dispatcher.dispatch('undo all moves')
         self.warning_window = False
         
 
-    def hanlde_change_of_tray_grid(self, mouse_x, mouse_y):
+    def hanlde_change_of_tray_grid(self, mouse_x: int, mouse_y: int) -> bool:
         if pygame.Rect(C.tray_up_button).collidepoint(mouse_x, mouse_y):
             self.chip_tracker.tray_grid.visible_row_start = max(
                 0, self.chip_tracker.tray_grid.visible_row_start - 1)
@@ -87,7 +98,7 @@ class PlayerInteraction:
         return False
 
 
-    def button_in_right_rect_pressed(self, mouse_x : int, mouse_y: int):
+    def button_in_right_rect_pressed(self, mouse_x : int, mouse_y: int) -> bool:
         if pygame.Rect(C.right_rect).collidepoint(mouse_x, mouse_y):
             for button_name, (x, y, w, h) in C.right_buttons.items():
                 button_rect = pygame.Rect(x, y, w, h)
@@ -98,6 +109,7 @@ class PlayerInteraction:
                     self.dispatcher.dispatch(f'button {button_name} pressed')
                     return True
         return False
+    
     
     def handle_next_turn_button_pressed(self, mouse_x: int, mouse_y: int) -> bool:
         if pygame.Rect(C.next_player_button[0]).collidepoint(mouse_x, mouse_y):

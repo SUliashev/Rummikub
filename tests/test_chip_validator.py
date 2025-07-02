@@ -9,13 +9,17 @@ from src.Grids.tray_grid import TrayGrid
 from src.GameUI.dragging_chip import DraggingChip
 
 class DummyChip:
-    def __init__(self, number, color, is_joker=False):
+    number: int
+    color: str
+    is_joker: bool
+    
+    def __init__(self, number: int, color: str, is_joker:bool=False):
         self.number = number
         self.color = color
         self.is_joker = is_joker
 
 class ChipValidatorTestCase(unittest.TestCase):
-    def setUp(self):
+    def setUp(self) -> None:
         C.setup_config()
         self.board_grid = BoardGrid()
         self.tray_grid = TrayGrid()
@@ -29,7 +33,7 @@ class ChipValidatorTestCase(unittest.TestCase):
         self.chip_tracker.dragging_chip = self.dragging_chip
         self.chip_validator = ChipValidator(self.chip_tracker)
 
-    def test_valid_run(self):
+    def test_valid_run(self) -> bool:
         # Place a valid run: 5-red, 6-red, 7-red
         self.board_grid.slots[(0,0)] = DummyChip(5, "red")
         self.board_grid.slots[(0,1)] = DummyChip(6, "red")
@@ -41,11 +45,8 @@ class ChipValidatorTestCase(unittest.TestCase):
         ]
         self.assertTrue(self.chip_validator.validate_combination(chips))
 
-    def test_chip_number_counting(self):
-        chips = [DummyChip(5, "red"), DummyChip(6, "red"), DummyChip(None, None, is_joker=True)]
 
-        # self.assertEqual(self.)
-    def test_invalid_run(self):
+    def test_invalid_run(self) -> bool:
         # Place an invalid run: 5-red, 7-red, 8-red (gap too big)
         self.board_grid.slots[(0,0)] = DummyChip(5, "red")
         self.board_grid.slots[(0,1)] = DummyChip(7, "red")
@@ -57,7 +58,7 @@ class ChipValidatorTestCase(unittest.TestCase):
         ]
         self.assertFalse(self.chip_validator.validate_combination(chips))
 
-    def test_valid_group_with_joker(self):
+    def test_valid_group_with_joker(self) -> bool:
         # Place a group: 5-red, 5-blue, joker
         self.board_grid.slots[(0,0)] = DummyChip(5, "red")
         self.board_grid.slots[(0,1)] = DummyChip(5, "blue")
@@ -70,7 +71,7 @@ class ChipValidatorTestCase(unittest.TestCase):
         self.assertTrue(self.chip_validator.validate_combination(chips))
 
 
-    def test_valid_group_of_same_color_with_joker(self):
+    def test_valid_group_of_same_color_with_joker(self) -> bool:
     
         self.board_grid.slots[(0,0)] = DummyChip(11, "red")
         self.board_grid.slots[(0,1)] = DummyChip(13, "red")

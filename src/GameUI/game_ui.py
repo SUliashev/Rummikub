@@ -2,12 +2,34 @@ import pygame
 from src.Core.chip import Chip
 from src.Config.config import C
 import random
+from src.Core.chip_tracker import ChipTracker
+from src.Core.chip_validator import ChipValidator
+from src.Core.event_dispatcher import EventDispatcher
+from src.GameUI.player_interaction import PlayerInteraction
+from src.GameUI.drag_manager import DragManager
+from src.Core.chip import Chip
 import math
 
 class GameUI:
-    def __init__(self, chip_tracker, chip_validator, dispatcher, player_interaction, drag_manager):
-        self.window = C.window 
+    window: pygame.display
+    chip_tracker: ChipTracker
+    drag_manager: DragManager
+    chip_validator: ChipValidator
+    dispatcher: EventDispatcher
+    player_interaction: PlayerInteraction
+    message: str
+    message_timer: int
+    fireworks: list[dict]
+    next_firework_time: int
+    end_game: bool 
 
+    def __init__(self, chip_tracker: ChipTracker, 
+                chip_validator: ChipValidator, 
+                dispatcher: EventDispatcher, 
+                player_interaction: PlayerInteraction, 
+                drag_manager: DragManager):
+        
+        self.window = C.window 
         pygame.display.set_caption("Rummikub")
         self.chip_tracker = chip_tracker  # Use ChipTracker for chip management
         self.drag_manager = drag_manager
@@ -21,7 +43,7 @@ class GameUI:
         self.end_the_game = False
         self.subscribe_events()
 
-    def draw(self):
+    def draw(self) -> None:
         self.window.fill((39,105,127))  # Clear the screen
 
         self.draw_tray_background()
@@ -47,12 +69,12 @@ class GameUI:
         self.end_of_game()
    
 
-    def draw_chip(self, chip, x, y):
+    def draw_chip(self, chip: Chip, x: int, y: int) -> None:
         chip_drawing = self.window.blit(chip.sprite, (x, y))
         return chip_drawing
     
     
-    def draw_empty_slot(self, x: int, y: int):
+    def draw_empty_slot(self, x: int, y: int) -> None:
         border_radius = 9
         thickness = 2
         pygame.draw.rect(
@@ -61,7 +83,7 @@ class GameUI:
         thickness, border_radius=border_radius)
     
 
-    def draw_invalid_placed_chip_border(self, x, y):       
+    def draw_invalid_placed_chip_border(self, x: int, y: int) -> None:       
         thickness = 5
         border_radius = 15
         pygame.draw.rect(
@@ -70,7 +92,7 @@ class GameUI:
         thickness, border_radius=border_radius)
         
             
-    def draw_chip_hue(self, x, y, width=None, height=None, outline_thickness=10, border_radius=10):
+    def draw_chip_hue(self, x:int, y:int, width:int=None, height:int=None, outline_thickness:int=10, border_radius:int=10) -> None:
         if width is None:
             width = C.chip_width
         if height is None:
@@ -91,7 +113,7 @@ class GameUI:
         self.window.blit(outline_surface, (rect_x, rect_y))
 
 
-    def draw_tray_background(self):
+    def draw_tray_background(self) -> None:
         pygame.draw.rect(
             self.window,
             (69, 69, 69), 
@@ -99,7 +121,7 @@ class GameUI:
             border_radius=20)
         
 
-    def draw_tray_grid(self): 
+    def draw_tray_grid(self) -> None: 
         if self.player_interaction.next_player_turn_wait == False:
             tray_grid = self.chip_tracker.tray_grid
             start_row = tray_grid.visible_row_start
@@ -113,7 +135,7 @@ class GameUI:
                         self.draw_chip(item_in_slot, x, y)       
     
 
-    def draw_tray_arrows(self):
+    def draw_tray_arrows(self) -> None:
         arrow_width = C.tray_down_button[2]
         arrow_height = C.tray_down_button[3]
         x = C.tray_down_button[0]
@@ -139,7 +161,7 @@ class GameUI:
         self.tray_arrow_down_rect = down_rect
 
 
-    def draw_board_slots(self):
+    def draw_board_slots(self) -> None:
         draw_numbers_next_to_slots = True       # testing stage, adds numbers next to the slots on the board
         font = pygame.font.SysFont(None, 18)
 
@@ -155,13 +177,13 @@ class GameUI:
                 self.window.blit(col_text, (x + 4, y + 2))
 
 
-    def draw_incorrect_chip_combination(self):
+    def draw_incorrect_chip_combination(self) -> None:
         for (row, col), correct in self.chip_validator.slots_on_board.items():
             if not correct:
                 self.draw_invalid_placed_chip_border(*C.board_slot_coordinates[row, col])
                 
 
-    def draw_hovering_slot(self):
+    def draw_hovering_slot(self) -> None:
         if not self.drag_manager.hovering_slot:
             return
         
@@ -183,7 +205,7 @@ class GameUI:
             self.draw_multiple_hovering_slots()
         
 
-    def show_selected_chips(self):
+    def show_selected_chips(self) -> None:
         if self.drag_manager.selected_chips:
             if not self.drag_manager.dragging_multiple_chips:
             
@@ -197,7 +219,7 @@ class GameUI:
                         self.draw_chip_hue(*slots_to_highlight[chip_positions[indx]])
         
 
-    def draw_multiple_hovering_slots(self):
+    def draw_multiple_hovering_slots(self) -> None:
         if self.drag_manager.multiple_hovering_slots:
             slot_type , slots = self.drag_manager.multiple_hovering_slots
             if slot_type == 'tray':
@@ -213,12 +235,12 @@ class GameUI:
                     3, border_radius=border_radius)
         
 
-    def set_message(self, message):
+    def set_message(self, message:str) -> None:
         self.message = message
         self.message_timer = 120
 
 
-    def draw_message(self):
+    def draw_message(self) -> None:
         behind = pygame.Rect(C.error_message_behind)
         error_rect = pygame.Rect(C.error_message_rect)
         pygame.draw.rect(self.window, (255,255,255), behind, border_radius=5)  
@@ -233,7 +255,7 @@ class GameUI:
             self.message = ""
 
 
-    def write_current_player(self):
+    def write_current_player(self) -> None:
         if hasattr(self, "current_player"):
             player_name = self.current_player.name
         elif hasattr(self.chip_tracker, "current_player"):
@@ -252,7 +274,7 @@ class GameUI:
         self.window.blit(text, C.current_player_xy)
 
 
-    def draw_side_rectangle(self):
+    def draw_side_rectangle(self) -> None:
         pygame.draw.rect(
             self.window,
             (200, 200, 200),  # Rectangle color
@@ -260,7 +282,7 @@ class GameUI:
             border_radius=12)
         
 
-    def draw_right_side_buttons(self):
+    def draw_right_side_buttons(self) -> None:
         for button_name, rect in C.right_buttons.items():
             pygame.draw.rect(
                 self.window,
@@ -276,7 +298,7 @@ class GameUI:
             self.window.blit(text, text_rect)
 
 
-    def draw_next_player_button(self): #to update later with config data
+    def draw_next_player_button(self) -> None:
         button_rect = pygame.Rect(C.next_player_button[0])
         font_size = int(C.next_player_button[1])
         pygame.draw.rect(self.window, C.draw_button_color, button_rect, border_radius=12)
@@ -286,7 +308,7 @@ class GameUI:
         self.window.blit(text, text_rect)
 
 
-    def draw_moving_chip(self):
+    def draw_moving_chip(self) -> None:
         if self.drag_manager.dragging_chip.main_chip:
             chips = self.drag_manager.dragging_chip.chips
             if len(chips) == 1 or chips is None:
@@ -304,7 +326,7 @@ class GameUI:
                 self.draw_multiple_moving_chips()
         
 
-    def draw_multiple_moving_chips(self):
+    def draw_multiple_moving_chips(self) -> None:
         dc = self.drag_manager.dragging_chip
         if not hasattr(dc, "main_chip") or dc.main_chip is None:
             return
@@ -340,7 +362,7 @@ class GameUI:
     
 
 
-    def draw_selection_rectangle(self):
+    def draw_selection_rectangle(self) -> None:
         if self.drag_manager.selection_start:
             x1, y1 = self.drag_manager.selection_start
             x2 = self.player_interaction.mouse_x
@@ -352,7 +374,7 @@ class GameUI:
             pygame.draw.rect(self.window, (0, 120, 255), rect, 2)
 
 
-    def draw_undo_all_confirmation(self):
+    def draw_undo_all_confirmation(self) -> None:
         if self.player_interaction.warning_window == True:
             overlay = pygame.Surface((C.window_width, C.window_height), pygame.SRCALPHA)
             overlay.fill((0, 0, 0, 120)) 
@@ -386,7 +408,7 @@ class GameUI:
             self.undo_all_no_rect = no_rect
 
 
-    def draw_next_player_ready_overlay(self):
+    def draw_next_player_ready_overlay(self) -> None:
         if self.player_interaction.next_player_turn_wait == True:
             overlay = pygame.Surface((C.window_width, C.window_height), pygame.SRCALPHA)
             overlay.fill((0, 0, 0, 120))  # RGBA, alpha=120 for shade
@@ -407,11 +429,11 @@ class GameUI:
             self.next_player_ready_rect = button_rect
 
 
-    def end_game(self):
+    def end_game(self) -> None:
         self.end_the_game = True
 
 
-    def end_of_game(self):
+    def end_of_game(self) -> None:
         if self.end_the_game == True:
             overlay = pygame.Surface((C.window_width, C.window_height), pygame.SRCALPHA)
             overlay.fill((0, 0, 0, 120))  # RGBA, alpha=120 for shade
@@ -439,19 +461,19 @@ class GameUI:
         
 
 
-    def subscribe_events(self):
+    def subscribe_events(self) -> None:
         self.dispatcher.subscribe('error', self.set_message)
         self.dispatcher.subscribe('end of game', self.end_game)
         
 
-    def schedule_fireworks(self):
+    def schedule_fireworks(self) -> None:
         current_time = pygame.time.get_ticks()
         if current_time >= self.next_firework_time:
             self.launch_firework()
             self.next_firework_time = current_time + random.randint(500, 600)  # 1–3s until next firework
 
 
-    def launch_firework(self):
+    def launch_firework(self) -> None:
         launch_x = random.randint(100, self.window.get_width() - 100)
         launch_y = self.window.get_height()
         pop_time = pygame.time.get_ticks() + random.randint(700, 1200)  # Time in air before pop
@@ -467,7 +489,7 @@ class GameUI:
             "particles": []
         })
 
-    def update_fireworks(self):
+    def update_fireworks(self) -> None:
         current_time = pygame.time.get_ticks()
         for fw in self.fireworks:
             if not fw["popped"]:
@@ -494,7 +516,7 @@ class GameUI:
         self.fireworks = [fw for fw in self.fireworks if any(p["life"] > 0 for p in fw["particles"]) or not fw["popped"]]
 
 
-    def draw_fireworks(self):
+    def draw_fireworks(self) -> None:
         for fw in self.fireworks:
             if not fw["popped"]:
                 pygame.draw.circle(self.window, fw["color"], (int(fw["x"]), int(fw["y"])), 3)
