@@ -80,6 +80,9 @@ class TrayGrid:
                 to_slot = self.get_first_open_slot()
                 to_slots.append(to_slot)
                 self.slots[to_slot] = chip
+            
+            if from_slots == from_chips:
+                return (None, None, None)
                         
             return (from_slots, from_chips, to_slots)
 

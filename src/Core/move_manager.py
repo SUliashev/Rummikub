@@ -11,7 +11,6 @@ class MoveManager:
     chips_placed_this_turn = set
     one_chip_drawn = Chip
 
-
     def __init__(self, chip_tracker: ChipTracker, chip_validator: ChipValidator, dispatcher: EventDispatcher):
         self.chip_tracker = chip_tracker
         self.chip_validator = chip_validator
@@ -127,11 +126,10 @@ class MoveManager:
         self.get_grid(grid_type)[slot] = chip
 
         if valid_move == True:
-            (from_grid, from_slot) = origin_pos
             self.move_history.append({
                 'action': f'place_on_{grid_type}',
                 'chip': chip,
-                'from': (from_grid, from_slot),
+                'from': origin_pos,
                 'to': (grid_type, slot)
             })
         
@@ -156,16 +154,13 @@ class MoveManager:
 
         if action in ['place_on_board', 'place_on_tray']:
             to_grid_type, to_coords = last_move['to']
-            
             from_grid_type, from_coords = last_move['from']
 
             self.get_grid(to_grid_type)[to_coords] = None
-            if from_grid_type == 'tray':
-                if self.get_grid(from_grid_type)[from_coords] is not None:
-                    slot = self.chip_tracker.tray_grid.get_first_open_slot()
-                    self.get_grid(from_grid_type)[slot] = last_move['chip']
-                else:
-                    self.get_grid(from_grid_type)[from_coords] = last_move['chip']
+
+            if self.get_grid(from_grid_type)[from_coords] is not None:
+                slot = self.chip_tracker.tray_grid.get_first_open_slot()
+                self.get_grid(from_grid_type)[slot] = last_move['chip']
             else:
                 self.get_grid(from_grid_type)[from_coords] = last_move['chip']
 
@@ -184,16 +179,13 @@ class MoveManager:
             for coord in to_coords:
                 self.get_grid(to_grid_type)[coord] = None
 
-            if from_grid_type == 'tray':
-                for i, chip in enumerate(chips):
-                    if self.get_grid(from_grid_type)[from_coords[i]] is not None:
-                        slot = self.chip_tracker.tray_grid.get_first_open_slot()
-                        self.get_grid('tray')[slot] = chip
-                    else:
-                        self.get_grid('tray')[from_coords[i]] = chip
-            else:
-                for i, chip in enumerate(chips):
-                    self.get_grid(from_grid_type)[from_coords[i]] = chip
+            for i, chip in enumerate(chips):
+                if self.get_grid(from_grid_type)[from_coords[i]] is not None:
+                    slot = self.chip_tracker.tray_grid.get_first_open_slot()
+                    self.get_grid('tray')[slot] = chip
+                else:
+                    self.get_grid('tray')[from_coords[i]] = chip
+
  
             if to_grid_type == 'board' and from_grid_type == 'tray':
                 for chip in chips:
@@ -215,12 +207,6 @@ class MoveManager:
 
             for i, chip in enumerate(chips):
                     self.get_grid('tray')[from_coords[i]] = chip
-            if self.one_chip_drawn != None:
-                if self.one_chip_drawn not in chips:        
-                    if self.chip_tracker.get_position_of_chip(self.one_chip_drawn) == None:
-                        slot = self.chip_tracker.tray_grid.get_first_open_slot()
-                        self.get_grid('tray')[slot] = self.one_chip_drawn
-
             self.dispatcher.dispatch('error', message='Chips un-sorted')
     
         if action == 'place_chip_from_hidden':
@@ -231,8 +217,6 @@ class MoveManager:
         for i in range(len(self.move_history)):
             self.undo_last_move()
         self.undo_warning_window = False
-        if len(self.move_history) == 0:
-            self.dispatcher.dispatch('error', message='No moves to be undone')
 
 
     def end_turn(self) -> None:

@@ -24,17 +24,19 @@ class PlayerInteraction:
 
 
     def handle_event(self, event: pygame.event)-> None:
+        LEFT = 1
+        
         if event.type in [pygame.MOUSEBUTTONDOWN, pygame.MOUSEMOTION, pygame.MOUSEBUTTONUP]:
             mouse_x, mouse_y = event.pos
 
-            if event.type == pygame.MOUSEBUTTONDOWN:
+            if event.type == pygame.MOUSEBUTTONDOWN and event.button == LEFT:
                 self.mouse_button_down(mouse_x, mouse_y )
 
             elif event.type == pygame.MOUSEMOTION: 
                 self.update_self_mouse_coordinates(event)
                 self.drag_manager.choose_next_slots(mouse_x, mouse_y)
 
-            elif event.type == pygame.MOUSEBUTTONUP:
+            elif event.type == pygame.MOUSEBUTTONUP and event.button == LEFT:
                 self.drag_manager.mouse_button_up_actions(mouse_x, mouse_y )
         
         else:

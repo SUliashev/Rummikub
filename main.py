@@ -47,7 +47,6 @@ def select_number_of_players() -> int:
                 elif event.key == pygame.K_UP:
                     selected = selected - 1 if selected > 1 else 4
                 elif event.key == pygame.K_RETURN:
-                    pygame.quit()
                     return selected
 
         clock.tick(30)

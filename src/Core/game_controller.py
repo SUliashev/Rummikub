@@ -156,13 +156,14 @@ class GameController:
             if chip is not None:
         # if self.current_player.turn >= 3:
                 (from_slots, from_chips, to_coordinates) = self.current_player.tray_grid.sort_chips_in_tray()
-                self.move_manager.move_history.append({
-                    'action': f'chips_sorted',
-                    'chip': from_chips,
-                    'from': from_slots,
-                    'to': to_coordinates})
+                if from_slots:
+                    self.move_manager.move_history.append({
+                        'action': f'chips_sorted',
+                        'chip': from_chips,
+                        'from': from_slots,
+                        'to': to_coordinates})
 
-                return
+                    return
         self.dispatcher.dispatch('error', message='No chips to sort')
 # ...existing code...
 

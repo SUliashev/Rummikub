@@ -122,10 +122,10 @@ class C:
         pygame.init()
         info = pygame.display.Info()
 
-        # C.window = pygame.display.set_mode((info.current_w, info.current_h), pygame.RESIZABLE)
+        C.window = pygame.display.set_mode((info.current_w, info.current_h), pygame.RESIZABLE)
 
         #small window 
-        C.window = pygame.display.set_mode((1500, 800), pygame.RESIZABLE)
+        # C.window = pygame.display.set_mode((1500, 800), pygame.RESIZABLE)
         C.window_width = C.window.get_width()
         C.window_height = C.window.get_height()
 
