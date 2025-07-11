@@ -19,7 +19,7 @@ class TrayGrid:
             for col in range(C.tray_cols):
                 if self.slots[(row, col)] is None:
                     return (row, col)
-        raise ValueError('No empty trayslots available')
+        raise ValueError('No empty tray slots available')
     
 
     def put_chip_in_tray_from_hidden(self, chip: Chip) -> None:

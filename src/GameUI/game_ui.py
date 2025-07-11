@@ -389,11 +389,11 @@ class GameUI:
             pygame.draw.rect(self.window, (0, 0, 0), C.undo_all_black_rect, 3, border_radius=15)
 
         
-            font = pygame.font.SysFont(None, int(C.undo_all_main_text_fontsize))
+            font = pygame.font.SysFont(None, int(C.undo_all_main_text_font_size))
             text = font.render("Are you sure you want to undo all the moves?", True, (0, 0, 0))
             self.window.blit(text, (x + 60, y + 40))
 
-            yes_rect = pygame.Rect(C.undo_cofirmation_button)
+            yes_rect = pygame.Rect(C.undo_confirmation_button)
             pygame.draw.rect(self.window, (0, 200, 0), yes_rect, border_radius=10)
             yes_text = font.render("Yes", True, (255, 255, 255))
             yes_text_rect = yes_text.get_rect(center=yes_rect.center)

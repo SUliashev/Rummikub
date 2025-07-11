@@ -51,7 +51,7 @@ class PlayerInteraction:
             return
         if self.warning_window == True:
             self.handle_warning_window(mouse_x, mouse_y)
-        if self.hanlde_change_of_tray_grid(mouse_x, mouse_y):
+        if self.handle_change_of_tray_grid(mouse_x, mouse_y):
             return
         if self.button_in_right_rect_pressed(mouse_x, mouse_y):
             return
@@ -80,12 +80,12 @@ class PlayerInteraction:
          
          
     def handle_warning_window(self, mouse_x: int, mouse_y: int) -> None:
-        if pygame.Rect(C.undo_cofirmation_button).collidepoint(mouse_x, mouse_y):
+        if pygame.Rect(C.undo_confirmation_button).collidepoint(mouse_x, mouse_y):
             self.dispatcher.dispatch('undo all moves')
         self.warning_window = False
         
 
-    def hanlde_change_of_tray_grid(self, mouse_x: int, mouse_y: int) -> bool:
+    def handle_change_of_tray_grid(self, mouse_x: int, mouse_y: int) -> bool:
         if pygame.Rect(C.tray_up_button).collidepoint(mouse_x, mouse_y):
             self.chip_tracker.tray_grid.visible_row_start = max(
                 0, self.chip_tracker.tray_grid.visible_row_start - 1)

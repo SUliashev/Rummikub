@@ -33,11 +33,11 @@ class GameController:
     player_interaction: PlayerInteraction
     game_ui: GameUI
 
-    def __init__(self, sprites: Dict[str, pygame.Surface], dispathcer: EventDispatcher, players: int):
+    def __init__(self, sprites: Dict[str, pygame.Surface], dispatcher: EventDispatcher, players: int):
         self.sprites = sprites
         self.board_grid = BoardGrid()
         self.dragging_chip = DraggingChip()
-        self.dispatcher = dispathcer
+        self.dispatcher = dispatcher
         self.players = self.create_players(players)
         self.current_player_index = 0
         self.current_player = self.players[self.current_player_index]

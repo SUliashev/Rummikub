@@ -7,13 +7,15 @@ import sys
 
 
 def main(players) -> None:
+ 
     C.setup_config()
+    
+
     dispatcher = EventDispatcher()
     chips_sprites = ChipSpriteGenerator.generate_all_chips()
     
     game_controller = GameController(chips_sprites, dispatcher, players)
     game_controller.run()
-
 
 def select_number_of_players() -> int:
     pygame.init()
@@ -47,6 +49,7 @@ def select_number_of_players() -> int:
                 elif event.key == pygame.K_UP:
                     selected = selected - 1 if selected > 1 else 4
                 elif event.key == pygame.K_RETURN:
+                    pygame.quit()
                     return selected
 
         clock.tick(30)

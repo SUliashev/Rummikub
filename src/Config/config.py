@@ -49,7 +49,7 @@ class C:
 
     '''Undo All Moves'''
     undo_all_moves_button_color = (69, 69, 69) 
-    undo_cofirmation_button = None
+    undo_confirmation_button = None
     
 
     '''STATIC VARIABLES'''
@@ -62,7 +62,7 @@ class C:
     '''Chip'''
     chip_width = None
     chip_height = None
-    chip_sufrace = None
+    chip_surface = None
     FONT_PATH = os.path.join(os.path.dirname(__file__), '../../assets/fonts/Ubuntu-B.ttf')
 
     '''Slot Coordinates'''
@@ -86,7 +86,7 @@ class C:
     '''Undo all moves waring window'''
     undo_all_white_rect = None
     undo_all_black_rect = None
-    undo_all_main_text_fontsize =None
+    undo_all_main_text_font_size =None
     undo_all_yes_rect = None
     undo_all_no_rect = None
     undo_all_yes_text_size = None
@@ -101,7 +101,7 @@ class C:
     '''Next Player Button'''
     next_player_button = None
 
-    '''Treminal'''
+    '''Terminal'''
     error_message_coord = None
     error_message_rect = None
     error_message_behind = None
@@ -129,7 +129,7 @@ class C:
         C.window_width = C.window.get_width()
         C.window_height = C.window.get_height()
 
-        C.setup_chip_dimentions()
+        C.setup_chip_dimensions()
         C.setup_tray()
         C.setup_right_rectangle()
         C.setup_right_buttons()
@@ -144,10 +144,10 @@ class C:
         C.setup_end_of_game_buttons()
 
     @staticmethod
-    def setup_chip_dimentions():
+    def setup_chip_dimensions():
         C.chip_width = int(((C.window_width - C.board_horizontal_edge * 2) - C.slot_horizontal_spacing * (C.board_cols - 1)) / C.board_cols) 
         C.chip_height = int((((C.window_height - C.board_vertical_edge * 2) - C.tray_background_extra_height * 2 ) - C.slot_vertical_spacing * C.board_rows)  / (C.board_rows + C.tray_visible_rows))
-        C.chip_sufrace = pygame.Surface((C.chip_width, C.chip_height))
+        C.chip_surface = pygame.Surface((C.chip_width, C.chip_height))
 
 
     @staticmethod
@@ -253,7 +253,7 @@ class C:
         height = C.window_height // 3
         x = (C.window_width - width) // 2
         y = (C.window_height - height) // 2
-        C.undo_cofirmation_button = (x  + 50, y + int(height* 0.8) , 100, 40)
+        C.undo_confirmation_button = (x  + 50, y + int(height* 0.8) , 100, 40)
     
 
     @staticmethod
@@ -278,7 +278,7 @@ class C:
         y = (C.window_height - height) // 2
         C.undo_all_white_rect = (x, y, width, height)
         C.undo_all_black_rect = (x, y, width, height)
-        C.undo_all_main_text_fontsize = C.calculate_font_size("Are you sure you want to undo all the moves?",width, height )
+        C.undo_all_main_text_font_size = C.calculate_font_size("Are you sure you want to undo all the moves?",width, height )
 
         button_width = int(width * 0.28)
         button_height = int(height * 0.18)
