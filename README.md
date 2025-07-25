@@ -1,3 +1,4 @@
+![Screenshot Description](assets/images/Screenshot_of_the_game.png)
 # Rummikub 
 This is a personal project created to practice object-oriented programming (OOP) in Python. The logic is based on the game Rummikub.
 
